@@ -396,3 +396,5 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+Web-Api-For-Collecting-RPG/appsettings.Development.json
+Web-Api-For-Collecting-RPG/appsettings.json
