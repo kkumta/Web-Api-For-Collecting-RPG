@@ -18,7 +18,9 @@ IConfiguration configuration = builder.Configuration;
 builder.Services.Configure<DbConfig>(configuration.GetSection(nameof(DbConfig)));
 
 // Add services to the container.
+builder.Services.AddMemoryCache();
 builder.Services.AddTransient<IAccountDb, AccountDb>();
+builder.Services.AddSingleton<IMasterDb, MasterDb>();
 //builder.Services.AddTransient<IGameDb, GameDb>();
 //builder.Services.AddSingleton<IMemoryDb, RedisDb>();
 builder.Services.AddControllers();
@@ -32,14 +34,7 @@ var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
 LogManager.SetLoggerFactory(loggerFactory, "Global");
 
 // 앱 실행 시 마스터 데이터 로드
-//using (var scope = app.Services.CreateScope())
-//{
-//    var cache = scope.ServiceProvider.GetService<IMemoryCache>();
-//    var queryFactory = scope.ServiceProvider.GetService<QueryFactory>();
-
-//    var results = queryFactory.Query("master_data").Get();
-//    cache.Set("master_data", results);
-//}
+loadMasterData();
 
 //app.UseMiddleware<WebApiForCollectingRPG.Middleware.CheckUserAuth>();
 
@@ -54,6 +49,12 @@ app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
 app.Run(configuration["ServerAddress"]);
 
+void loadMasterData()
+{
+    var service = app.Services.GetService<IMasterDb>();
+    service.GetItemList();
+    service.GetItemAttributeList();
+}
 
 void SettingLogger()
 {

@@ -32,7 +32,6 @@ public class AccountDb : IAccountDb
 
     public async Task<ErrorCode> CreateAccountAsync(String email, String password)
     {
-        Console.WriteLine("CreateAccountAsync start");
         try
         {
             // password를 salt로 암호화
@@ -43,9 +42,9 @@ public class AccountDb : IAccountDb
 
             var count = await _queryFactory.Query("account").InsertAsync(new
             {
-                Email = email,
-                SaltValue = saltValue,
-                HashedPassword = hashingPassword
+                email = email,
+                salt_value = saltValue,
+                hashed_password = hashingPassword
             });
 
             if (count != 1)
