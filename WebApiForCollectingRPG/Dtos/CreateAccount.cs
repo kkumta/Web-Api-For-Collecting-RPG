@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebApiForCollectingRPG.Dtos;
 
-public class PkCreateAccountReq
+public class CreateAccountReq
 {
     [Required]
     [MinLength(1, ErrorMessage = "EMAIL CANNOT BE EMPTY")]
@@ -18,7 +18,7 @@ public class PkCreateAccountReq
     public String Password { get; set; }
 }
 
-public class PkCreateAccountRes
+public class CreateAccountRes
 {
     public ErrorCode Result { get; set; } = ErrorCode.None;
 }

@@ -32,6 +32,7 @@ public class AccountDb : IAccountDb
 
     public async Task<ErrorCode> CreateAccountAsync(String email, String password)
     {
+        Console.WriteLine("CreateAccountAsync start");
         try
         {
             // password를 salt로 암호화
@@ -99,10 +100,22 @@ public class AccountDb : IAccountDb
 
     private void Open()
     {
-        _dbConn = new MySqlConnection(_dbConfig.Value.AccountDb);
-        _logger.ZLogError(
-$"[AccountDb.Open] ErrorCode: {ErrorCode.GetAccountDbConnectionFail}, _dbConfig: {_dbConfig.ToString}");
-        _dbConn.Open();
+        try
+        {
+            _dbConn = new MySqlConnection(_dbConfig.Value.AccountDb);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(ex,
+$"[AccountDb.Open] ErrorCode: {ErrorCode.GetAccountDbConnectionFail}");
+        }
+
+        try { _dbConn.Open(); }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(ex,
+$"[_dbConn.Open() OK] ErrorCode: {ErrorCode.GetAccountDbConnectionFail}");
+        }
     }
 
     private void Close()
@@ -115,6 +128,6 @@ public class DbConfig
 {
     public String MasterDb { get; set; }
     public String AccountDb { get; set; }
-    public String GameDb { get; set; }
-    public String Memcached { get; set; }
+    //public String GameDb { get; set; }
+    //public String Memcached { get; set; }
 }

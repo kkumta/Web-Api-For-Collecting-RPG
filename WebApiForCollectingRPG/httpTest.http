@@ -1,0 +1,43 @@
+﻿POST http://localhost:11500/api/account
+Content-Type: application/json
+
+{
+  "Email":"sdfads@naver.com",
+  "Password":"dsd"
+}
+
+###
+POST http://localhost:11500/Login
+Content-Type: application/json
+
+{
+  "Email":"jacking@gmail.com",
+  "Password":"dsd"
+}
+
+###
+POST http://localhost:11500/CreateCharacter
+Content-Type: application/json
+
+{
+  "Email":"jacking@gmail.com",
+  "AuthToken":"dsd"
+}
+
+###
+POST http://localhost:11500/EnterField
+Content-Type: application/json
+
+{
+  "Email":"jacking@gmail.com",
+  "AuthToken":"dsd"
+}
+
+###
+POST http://localhost:11500/CharacterList
+Content-Type: application/json
+
+{
+  "Email":"jacking@gmail.com",
+  "AuthToken":"dsd"
+}
