@@ -12,7 +12,7 @@ USE account_db;
 DROP TABLE IF EXISTS account_db.`account`;
 CREATE TABLE IF NOT EXISTS account_db.`account`
 (
-    account_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '계정번호',
+    account_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '계정 번호',
     email VARCHAR(50) NOT NULL UNIQUE COMMENT '이메일',
     salt_value VARCHAR(100) NOT NULL COMMENT  '암호화 값',
     hashed_password VARCHAR(100) NOT NULL COMMENT '해싱된 비밀번호',
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS master_db.`item`
     attack BIGINT COMMENT '공격력',
     defence BIGINT  COMMENT '방어력',
     magic BIGINT COMMENT '마력',
-    enhance_max_count BIGINT COMMENT '최대 강화 횟수', 
+    enhance_max_count SMALLINT COMMENT '최대 강화 횟수', 
     is_item_stackable BOOL COMMENT '아이템 겹침 보관 가능 여부'
 
 ) COMMENT '아이템 정보';
@@ -81,4 +81,42 @@ insert into item_attribute (name) values
 ("복장"),
 ("마법도구"),
 ("돈");
+```
+
+
+# Game DB
+
+```sql
+CREATE DATABASE IF NOT EXISTS game_db;
+```
+  
+## account_game 테이블
+각 유저별 게임 데이터
+
+```sql
+USE game_db;
+DROP TABLE IF EXISTS game_db.`account_game`;
+CREATE TABLE IF NOT EXISTS game_db.`account_game`
+(
+    account_id BIGINT UNSIGNED NOT NULL PRIMARY KEY COMMENT '계정 번호',
+    money BIGINT UNSIGNED NOT NULL COMMENT '돈',
+    exp BIGINT UNSIGNED NOT NULL COMMENT '경험치'
+) COMMENT '유저별 게임 데이터';
+```
+  
+## item_data 테이블
+각 유저별 아이템 데이터
+
+```sql
+USE game_db;
+DROP TABLE IF EXISTS game_db.`account_item`;
+CREATE TABLE IF NOT EXISTS game_db.`account_item`
+(
+    account_item_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '계정-아이템 번호',
+    account_id BIGINT UNSIGNED NOT NULL COMMENT '계정 번호',
+    slot_id SMALLINT UNSIGNED NOT NULL COMMENT '아이템 슬롯 번호',
+    item_id BIGINT UNSIGNED NOT NULL COMMENT '아이템 번호',
+    item_count INT UNSIGNED NOT NULL COMMENT '아이템 개수',
+    enhance_count SMALLINT NOT NULL COMMENT '강화횟수'
+) COMMENT '유저별 아이템 데이터';
 ```

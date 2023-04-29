@@ -15,12 +15,14 @@ namespace WebApiForCollectingRPG.Controllers;
 public class CreateAccount : ControllerBase
 {
     private readonly IAccountDb _accountDb;
+    private readonly IGameDb _gameDb;
     private readonly ILogger<Account> _logger;
 
-    public CreateAccount(ILogger<Account> logger, IAccountDb accountDb)
+    public CreateAccount(ILogger<Account> logger, IAccountDb accountDb, IGameDb gameDb)
     {
         _logger = logger;
         _accountDb = accountDb;
+        _gameDb = gameDb;
     }
 
     [HttpPost]
@@ -29,7 +31,7 @@ public class CreateAccount : ControllerBase
     {
         var response = new CreateAccountRes();
 
-        var errorCode = await _accountDb.CreateAccountAsync(request.Email, request.Password);
+        var (errorCode, accountId) = await _accountDb.CreateAccountAsync(request.Email, request.Password);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;
@@ -37,6 +39,22 @@ public class CreateAccount : ControllerBase
         }
 
         _logger.ZLogInformationWithPayload(EventIdDic[EventType.CreateAccount], new { Email = request.Email }, $"CreateAccount Success");
+
+        // 계정이 정상적으로 생성된 경우, 계정 게임 데이터 생성
+        errorCode = await _gameDb.CreateAccountGameDataAsync(accountId);
+        if (errorCode != ErrorCode.None)
+        {
+            response.Result = errorCode;
+            return response;
+        }
+
+        errorCode = await _gameDb.CreateAccountItemDataAsync(accountId);
+        if (errorCode != ErrorCode.None)
+        {
+            response.Result = errorCode;
+            return response;
+        }
+
         return response;
     }
 }

@@ -21,7 +21,7 @@ builder.Services.Configure<DbConfig>(configuration.GetSection(nameof(DbConfig)))
 builder.Services.AddMemoryCache();
 builder.Services.AddTransient<IAccountDb, AccountDb>();
 builder.Services.AddSingleton<IMasterDb, MasterDb>();
-//builder.Services.AddTransient<IGameDb, GameDb>();
+builder.Services.AddTransient<IGameDb, GameDb>();
 //builder.Services.AddSingleton<IMemoryDb, RedisDb>();
 builder.Services.AddControllers();
 

@@ -30,7 +30,9 @@ public enum ErrorCode : UInt16
     GetAccountDbConnectionFail = 2018,
 
     //GameDb
-    GetGameDbConnectionFail = 4002,
+    GetGameDbConnectionFail = 4001,
+    CreateAccountGameFailException = 4002,
+    CreateAccountItemFailException = 4003,
 
     //MasterDb
     GetItemListFail = 5001,

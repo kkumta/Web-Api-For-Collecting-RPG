@@ -30,7 +30,7 @@ public class AccountDb : IAccountDb
         _queryFactory = new QueryFactory(_dbConn, _compiler);
     }
 
-    public async Task<ErrorCode> CreateAccountAsync(String email, String password)
+    public async Task<Tuple<ErrorCode, Int64>> CreateAccountAsync(String email, String password)
     {
         try
         {
@@ -40,25 +40,20 @@ public class AccountDb : IAccountDb
             _logger.ZLogDebug(
                 $"[CreateAccount] Email: {email}, SaltValue : {saltValue}, HashingPassword:{hashingPassword}");
 
-            var count = await _queryFactory.Query("account").InsertAsync(new
+            var accountId = await _queryFactory.Query("account").InsertGetIdAsync<Int64>(new
             {
                 email = email,
                 salt_value = saltValue,
                 hashed_password = hashingPassword
             });
 
-            if (count != 1)
-            {
-                return ErrorCode.CreateAccountFailInsert;
-            }
-
-            return ErrorCode.None;
+            return new Tuple<ErrorCode, Int64>(ErrorCode.None, accountId);
         }
         catch (Exception e)
         {
             _logger.ZLogError(e,
                 $"[AccountDb.CreateAccount] ErrorCode: {ErrorCode.CreateAccountFailException}, Email: {email}");
-            return ErrorCode.CreateAccountFailException;
+            return new Tuple<ErrorCode, Int64>(ErrorCode.CreateAccountFailException, 0);
         }
     }
 
@@ -127,6 +122,6 @@ public class DbConfig
 {
     public String MasterDb { get; set; }
     public String AccountDb { get; set; }
-    //public String GameDb { get; set; }
-    //public String Memcached { get; set; }
+    public String GameDb { get; set; }
+    public String Memcached { get; set; }
 }
