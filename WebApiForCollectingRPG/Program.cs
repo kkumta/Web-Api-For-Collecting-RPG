@@ -22,7 +22,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddTransient<IAccountDb, AccountDb>();
 builder.Services.AddSingleton<IMasterDb, MasterDb>();
 builder.Services.AddTransient<IGameDb, GameDb>();
-//builder.Services.AddSingleton<IMemoryDb, RedisDb>();
+builder.Services.AddSingleton<IMemoryDb, RedisDb>();
 builder.Services.AddControllers();
 
 SettingLogger();
@@ -36,7 +36,7 @@ LogManager.SetLoggerFactory(loggerFactory, "Global");
 // 앱 실행 시 마스터 데이터 로드
 loadMasterData();
 
-//app.UseMiddleware<WebApiForCollectingRPG.Middleware.CheckUserAuth>();
+app.UseMiddleware<WebApiForCollectingRPG.Middleware.CheckUserAuth>();
 
 // Configure the HTTP request pipeline.
 app.UseRouting();
@@ -44,8 +44,8 @@ app.UseRouting();
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 #pragma warning restore ASP0014
 
-//var redisDB = app.Services.GetRequiredService<IMemoryDb>();
-//redisDB.Init(configuration.GetSection("DbConfig")["Redis"]);
+var redisDB = app.Services.GetRequiredService<IMemoryDb>();
+redisDB.Init(configuration.GetSection("DbConfig")["Redis"]);
 
 app.Run(configuration["ServerAddress"]);
 

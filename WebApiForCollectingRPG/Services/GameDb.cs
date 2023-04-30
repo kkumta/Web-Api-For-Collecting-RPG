@@ -4,8 +4,10 @@ using MySqlConnector;
 using SqlKata.Compilers;
 using SqlKata.Execution;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using WebApiForCollectingRPG.Dtos.Game;
 using ZLogger;
 using static LogManager;
 
@@ -112,5 +114,55 @@ $"[Open GameDb Fail] ErrorCode: {ErrorCode.GetGameDbConnectionFail}");
     $"[GameDb.CreateAccountItemData] ErrorCode: {ErrorCode.CreateAccountItemFailException}");
         }
         return ErrorCode.CreateAccountItemFailException;
+    }
+
+    public async Task<Tuple<ErrorCode, AccountGame>> GetAccountGameInfoAsync(Int64 accountId)
+    {
+        try
+        {
+            var accountGameInfo = await _queryFactory.Query("AccountGame")
+                .Where("AccountId", accountId)
+                .FirstAsync<AccountGame>();
+
+            if (accountGameInfo is null)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+$"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetAccountGameInfoFailNotExist}, AccountId: {accountId}");
+                return new Tuple<ErrorCode, AccountGame>(ErrorCode.GetAccountGameInfoFailNotExist, null);
+            }
+
+            return new Tuple<ErrorCode, AccountGame>(ErrorCode.None, accountGameInfo);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+$"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetAccountGameInfoFailException}, AccountId: {accountId}");
+            return new Tuple<ErrorCode, AccountGame>(ErrorCode.GetAccountGameInfoFailException, null);
+        }
+    }
+
+    public async Task<Tuple<ErrorCode, IEnumerable<AccountItem>>> GetAccountItemListAsync(Int64 accountId)
+    {
+        try
+        {
+            var accountItemList = await _queryFactory.Query("AccountItem")
+                .Where("AccountId", accountId)
+                .GetAsync<AccountItem>();
+
+            if (accountItemList is null)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+$"[GameDb.GetAccountItemListAsync] ErrorCode: {ErrorCode.GetAccountItemListFailNotExist}, AccountId: {accountId}");
+                return new Tuple<ErrorCode, IEnumerable<AccountItem>>(ErrorCode.GetAccountItemListFailNotExist, null);
+            }
+
+            return new Tuple<ErrorCode, IEnumerable<AccountItem>>(ErrorCode.None, accountItemList);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+$"[GameDb.GetAccountItemListAsync] ErrorCode: {ErrorCode.GetAccountItemListFailException}, AccountId: {accountId}");
+            return new Tuple<ErrorCode, IEnumerable<AccountItem>>(ErrorCode.GetAccountItemListFailException, null);
+        }
     }
 }
