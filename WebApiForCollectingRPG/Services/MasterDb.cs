@@ -65,7 +65,7 @@ public class MasterDb : IMasterDb
 
             _cache.Set(key, itemList, cacheOptions);
             _logger.ZLogDebug(EventIdDic[EventType.MasterDb],
-    $"[ItemList] item_list: {_cache.Get("item_list")}");
+    $"[MasterDb.GetItemList] item_list: {_cache.Get("item_list")}");
 
         }
         catch (Exception ex)
@@ -90,13 +90,13 @@ public class MasterDb : IMasterDb
 
             _cache.Set(key, itemAttributeList, cacheOptions);
             _logger.ZLogDebug(EventIdDic[EventType.MasterDb],
-    $"[ItemAttributeList] item_attribute_list: {_cache.Get("item_attribute_list")}");
+    $"[MasterDb.GetItemAttributeList] item_attribute_list: {_cache.Get("item_attribute_list")}");
 
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
-    $"[MasterDb.GetItemAttribute] ErrorCode : {ErrorCode.GetItemAttributeListFail}");
+    $"[MasterDb.GetItemAttributeList] ErrorCode : {ErrorCode.GetItemAttributeListFail}");
         }
     }
 }
