@@ -25,7 +25,7 @@ public enum UserState
     Playing = 2
 }
 
-public class RedisKeyExpireTime
+public class RediskeyExpireTime
 {
     public const ushort NxKeyExpireSecond = 3;
     public const ushort RegistKeyExpireSecond = 6000;

@@ -5,8 +5,10 @@ using SqlKata.Execution;
 using System;
 using System.Data;
 using System.Threading.Tasks;
+using WebApiForCollectingRPG.Controllers;
 using WebApiForCollectingRPG.ModelDB;
 using ZLogger;
+using static LogManager;
 
 namespace WebApiForCollectingRPG.Services;
 
@@ -37,41 +39,45 @@ public class AccountDb : IAccountDb
             // password를 salt로 암호화
             var saltValue = Security.SaltString();
             var hashingPassword = Security.MakeHashingPassword(saltValue, password);
-            _logger.ZLogDebug(
+            _logger.ZLogDebug(EventIdDic[EventType.AccountDb],
                 $"[CreateAccount] Email: {email}, SaltValue : {saltValue}, HashingPassword:{hashingPassword}");
 
-            var accountId = await _queryFactory.Query("account").InsertGetIdAsync<Int64>(new
+            var accountId = await _queryFactory.Query("Account").InsertGetIdAsync<Int64>(new
             {
-                email = email,
-                salt_value = saltValue,
-                hashed_password = hashingPassword
+                Email = email,
+                SaltValue = saltValue,
+                HashedPassword = hashingPassword
             });
 
             return new Tuple<ErrorCode, Int64>(ErrorCode.None, accountId);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.ZLogError(e,
+            _logger.ZLogError(EventIdDic[EventType.AccountDb], ex,
                 $"[AccountDb.CreateAccount] ErrorCode: {ErrorCode.CreateAccountFailException}, Email: {email}");
             return new Tuple<ErrorCode, Int64>(ErrorCode.CreateAccountFailException, 0);
         }
     }
 
-    public async Task<Tuple<ErrorCode, Int64>> VerifyAccount(string email, string password)
+    public async Task<Tuple<ErrorCode, Int64>> VerifyAccount(String email, String password)
     {
         try
         {
-            var accountInfo = await _queryFactory.Query("account").Where("Email", email).FirstOrDefaultAsync<Account>();
+            var accountInfo = await _queryFactory.Query("Account")
+                .Where("Email", email)
+                .FirstOrDefaultAsync<Account>();
 
             if (accountInfo is null || accountInfo.AccountId == 0)
             {
+                _logger.ZLogError(EventIdDic[EventType.AccountDb],
+$"[AccountDb.VerifyAccount] ErrorCode: {ErrorCode.LoginFailUserNotExist}, AccountId: {accountInfo.AccountId} Email: {accountInfo.Email} SaltValue: {accountInfo.SaltValue}");
                 return new Tuple<ErrorCode, Int64>(ErrorCode.LoginFailUserNotExist, 0);
             }
 
             var hashingPassword = Security.MakeHashingPassword(accountInfo.SaltValue, password);
             if (accountInfo.HashedPassword != hashingPassword)
             {
-                _logger.ZLogError(
+                _logger.ZLogError(EventIdDic[EventType.AccountDb],
     $"[AccountDb.VerifyAccount] ErrorCode: {ErrorCode.LoginFailPasswordNotMatch}, Email: {email}");
                 return new Tuple<ErrorCode, Int64>(ErrorCode.LoginFailPasswordNotMatch, 0);
             }
@@ -81,7 +87,7 @@ public class AccountDb : IAccountDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(ex,
+            _logger.ZLogError(EventIdDic[EventType.AccountDb], ex,
     $"[AccountDb.VerifyAccount] ErrorCode: {ErrorCode.LoginFailException}, Email: {email}");
             return new Tuple<ErrorCode, Int64>(ErrorCode.LoginFailException, 0);
         }
@@ -97,18 +103,12 @@ public class AccountDb : IAccountDb
         try
         {
             _dbConn = new MySqlConnection(_dbConfig.Value.AccountDb);
+            _dbConn.Open();
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(ex,
+            _logger.ZLogError(EventIdDic[EventType.AccountDb], ex,
 $"[AccountDb.Open] ErrorCode: {ErrorCode.GetAccountDbConnectionFail}");
-        }
-
-        try { _dbConn.Open(); }
-        catch (Exception ex)
-        {
-            _logger.ZLogError(ex,
-$"[_dbConn.Open() OK] ErrorCode: {ErrorCode.GetAccountDbConnectionFail}");
         }
     }
 

@@ -16,9 +16,9 @@ public class CreateAccount : ControllerBase
 {
     private readonly IAccountDb _accountDb;
     private readonly IGameDb _gameDb;
-    private readonly ILogger<Account> _logger;
+    private readonly ILogger<CreateAccount> _logger;
 
-    public CreateAccount(ILogger<Account> logger, IAccountDb accountDb, IGameDb gameDb)
+    public CreateAccount(ILogger<CreateAccount> logger, IAccountDb accountDb, IGameDb gameDb)
     {
         _logger = logger;
         _accountDb = accountDb;
@@ -48,12 +48,16 @@ public class CreateAccount : ControllerBase
             return response;
         }
 
+        _logger.ZLogInformationWithPayload(EventIdDic[EventType.CreateAccount], new { Email = request.Email }, $"CreateAccountGame Success");
+
         errorCode = await _gameDb.CreateAccountItemDataAsync(accountId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;
             return response;
         }
+
+        _logger.ZLogInformationWithPayload(EventIdDic[EventType.CreateAccount], new { Email = request.Email }, $"CreateAccountItem Success");
 
         return response;
     }

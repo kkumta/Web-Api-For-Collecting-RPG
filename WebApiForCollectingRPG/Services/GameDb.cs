@@ -7,6 +7,7 @@ using System;
 using System.Data;
 using System.Threading.Tasks;
 using ZLogger;
+using static LogManager;
 
 namespace WebApiForCollectingRPG.Services;
 
@@ -43,7 +44,7 @@ public class GameDb : IGameDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(ex,
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
 $"[Open GameDb Fail] ErrorCode: {ErrorCode.GetGameDbConnectionFail}");
         }
 
@@ -58,20 +59,21 @@ $"[Open GameDb Fail] ErrorCode: {ErrorCode.GetGameDbConnectionFail}");
     {
         try
         {
-            await _queryFactory.Query("account_game").InsertAsync(new
+            await _queryFactory.Query("AccountGame").InsertAsync(new
             {
-                account_id = accountId,
-                money = 0,
-                exp = 0
+                AccountId = accountId,
+                Money = 0,
+                Exp = 0
             });
 
-            _logger.ZLogDebug(
+            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
     $"[GameDb.CreateAccountGameData] AccountId: {accountId}");
 
             return ErrorCode.None;
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
-            _logger.ZLogError(ex,
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
     $"[GameDb.CreateAccountGameData] ErrorCode: {ErrorCode.CreateAccountGameFailException}");
         }
         return ErrorCode.CreateAccountGameFailException;
@@ -82,7 +84,7 @@ $"[Open GameDb Fail] ErrorCode: {ErrorCode.GetGameDbConnectionFail}");
         try
         {
 
-            var cols = new[] { "account_id", "slot_id", "item_id", "item_count", "enhance_count" };
+            var cols = new[] { "AccountId", "SlotId", "ItemId", "ItemCount", "EnhanceCount" };
             var data = new[]
             {
                 new object[]{accountId, 1, 0, 0, 0},
@@ -97,16 +99,16 @@ $"[Open GameDb Fail] ErrorCode: {ErrorCode.GetGameDbConnectionFail}");
                 new object[]{accountId, 10, 0, 0, 0 },
             };
 
-            await _queryFactory.Query("account_item").InsertAsync(cols, data);
+            await _queryFactory.Query("AccountItem").InsertAsync(cols, data);
 
-            _logger.ZLogDebug(
+            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
     $"[GameDb.CreateAccountItemData] AccountId: {accountId}");
 
             return ErrorCode.None;
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(ex,
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
     $"[GameDb.CreateAccountItemData] ErrorCode: {ErrorCode.CreateAccountItemFailException}");
         }
         return ErrorCode.CreateAccountItemFailException;

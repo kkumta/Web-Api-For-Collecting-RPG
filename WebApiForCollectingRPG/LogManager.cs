@@ -9,7 +9,10 @@ public class LogManager
         CreateAccount = 101,
         Login = 201,
         LoginAddRedis = 202,
-        SetMasterData = 301,
+        AccountDb = 1001,
+        GameDb = 1002,
+        MasterDb = 1003,
+        RedisDb = 1004
     }
 
     private static ILoggerFactory s_loggerFactory;
@@ -19,7 +22,11 @@ public class LogManager
         {EventType.CreateAccount, new EventId((int)EventType.CreateAccount, "CreateAccount") },
         {EventType.Login, new EventId((int)EventType.Login, "Login") },
         {EventType.LoginAddRedis, new EventId((int)EventType.LoginAddRedis, "LoginAddRedis") },
-        {EventType.SetMasterData, new EventId((int)EventType.SetMasterData, "SetMasterData") }
+        {EventType.AccountDb, new EventId((int)EventType.AccountDb, "AccountDb") },
+        {EventType.GameDb, new EventId((int)EventType.GameDb, "GameDb") },
+        {EventType.MasterDb, new EventId((int)EventType.MasterDb, "MasterDb") },
+        {EventType.RedisDb, new EventId((int)EventType.RedisDb, "RedisDb") }
+
     };
 
     public static ILogger Logger { get; private set; }

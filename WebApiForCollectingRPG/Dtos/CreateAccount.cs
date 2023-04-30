@@ -8,7 +8,7 @@ public class CreateAccountReq
     [Required]
     [MinLength(1, ErrorMessage = "EMAIL CANNOT BE EMPTY")]
     [StringLength(50, ErrorMessage = "EMAIL IS TOO LONG")]
-    [EmailAddress(ErrorMessage ="E-mail is not valid")]
+    [EmailAddress(ErrorMessage = "E-mail is not valid")]
     public String Email { get; set; }
 
     [Required]

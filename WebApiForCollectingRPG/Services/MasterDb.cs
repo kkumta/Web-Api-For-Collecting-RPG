@@ -4,11 +4,10 @@ using Microsoft.Extensions.Options;
 using MySqlConnector;
 using SqlKata.Execution;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Threading.Tasks;
 using WebApiForCollectingRPG.Dtos.MasterData;
 using ZLogger;
+using static LogManager;
 
 namespace WebApiForCollectingRPG.Services;
 
@@ -57,8 +56,7 @@ public class MasterDb : IMasterDb
         {
             String key = "item_list";
 
-            var itemList = await _queryFactory.Query("item")
-                .Select("item_id", "name", "attribute", "sell_price", "buy_price", "use_lv", "attack", "defence", "magic", "enhance_max_count", "is_item_stackable")
+            var itemList = await _queryFactory.Query("Item")
                 .GetAsync<Item>();
 
             var cacheOptions = new MemoryCacheEntryOptions()
@@ -66,13 +64,13 @@ public class MasterDb : IMasterDb
                 .SetAbsoluteExpiration(DateTime.MaxValue);
 
             _cache.Set(key, itemList, cacheOptions);
-            _logger.ZLogDebug(
+            _logger.ZLogDebug(EventIdDic[EventType.MasterDb],
     $"[ItemList] item_list: {_cache.Get("item_list")}");
 
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(ex,
+            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
     $"[MasterDb.GetItemList] ErrorCode : {ErrorCode.GetItemListFail}");
         }
     }
@@ -83,8 +81,7 @@ public class MasterDb : IMasterDb
         {
             String key = "item_attribute_list";
 
-            var itemAttributeList = await _queryFactory.Query("item_attribute")
-                .Select("attribute_id", "name")
+            var itemAttributeList = await _queryFactory.Query("ItemAttribute")
                 .GetAsync<ItemAttribute>();
 
             var cacheOptions = new MemoryCacheEntryOptions()
@@ -92,13 +89,13 @@ public class MasterDb : IMasterDb
                 .SetAbsoluteExpiration(DateTime.MaxValue);
 
             _cache.Set(key, itemAttributeList, cacheOptions);
-            _logger.ZLogDebug(
+            _logger.ZLogDebug(EventIdDic[EventType.MasterDb],
     $"[ItemAttributeList] item_attribute_list: {_cache.Get("item_attribute_list")}");
 
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(ex,
+            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
     $"[MasterDb.GetItemAttribute] ErrorCode : {ErrorCode.GetItemAttributeListFail}");
         }
     }

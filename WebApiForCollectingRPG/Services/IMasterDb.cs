@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using WebApiForCollectingRPG.Dtos.MasterData;
-
-namespace WebApiForCollectingRPG.Services;
+﻿namespace WebApiForCollectingRPG.Services;
 
 public interface IMasterDb
 {
