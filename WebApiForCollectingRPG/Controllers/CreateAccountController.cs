@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using ZLogger;
 using static LogManager;
 using WebApiForCollectingRPG.Dtos;
-using WebApiForCollectingRPG.ModelDB;
 
 namespace WebApiForCollectingRPG.Controllers;
 

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using static LogManager;
 using System.Threading.Tasks;
 using WebApiForCollectingRPG.Dtos;
@@ -8,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using ZLogger;
 using WebApiForCollectingRPG.Dtos.Game;
-using WebApiForCollectingRPG.Dtos.MasterData;
 
 namespace WebApiForCollectingRPG.Controllers
 {
