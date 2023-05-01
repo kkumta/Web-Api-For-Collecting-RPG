@@ -36,7 +36,7 @@ LogManager.SetLoggerFactory(loggerFactory, "Global");
 // 앱 실행 시 마스터 데이터 로드
 loadMasterData();
 
-app.UseMiddleware<WebApiForCollectingRPG.Middleware.CheckUserAuth>();
+app.UseMiddleware<WebApiForCollectingRPG.Middleware.SecurityAuthentication>();
 
 // Configure the HTTP request pipeline.
 app.UseRouting();

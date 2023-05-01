@@ -2,42 +2,26 @@
 Content-Type: application/json
 
 {
-  "Email":"weij@naver.com",
+  "Email":"luawill@naver.com",
   "Password":"dsd"
 }
 
 ###
-POST http://localhost:11500/Login
+POST http://localhost:11500/api/login
 Content-Type: application/json
 
 {
-  "Email":"jacking@gmail.com",
+  "Email":"luawill@naver.com",
   "Password":"dsd"
 }
 
 ###
-POST http://localhost:11500/CreateCharacter
+POST http://localhost:11500/api/notice
 Content-Type: application/json
 
 {
-  "Email":"jacking@gmail.com",
-  "AuthToken":"dsd"
-}
-
-###
-POST http://localhost:11500/EnterField
-Content-Type: application/json
-
-{
-  "Email":"jacking@gmail.com",
-  "AuthToken":"dsd"
-}
-
-###
-POST http://localhost:11500/CharacterList
-Content-Type: application/json
-
-{
-  "Email":"jacking@gmail.com",
-  "AuthToken":"dsd"
+  "Email":"luawill@naver.com",
+  "AuthToken":"r6dwpttm1tgi5vjbo063klwe9",
+  "ClientVersion":"1.0.0",
+  "MasterDataVersion":"1.0.0"
 }

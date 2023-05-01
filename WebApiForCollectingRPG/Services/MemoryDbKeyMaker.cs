@@ -6,6 +6,7 @@ public class MemoryDbKeyMaker
 {
     const String loginUID = "UID_";
     const String userLockKey = "ULock_";
+    const String noticeKey = "Notice_";
 
     public static String MakeUIDKey(String id)
     {
@@ -15,5 +16,10 @@ public class MemoryDbKeyMaker
     public static String MakeUserLockKey(String id)
     {
         return userLockKey + id;
+    }
+
+    public static String MakeNoticeKey(Int32 id)
+    {
+        return noticeKey + id;
     }
 }

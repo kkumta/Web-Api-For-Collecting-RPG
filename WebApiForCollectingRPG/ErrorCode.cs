@@ -29,7 +29,7 @@ public enum ErrorCode : UInt16
     CheckAuthFailException = 2017,
     GetAccountDbConnectionFail = 2018,
 
-    //GameDb
+    // GameDb
     GetGameDbConnectionFail = 4001,
     CreateAccountGameFailException = 4002,
     CreateAccountItemFailException = 4003,
@@ -38,7 +38,15 @@ public enum ErrorCode : UInt16
     GetAccountItemListFailNotExist = 4103,
     GetAccountItemListFailException = 4104,
 
-    //MasterDb
+    // MasterDb
     GetItemListFail = 5001,
-    GetItemAttributeListFail = 5002
+    GetItemAttributeListFail = 5002,
+
+    // Version
+    ClientVersionFailNotMatch = 6001,
+    MasterDataVersionFailNotMatch = 6002,
+
+    // Notice
+    GetNoticeFailNotExist = 7001,
+    GetNoticeException = 7002
 }

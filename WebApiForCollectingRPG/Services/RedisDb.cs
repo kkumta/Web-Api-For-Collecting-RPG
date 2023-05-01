@@ -93,24 +93,126 @@ public class RedisDb : IMemoryDb
         return result;
     }
 
-    public Task<(bool, AuthUser)> GetUserAsync(String email)
+    public async Task<bool> SetUserStateAsync(AuthUser user, UserState userState)
     {
-        throw new System.NotImplementedException();
+        var uid = MemoryDbKeyMaker.MakeUIDKey(user.Email);
+        try
+        {
+            var redis = new RedisString<AuthUser>(_redisConn, uid, null);
+
+            user.State = userState.ToString();
+
+            if (await redis.SetAsync(user) == false)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
-    public Task<bool> SetUserStateAsync(AuthUser user, UserState userState)
+    public async Task<(bool, AuthUser)> GetUserAsync(string id)
     {
-        throw new System.NotImplementedException();
+        var uid = MemoryDbKeyMaker.MakeUIDKey(id);
+
+        try
+        {
+            var redis = new RedisString<AuthUser>(_redisConn, uid, null);
+            var user = await redis.GetAsync();
+            if (!user.HasValue)
+            {
+                s_logger.ZLogError(
+                    $"RedisDb.UserStartCheckAsync: UID = {uid}, ErrorMessage = Not Assigned User, RedisString get Error");
+                return (false, null);
+            }
+
+            return (true, user.Value);
+        }
+        catch
+        {
+            s_logger.ZLogError($"UID:{uid},ErrorMessage:ID does Not Exist");
+            return (false, null);
+        }
     }
 
-    public Task<bool> SetUserReqLockAsync(String key)
+    public async Task<bool> SetUserReqLockAsync(string key)
     {
-        throw new System.NotImplementedException();
+        try
+        {
+            var redis = new RedisString<AuthUser>(_redisConn, key, NxKeyTimeSpan());
+            if (await redis.SetAsync(new AuthUser
+            {
+                // emtpy value
+            }, NxKeyTimeSpan(), StackExchange.Redis.When.NotExists) == false)
+            {
+                return false;
+            }
+        }
+        catch
+        {
+            return false;
+        }
+
+        return true;
     }
 
-    public Task<bool> DelUserReqLockAsync(String key)
+    public async Task<bool> DelUserReqLockAsync(string key)
     {
-        throw new System.NotImplementedException();
+        if (string.IsNullOrEmpty(key))
+        {
+            return false;
+        }
+
+        try
+        {
+            var redis = new RedisString<AuthUser>(_redisConn, key, null);
+            var redisResult = await redis.DeleteAsync();
+            return redisResult;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public async Task<(ErrorCode, Notice)> GetNoticeAsync()
+    {
+        Int32 id = 1;
+        var key = MemoryDbKeyMaker.MakeNoticeKey(id);
+
+        try
+        {
+            // 공지 넣기
+            var redis = new RedisString<Notice>(_redisConn, key, null);
+            var input = new Notice();
+            input.Title = "사전 예약 보상 공지";
+            input.Description = "사전 예약 보상인 작은 칼과 돈 50을 우편으로 발송했습니다.";
+            await redis.SetAsync(input);
+
+            var notice = await redis.GetAsync();
+            if (!notice.HasValue)
+            {
+                s_logger.ZLogError(EventIdDic[EventType.ReceiveNotice],
+                    $"RedisDb.GetNoticeAsync: key = {key}, ErrorMessage = Applicable Notice Not Exist, ErrorCode: {ErrorCode.GetNoticeFailNotExist}");
+
+                return (ErrorCode.GetNoticeFailNotExist, null);
+            }
+            s_logger.ZLogDebug(EventIdDic[EventType.ReceiveNotice],
+                    $"RedisDb.GetNoticeAsync: key = {key}, value = {notice.Value}");
+
+            return (ErrorCode.None, notice.Value);
+        }
+        catch (Exception ex)
+        {
+            s_logger.ZLogError(EventIdDic[EventType.ReceiveNotice], ex,
+                $"RedisDb.GetNoticeAsync: key = {key}, ErrorMessage = Applicable Notice Not Exist, ErrorCode: {ErrorCode.GetNoticeException}");
+
+            return (ErrorCode.GetNoticeException, null);
+        }
     }
 
     public TimeSpan LoginTimeSpan()

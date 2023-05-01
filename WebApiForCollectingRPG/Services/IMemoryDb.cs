@@ -19,5 +19,7 @@ namespace WebApiForCollectingRPG.Services
         public Task<bool> SetUserReqLockAsync(String key);
 
         public Task<bool> DelUserReqLockAsync(String key);
+
+        public Task<(ErrorCode, Notice)> GetNoticeAsync();
     }
 }
