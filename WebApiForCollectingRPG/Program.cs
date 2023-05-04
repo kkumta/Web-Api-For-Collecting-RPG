@@ -55,6 +55,7 @@ void loadMasterData()
     service.GetItemList();
     service.GetItemAttributeList();
     service.GetAttendanceCompensation();
+    service.GetInAppProductListAsync();
 }
 
 void SettingLogger()

@@ -5,6 +5,7 @@ using MySqlConnector;
 using SqlKata.Execution;
 using System;
 using System.Data;
+using System.Threading.Tasks;
 using WebApiForCollectingRPG.DAO.Master;
 using ZLogger;
 using static LogManager;
@@ -127,6 +128,27 @@ public class MasterDb : IMasterDb
         {
             _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
                 $"[MasterDb.GetAttendanceCompensation] ErrorCode : {ErrorCode.GetAttendanceCompensationFail}");
+        }
+    }
+
+    public async void GetInAppProductListAsync()
+    {
+        try
+        {
+            String key = "in_app_product_list";
+
+            var inAppProductList = await _queryFactory.Query("in_app_product")
+                .Select("product_id AS ProductId", "item_id AS ItemId", "item_name AS ItemName", "item_count AS ItemCount")
+                .GetAsync<InAppProduct>();
+
+            _cache.Set(key, inAppProductList, cacheOptions);
+            _logger.ZLogDebug(EventIdDic[EventType.MasterDb],
+                $"[MasterDb.GetInAppProductListAsync] in_app_product_list: {_cache.Get("in_app_product_list")}");
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
+                $"[MasterDb.GetInAppProductListAsync] ErrorCode : {ErrorCode.GetInAppProductListFail}");
         }
     }
 }

@@ -48,6 +48,7 @@ public enum ErrorCode : UInt16
     GetItemListFail = 5001,
     GetItemAttributeListFail = 5002,
     GetAttendanceCompensationFail = 5003,
+    GetInAppProductListFail = 5004,
 
     // Version
     ClientVersionFailNotMatch = 6001,
