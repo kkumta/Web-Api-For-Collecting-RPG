@@ -44,9 +44,9 @@ public class AccountDb : IAccountDb
 
             var accountId = await _queryFactory.Query("Account").InsertGetIdAsync<Int64>(new
             {
-                Email = email,
-                SaltValue = saltValue,
-                HashedPassword = hashingPassword
+                email = email,
+                salt_value = saltValue,
+                hashed_password = hashingPassword
             });
 
             return new Tuple<ErrorCode, Int64>(ErrorCode.None, accountId);
@@ -63,9 +63,17 @@ public class AccountDb : IAccountDb
     {
         try
         {
-            var accountInfo = await _queryFactory.Query("Account")
-                .Where("Email", email)
-                .FirstOrDefaultAsync<Account>();
+
+            var accountInfo = await _queryFactory.Query("account")
+                .Where("email", email)
+                .Select("account_id AS AccountId",              
+                "email AS Email",
+                "hashed_password AS HashedPassword",
+                "salt_value AS SaltValue")
+                .FirstOrDefaultAsync();
+
+            _logger.ZLogDebug(EventIdDic[EventType.AccountDb],
+    $"[VerifyAccount] AccountId: {accountInfo.AccountId} Email: {accountInfo.Email}");
 
             if (accountInfo is null || accountInfo.AccountId == 0)
             {

@@ -77,7 +77,6 @@ namespace WebApiForCollectingRPG.Controllers
             {
                 var itemInfo = new AccountItem
                 {
-                    SlotId = item.SlotId,
                     ItemId = item.ItemId,
                     ItemCount = item.ItemCount,
                     EnhanceCount = item.EnhanceCount

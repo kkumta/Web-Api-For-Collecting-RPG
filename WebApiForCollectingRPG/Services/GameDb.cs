@@ -61,11 +61,11 @@ $"[Open GameDb Fail] ErrorCode: {ErrorCode.GetGameDbConnectionFail}");
     {
         try
         {
-            await _queryFactory.Query("AccountGame").InsertAsync(new
+            await _queryFactory.Query("account_game").InsertAsync(new
             {
-                AccountId = accountId,
-                Money = 0,
-                Exp = 0
+                account_id = accountId,
+                money = 0,
+                exp = 0
             });
 
             _logger.ZLogDebug(EventIdDic[EventType.GameDb],
@@ -81,48 +81,15 @@ $"[Open GameDb Fail] ErrorCode: {ErrorCode.GetGameDbConnectionFail}");
         return ErrorCode.CreateAccountGameFailException;
     }
 
-    public async Task<ErrorCode> CreateAccountItemDataAsync(Int64 accountId)
-    {
-        try
-        {
-
-            var cols = new[] { "AccountId", "SlotId", "ItemId", "ItemCount", "EnhanceCount" };
-            var data = new[]
-            {
-                new object[]{accountId, 1, 0, 0, 0},
-                new object[]{accountId, 2, 0, 0, 0},
-                new object[]{accountId, 3, 0, 0, 0 },
-                new object[]{accountId, 4, 0, 0, 0 },
-                new object[]{accountId, 5, 0, 0, 0 },
-                new object[]{accountId, 6, 0, 0, 0 },
-                new object[]{accountId, 7, 0, 0, 0 },
-                new object[]{accountId, 8, 0, 0, 0 },
-                new object[]{accountId, 9, 0, 0, 0 },
-                new object[]{accountId, 10, 0, 0, 0 },
-            };
-
-            await _queryFactory.Query("AccountItem").InsertAsync(cols, data);
-
-            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
-    $"[GameDb.CreateAccountItemData] AccountId: {accountId}");
-
-            return ErrorCode.None;
-        }
-        catch (Exception ex)
-        {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
-    $"[GameDb.CreateAccountItemData] ErrorCode: {ErrorCode.CreateAccountItemFailException}");
-        }
-        return ErrorCode.CreateAccountItemFailException;
-    }
-
     public async Task<Tuple<ErrorCode, AccountGame>> GetAccountGameInfoAsync(Int64 accountId)
     {
         try
         {
-            var accountGameInfo = await _queryFactory.Query("AccountGame")
-                .Where("AccountId", accountId)
-                .FirstAsync<AccountGame>();
+            var accountGameInfo = await _queryFactory.Query("account_game")
+                .Where("account_id", accountId)
+                .Select("money AS Money",
+                "exp AS Exp")
+                .FirstOrDefaultAsync<AccountGame>();
 
             if (accountGameInfo is null)
             {
@@ -145,16 +112,12 @@ $"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetAccountGameInfoFailE
     {
         try
         {
-            var accountItemList = await _queryFactory.Query("AccountItem")
-                .Where("AccountId", accountId)
+            var accountItemList = await _queryFactory.Query("account_item")
+                .Where("account_id", accountId)
+                .Select("item_id AS ItemId",
+                "item_count AS ItemCount",
+                "enhance_count AS EnhanceCount")
                 .GetAsync<AccountItem>();
-
-            if (accountItemList is null)
-            {
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
-$"[GameDb.GetAccountItemListAsync] ErrorCode: {ErrorCode.GetAccountItemListFailNotExist}, AccountId: {accountId}");
-                return new Tuple<ErrorCode, IEnumerable<AccountItem>>(ErrorCode.GetAccountItemListFailNotExist, null);
-            }
 
             return new Tuple<ErrorCode, IEnumerable<AccountItem>>(ErrorCode.None, accountItemList);
         }

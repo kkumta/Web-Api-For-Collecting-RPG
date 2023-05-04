@@ -4,19 +4,19 @@
 게임에서 생성된 계정 정보를 가지고 있는 테이블    
   
 ```sql
-DROP DATABASE IF EXISTS AccountDB;
-CREATE DATABASE IF NOT EXISTS AccountDB;
+DROP DATABASE IF EXISTS account_db;
+CREATE DATABASE IF NOT EXISTS account_db;
 
-USE AccountDB;
+USE account_db;
 
-DROP TABLE IF EXISTS AccountDB.`Account`;
-CREATE TABLE IF NOT EXISTS AccountDB.`Account`
+DROP TABLE IF EXISTS account_db.`account`;
+CREATE TABLE IF NOT EXISTS account_db.`account`
 (
-    AccountId BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '계정 번호',
-    Email VARCHAR(50) NOT NULL UNIQUE COMMENT '이메일',
-    SaltValue VARCHAR(100) NOT NULL COMMENT  '암호화 값',
-    HashedPassword VARCHAR(100) NOT NULL COMMENT '해싱된 비밀번호',
-    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 날짜'
+    account_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '계정 번호',
+    email VARCHAR(50) NOT NULL UNIQUE COMMENT '이메일',
+    salt_value VARCHAR(100) NOT NULL COMMENT  '암호화 값',
+    hashed_password VARCHAR(100) NOT NULL COMMENT '해싱된 비밀번호',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 날짜'
 ) COMMENT '계정 정보 테이블';
 ```
    
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS AccountDB.`Account`
 # MasterDB
 
 ```sql
-CREATE DATABASE IF NOT EXISTS MasterDB;
+CREATE DATABASE IF NOT EXISTS master_db;
 ```
   
 ## Item Table
@@ -34,25 +34,25 @@ CREATE DATABASE IF NOT EXISTS MasterDB;
 
 ```sql
 
-USE MasterDB;
-DROP TABLE IF EXISTS MasterDB.`Item`;
-CREATE TABLE IF NOT EXISTS MasterDB.`Item`
+USE master_db;
+DROP TABLE IF EXISTS master_db.`item`;
+CREATE TABLE IF NOT EXISTS master_db.`item`
 (
-    ItemId BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '아이템 번호',
-    Name VARCHAR(50) UNIQUE NOT NULL COMMENT '아이템 이름',
-    AttributeId INT COMMENT  '아이템 특성',
-    SellPrice BIGINT COMMENT  '파는 가격',
-    BuyPrice BIGINT COMMENT '사는 가격',
-    UseLv SMALLINT COMMENT '사용 가능 레벨',
-    Attack BIGINT COMMENT '공격력',
-    Defence BIGINT  COMMENT '방어력',
-    Magic BIGINT COMMENT '마력',
-    EnhanceMaxCount SMALLINT COMMENT '최대 강화 횟수', 
-    IsItemStackable BOOL COMMENT '아이템 겹침 보관 가능 여부'
+    item_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '아이템 번호',
+    name VARCHAR(50) UNIQUE NOT NULL COMMENT '아이템 이름',
+    attribute_id INT COMMENT  '아이템 특성',
+    sell_price BIGINT COMMENT  '파는 가격',
+    buy_price BIGINT COMMENT '사는 가격',
+    use_lv SMALLINT COMMENT '사용 가능 레벨',
+    attack BIGINT COMMENT '공격력',
+    defence BIGINT  COMMENT '방어력',
+    magic BIGINT COMMENT '마력',
+    enhance_max_count SMALLINT COMMENT '최대 강화 횟수', 
+    is_item_stackable BOOL COMMENT '아이템 겹침 보관 가능 여부'
 
 ) COMMENT '아이템 정보';
 
-insert into Item (Name, Attribute, SellPrice, BuyPrice, UseLv, Attack, Defence, Magic, EnhanceMaxCount, IsItemStackable) values
+insert into Item (name, attribute_id, sell_price, buy_price, use_lv, attack, defence, magic, enhance_max_count, is_item_stackable) values
 ("돈", 5, 0, 0, 0, 0, 0, 0, 0, true),
 ("작은 칼", 1, 10, 20, 1, 10, 5, 1, 10, false),
 ("도금 칼", 1, 100, 200, 5, 29, 12, 10, 10, false),
@@ -65,15 +65,15 @@ insert into Item (Name, Attribute, SellPrice, BuyPrice, UseLv, Attack, Defence, 
 아이템 특성 정보
 
 ```sql
-USE MasterDB;
-DROP TABLE IF EXISTS MasterDB.`ItemAttribute`;
-CREATE TABLE IF NOT EXISTS MasterDB.`ItemAttribute`
+USE master_db;
+DROP TABLE IF EXISTS master_db.`item_attribute`;
+CREATE TABLE IF NOT EXISTS master_db.`item_attribute`
 (
-    AttributeId INT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '특성 번호',
-    Name VARCHAR(50) UNIQUE NOT NULL COMMENT '특성 이름'
+    attribute_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '특성 번호',
+    name VARCHAR(50) UNIQUE NOT NULL COMMENT '특성 이름'
 ) COMMENT '아이템 특성 정보';
 
-insert into ItemAttribute (Name) values
+insert into item_attribute (name) values
 ("무기"),
 ("방어구"),
 ("복장"),
@@ -85,16 +85,16 @@ insert into ItemAttribute (Name) values
 출석부 보상
 
 ```sql
-USE MasterDB;
-DROP TABLE IF EXISTS MasterDB.`AttendanceCompensation`;
-CREATE TABLE IF NOT EXISTS MasterDB.`AttendanceCompensation`
+USE master_db;
+DROP TABLE IF EXISTS master_db.`attendance_compensation`;
+CREATE TABLE IF NOT EXISTS master_db.`attendance_compensation`
 (
-    CompensationId SMALLINT NOT NULL PRIMARY KEY COMMENT '보상 번호',
-    ItemId BIGINT NOT NULL COMMENT '아이템 번호',
-    ItemCount INT NOT NULL COMMENT '아이템 개수'
+    compensation_id SMALLINT NOT NULL PRIMARY KEY COMMENT '보상 번호',
+    item_id BIGINT NOT NULL COMMENT '아이템 번호',
+    item_count INT NOT NULL COMMENT '아이템 개수'
 ) COMMENT '출석부 보상';
 
-insert into AttendanceCompensation (CompensationId, ItemId, ItemCount) values
+insert into attendance_compensation (compensation_id, item_id, item_count) values
 (1, 1, 100),
 (2, 1, 100),
 (3, 1, 100),
@@ -131,17 +131,17 @@ insert into AttendanceCompensation (CompensationId, ItemId, ItemCount) values
 인앱 상품
 
 ```sql
-USE MasterDB;
-DROP TABLE IF EXISTS MasterDB.`InAppProduct`;
-CREATE TABLE IF NOT EXISTS MasterDB.`InAppProduct`
+USE master_db;
+DROP TABLE IF EXISTS master_db.`in_app_product`;
+CREATE TABLE IF NOT EXISTS master_db.`in_app_product`
 (
-    ProductId SMALLINT NOT NULL COMMENT '상품 번호',
-    ItemId BIGINT NOT NULL COMMENT '아이템 번호',
-    ItemName VARCHAR(50) NOT NULL COMMENT '아이템 이름',
-    ItemCount INT NOT NULL COMMENT '아이템 개수'
+    product_id SMALLINT NOT NULL COMMENT '상품 번호',
+    item_id BIGINT NOT NULL COMMENT '아이템 번호',
+    item_name VARCHAR(50) NOT NULL COMMENT '아이템 이름',
+    item_count INT NOT NULL COMMENT '아이템 개수'
 ) COMMENT '인앱 상품 정보';
 
-insert into InAppProduct (ProductId, ItemId, ItemName, ItemCount) values
+insert into in_app_product (product_id, item_id, item_name, item_count) values
 (1, 1, "돈", 1000),
 (1, 2, "작은 칼", 1),
 (1, 3, "도금 칼", 1),
@@ -158,21 +158,21 @@ insert into InAppProduct (ProductId, ItemId, ItemName, ItemCount) values
 # GameDB
 
 ```sql
-DROP DATABASE IF EXISTS GameDB;
-CREATE DATABASE IF NOT EXISTS GameDB;
+DROP DATABASE IF EXISTS game_db;
+CREATE DATABASE IF NOT EXISTS game_db;
 ```
   
 ## AccountGame Table
 각 유저별 게임 데이터
 
 ```sql
-USE GameDB;
-DROP TABLE IF EXISTS GameDB.`AccountGame`;
-CREATE TABLE IF NOT EXISTS GameDB.`AccountGame`
+USE game_db;
+DROP TABLE IF EXISTS game_db.`account_game`;
+CREATE TABLE IF NOT EXISTS game_db.`account_game`
 (
-    AccountId BIGINT NOT NULL PRIMARY KEY COMMENT '계정 번호',
-    Money BIGINT NOT NULL COMMENT '돈',
-    Exp BIGINT NOT NULL COMMENT '경험치'
+    account_id BIGINT NOT NULL PRIMARY KEY COMMENT '계정 번호',
+    money BIGINT NOT NULL COMMENT '돈',
+    exp BIGINT NOT NULL COMMENT '경험치'
 ) COMMENT '유저별 게임 데이터';
 ```
   
@@ -180,15 +180,15 @@ CREATE TABLE IF NOT EXISTS GameDB.`AccountGame`
 각 유저별 아이템 데이터
 
 ```sql
-USE GameDB;
-DROP TABLE IF EXISTS GameDB.`AccountItem`;
-CREATE TABLE IF NOT EXISTS GameDB.`AccountItem`
+USE game_db;
+DROP TABLE IF EXISTS game_db.`account_item`;
+CREATE TABLE IF NOT EXISTS game_db.`account_item`
 (
-    AccountItemId BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '계정-아이템 번호',
-    AccountId BIGINT NOT NULL COMMENT '계정 번호',
-    ItemId BIGINT NOT NULL COMMENT '아이템 번호',
-    ItemCount INT NOT NULL COMMENT '아이템 개수',
-    EnhanceCount SMALLINT NOT NULL COMMENT '강화횟수'
+    account_item_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '계정-아이템 번호',
+    account_id BIGINT NOT NULL COMMENT '계정 번호',
+    item_id BIGINT NOT NULL COMMENT '아이템 번호',
+    item_count INT NOT NULL COMMENT '아이템 개수',
+    enhance_count SMALLINT NOT NULL COMMENT '강화횟수'
 ) COMMENT '유저별 아이템 데이터';
 ```
 
@@ -196,18 +196,18 @@ CREATE TABLE IF NOT EXISTS GameDB.`AccountItem`
 우편
 
 ```sql
-USE GameDB;
-DROP TABLE IF EXISTS GameDB.`Mail`;
-CREATE TABLE IF NOT EXISTS GameDB.`Mail`
+USE game_db;
+DROP TABLE IF EXISTS game_db.`mail`;
+CREATE TABLE IF NOT EXISTS game_db.`mail`
 (
-    MailId BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '메일 번호',
-    AccountId BIGINT NOT NULL COMMENT '계정 번호',
-    Title VARCHAR(50) NOT NULL COMMENT '메일 제목',
-    Content VARCHAR(200) NOT NULL COMMENT '메일 내용',
-    IsRead BOOL COMMENT NOT NULL COMMENT '읽음 여부',
-    IsReceived BOOL COMMENT NOT NULL COMMENT '아이템 수령 여부',
-    IsInAppProduct BOOL COMMENT NOT NULL COMMENT '인앱 상품 여부',
-    ExpirationTime DATETIME NOT NULL COMMENT '보관 만료 시간'
+    mail_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '메일 번호',
+    account_id BIGINT NOT NULL COMMENT '계정 번호',
+    title VARCHAR(50) NOT NULL COMMENT '메일 제목',
+    content VARCHAR(200) NOT NULL COMMENT '메일 내용',
+    is_read BOOL NOT NULL COMMENT '읽음 여부',
+    is_received BOOL NOT NULL COMMENT '아이템 수령 여부',
+    is_in_app_product BOOL NOT NULL COMMENT '인앱 상품 여부',
+    expiratio_time DATETIME NOT NULL COMMENT '보관 만료 시간'
 ) COMMENT '우편';
 ```
 
@@ -215,13 +215,13 @@ CREATE TABLE IF NOT EXISTS GameDB.`Mail`
 우편 아이템
 
 ```sql
-USE GameDB;
-DROP TABLE IF EXISTS GameDB.`MailItem`;
-CREATE TABLE IF NOT EXISTS GameDB.`MailItem`
+USE game_db;
+DROP TABLE IF EXISTS game_db.`mail_item`;
+CREATE TABLE IF NOT EXISTS game_db.`mail_item`
 (
-    MailId BIGINT NOT NULL COMMENT '메일 번호',
-    ItemId BIGINT NOT NULL COMMENT '아이템 번호',
-    ItemCount INT NOT NULL COMMENT '아이템 개수'
+    mail_id BIGINT NOT NULL COMMENT '메일 번호',
+    item_id BIGINT NOT NULL COMMENT '아이템 번호',
+    item_count INT NOT NULL COMMENT '아이템 개수'
 ) COMMENT '우편';
 ```
 
@@ -229,13 +229,13 @@ CREATE TABLE IF NOT EXISTS GameDB.`MailItem`
 출석
 
 ```sql
-USE GameDB;
-DROP TABLE IF EXISTS GameDB.`Attendance`;
-CREATE TABLE IF NOT EXISTS GameDB.`Attendance`
+USE game_db;
+DROP TABLE IF EXISTS game_db.`attendance`;
+CREATE TABLE IF NOT EXISTS game_db.`attendance`
 (
-    AccountId BIGINT NOT NULL PRIMARY KEY COMMENT '계정 번호',
-    DateId SMALLINT NOT NULL COMMENT '마지막으로 받은 보상 번호',
-    LastAttendanceDate DATETIME NOT NULL COMMENT '마지막으로 출석한 날짜'
+    account_id BIGINT NOT NULL PRIMARY KEY COMMENT '계정 번호',
+    data_id SMALLINT NOT NULL COMMENT '마지막으로 받은 보상 번호',
+    last_attendance_date DATETIME NOT NULL COMMENT '마지막으로 출석한 날짜'
 ) COMMENT '출석부';
 ```
 
@@ -243,12 +243,12 @@ CREATE TABLE IF NOT EXISTS GameDB.`Attendance`
 영수증
 
 ```sql
-USE GameDB;
-DROP TABLE IF EXISTS GameDB.`Receipt`;
-CREATE TABLE IF NOT EXISTS GameDB.`Receipt`
+USE game_db;
+DROP TABLE IF EXISTS game_db.`receipt`;
+CREATE TABLE IF NOT EXISTS game_db.`receipt`
 (
-    ReceiptId BIGINT NOT NULL PRIMARY KEY COMMENT '영수증 번호',
-    AccountId BIGINT NOT NULL COMMENT '계정 번호',
-    ProductId SMALLINT NOT NULL COMMENT '상품 번호'
+    receipt_id BIGINT NOT NULL PRIMARY KEY COMMENT '영수증 번호',
+    account_id BIGINT NOT NULL COMMENT '계정 번호',
+    product_id SMALLINT NOT NULL COMMENT '상품 번호'
 ) COMMENT '인앱 결제 영수증';
 ```

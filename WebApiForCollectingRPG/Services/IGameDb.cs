@@ -8,7 +8,6 @@ namespace WebApiForCollectingRPG.Services;
 public interface IGameDb : IDisposable
 {
     public Task<ErrorCode> CreateAccountGameDataAsync(Int64 accountId);
-    public Task<ErrorCode> CreateAccountItemDataAsync(Int64 accountId);
     public Task<Tuple<ErrorCode, AccountGame>> GetAccountGameInfoAsync(Int64 accountId);
     public Task<Tuple<ErrorCode, IEnumerable<AccountItem>>> GetAccountItemListAsync(Int64 accountId);
 }

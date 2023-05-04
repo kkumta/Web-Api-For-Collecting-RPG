@@ -49,15 +49,6 @@ public class CreateAccount : ControllerBase
 
         _logger.ZLogInformationWithPayload(EventIdDic[EventType.CreateAccount], new { Email = request.Email }, $"CreateAccountGame Success");
 
-        errorCode = await _gameDb.CreateAccountItemDataAsync(accountId);
-        if (errorCode != ErrorCode.None)
-        {
-            response.Result = errorCode;
-            return response;
-        }
-
-        _logger.ZLogInformationWithPayload(EventIdDic[EventType.CreateAccount], new { Email = request.Email }, $"CreateAccountItem Success");
-
         return response;
     }
 }

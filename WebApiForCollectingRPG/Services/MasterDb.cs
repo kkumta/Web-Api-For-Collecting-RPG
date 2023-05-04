@@ -56,8 +56,20 @@ public class MasterDb : IMasterDb
         {
             String key = "item_list";
 
-            var itemList = await _queryFactory.Query("Item")
+            var itemList = await _queryFactory.Query("item")
+                .Select("item_id AS ItemId",
+                "name AS Name",
+                "attribute_id AS AttributeId",
+                "sell_price AS SellPrice",
+                "buy_price AS BuyPrice",
+                "use_lv AS UseLv",
+                "attack AS Attack",
+                "defence AS Defence",
+                "magic AS Magic",
+                "enhance_max_count AS EnhanceMaxCount",
+                "is_item_stackable AS IsItemStackable")
                 .GetAsync<Item>();
+
 
             var cacheOptions = new MemoryCacheEntryOptions()
                 .SetPriority(CacheItemPriority.NeverRemove)
@@ -81,7 +93,9 @@ public class MasterDb : IMasterDb
         {
             String key = "item_attribute_list";
 
-            var itemAttributeList = await _queryFactory.Query("ItemAttribute")
+            var itemAttributeList = await _queryFactory.Query("item_attribute")
+                .Select("attribute_id AS AttributeId",
+                "name AS Name")
                 .GetAsync<ItemAttribute>();
 
             var cacheOptions = new MemoryCacheEntryOptions()

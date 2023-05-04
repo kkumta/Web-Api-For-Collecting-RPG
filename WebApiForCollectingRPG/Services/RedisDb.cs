@@ -48,7 +48,7 @@ public class RedisDb : IMemoryDb
         }
         catch (Exception ex)
         {
-            s_logger.ZLogError(EventIdDic[EventType.LoginAddRedis],
+            s_logger.ZLogError(EventIdDic[EventType.LoginAddRedis], ex,
                 $"Email:{email},AuthToken:{authToken},ErrorMessage:Redis Connection Error");
             result = ErrorCode.LoginFailAddRedis;
             return result;
@@ -186,12 +186,7 @@ public class RedisDb : IMemoryDb
 
         try
         {
-            // 공지 넣기
             var redis = new RedisString<Notice>(_redisConn, key, null);
-            var input = new Notice();
-            input.Title = "사전 예약 보상 공지";
-            input.Description = "사전 예약 보상인 작은 칼과 돈 50을 우편으로 발송했습니다.";
-            await redis.SetAsync(input);
 
             var notice = await redis.GetAsync();
             if (!notice.HasValue)
