@@ -49,8 +49,19 @@ public class GetMail : ControllerBase
             response.Result = errorCode;
             return response;
         }
+        foreach(var mail in mails)
+        {
+            var mailInfo = new MailListInfo
+            {
+                Title = mail.Title,
+                IsReceived = mail.IsReceived,
+                ExpirationTime = mail.ExpirationTime
+            };
 
-        _logger.ZLogInformationWithPayload(EventIdDic[EventType.GetMails], $"GetMails Success");
+            response.Mails.Add(mailInfo);   
+        }
+
+        _logger.ZLogInformationWithPayload(EventIdDic[EventType.GetMails], $"GetMails Success");        
         return response;
     }
 }

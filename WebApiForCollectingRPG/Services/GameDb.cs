@@ -6,6 +6,7 @@ using SqlKata.Execution;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using WebApiForCollectingRPG.DAO;
 using WebApiForCollectingRPG.DTO.Mail;
@@ -134,6 +135,13 @@ $"[GameDb.GetAccountItemListAsync] ErrorCode: {ErrorCode.GetAccountItemListFailE
 
     public async Task<Tuple<ErrorCode, IEnumerable<MailListInfo>>> GetMailsByPage(Int64 accountId, Int32 page)
     {
+        if (page <= 0)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb],
+$"[GameDb.GetMailsByPage] ErrorCode: {ErrorCode.GetMailsFailNotExistPage}, AccountId: {accountId}, Page: {page}");
+            return new Tuple<ErrorCode, IEnumerable<MailListInfo>>(ErrorCode.GetMailsFailNotExistPage, null);
+        }
+
         try
         {
             var mails = await _queryFactory.Query("mail")
@@ -143,14 +151,14 @@ $"[GameDb.GetAccountItemListAsync] ErrorCode: {ErrorCode.GetAccountItemListFailE
                 .OrderByDesc("created_at")
                 .PaginateAsync<MailListInfo>(page, PerPage);
 
-            if (mails.Count == 0)
+            if (page > mails.TotalPages)
             {
                 _logger.ZLogError(EventIdDic[EventType.GameDb],
 $"[GameDb.GetMailsByPage] ErrorCode: {ErrorCode.GetMailsFailNotExistPage}, AccountId: {accountId}, Page: {page}");
                 return new Tuple<ErrorCode, IEnumerable<MailListInfo>>(ErrorCode.GetMailsFailNotExistPage, null);
             }
 
-            return new Tuple<ErrorCode, IEnumerable<MailListInfo>>(ErrorCode.None, null);
+            return new Tuple<ErrorCode, IEnumerable<MailListInfo>>(ErrorCode.None, mails.List);
         }
         catch (Exception ex)
         {

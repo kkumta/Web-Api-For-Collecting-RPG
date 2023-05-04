@@ -22,7 +22,7 @@ public class GetMailsReq
 public class GetMailsRes
 {
     [Required] public ErrorCode Result { get; set; } = ErrorCode.None;
-    [Required] public List<MailListInfo> MailList { get; set; } = new();
+    [Required] public List<MailListInfo> Mails { get; set; } = new();
 }
 
 public class MailListInfo
