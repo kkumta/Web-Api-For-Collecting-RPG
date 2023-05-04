@@ -27,6 +27,7 @@ public class GetMailsRes
 
 public class MailListInfo
 {
+    public Int64 MailId { get; set; }
     public String Title { get; set; }
     public bool IsReceived { get; set; }
     public DateTime ExpirationTime { get; set; }

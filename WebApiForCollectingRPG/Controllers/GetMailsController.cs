@@ -11,13 +11,13 @@ namespace WebApiForCollectingRPG.Controllers;
 
 [ApiController]
 [Route("api")]
-public class GetMail : ControllerBase
+public class GetMails : ControllerBase
 {
     readonly IGameDb _gameDb;
     readonly IAccountDb _accountDb;
-    readonly ILogger<GetMail> _logger;
+    readonly ILogger<GetMails> _logger;
 
-    public GetMail(ILogger<GetMail> logger, IGameDb gameDb, IAccountDb accountDb)
+    public GetMails(ILogger<GetMails> logger, IGameDb gameDb, IAccountDb accountDb)
     {
         _logger = logger;
         _gameDb = gameDb;
@@ -53,6 +53,7 @@ public class GetMail : ControllerBase
         {
             var mailInfo = new MailListInfo
             {
+                MailId = mail.MailId,
                 Title = mail.Title,
                 IsReceived = mail.IsReceived,
                 ExpirationTime = mail.ExpirationTime

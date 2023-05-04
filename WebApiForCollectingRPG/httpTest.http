@@ -21,7 +21,30 @@ Content-Type: application/json
 
 {
   "Email":"luawill@naver.com",
-  "AuthToken":"r6dwpttm1tgi5vjbo063klwe9",
+  "AuthToken":"xdpx3nw2mbinighamoaqxsjek",
+  "ClientVersion":"1.0.0",
+  "MasterDataVersion":"1.0.0"
+}
+
+###
+POST http://localhost:11500/api/mails
+Content-Type: application/json
+
+{
+  "Email":"luawill@naver.com",
+  "AuthToken":"aqczr6e3pa33rqcbufpi7ix0b",
+  "ClientVersion":"1.0.0",
+  "MasterDataVersion":"1.0.0",
+  "Page":1
+}
+
+###
+POST http://localhost:11500/api/mails/3
+Content-Type: application/json
+
+{
+  "Email":"luawill@naver.com",
+  "AuthToken":"aqczr6e3pa33rqcbufpi7ix0b",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
 }

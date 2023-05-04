@@ -39,8 +39,10 @@ public enum ErrorCode : UInt16
     GetAccountGameInfoFailException = 4102,
     GetAccountItemListFailNotExist = 4103,
     GetAccountItemListFailException = 4104,
-    GetMailsFailNotExistPage = 4105,
-    GetMailsFailException = 4106,
+    GetMailsFailNotExistPage = 4201,
+    GetMailsFailException = 4202,
+    GetMailFailNotExist = 4203,
+    GetMailFailException = 4204,
 
     // MasterDb
     GetItemListFail = 5001,

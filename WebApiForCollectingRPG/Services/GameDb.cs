@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
 using SqlKata.Compilers;
@@ -147,7 +148,7 @@ $"[GameDb.GetMailsByPage] ErrorCode: {ErrorCode.GetMailsFailNotExistPage}, Accou
             var mails = await _queryFactory.Query("mail")
                 .Where("account_id", accountId)
                 .Where("is_deleted", false)
-                .Select("title AS Title", "is_received AS IsReceived", "expiration_time AS ExpirationTime")
+                .Select("mail_id AS MailId", "title AS Title", "is_received AS IsReceived", "expiration_time AS ExpirationTime")
                 .OrderByDesc("created_at")
                 .PaginateAsync<MailListInfo>(page, PerPage);
 
@@ -165,6 +166,39 @@ $"[GameDb.GetMailsByPage] ErrorCode: {ErrorCode.GetMailsFailNotExistPage}, Accou
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
 $"[GameDb.GetMailsByPage] ErrorCode: {ErrorCode.GetMailsFailException}, AccountId: {accountId}, Page: {page}");
             return new Tuple<ErrorCode, IEnumerable<MailListInfo>>(ErrorCode.GetMailsFailException, null);
+        }
+    }
+
+    public async Task<Tuple<ErrorCode, MailDetailInfo>> GetMailByMailId(Int64 accountId, Int64 mailId)
+    {
+        try
+        {
+            var mail = await _queryFactory.Query("mail")
+                .Where("account_id", accountId)
+                .Where("mail_id", mailId)
+                .Select("mail_id AS MailId", 
+                "title AS Title", 
+                "content AS Content",
+                "is_received AS IsReceived",
+                "is_in_app_product AS IsInAppProduct",
+                "created_at AS CreatedAt",
+                "expiration_time AS ExpirationTime")
+                .FirstOrDefaultAsync<MailDetailInfo>();
+
+            if (mail == null || mailId == 0)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+    $"[GameDb.GetMailByMailId] ErrorCode: {ErrorCode.GetMailFailNotExist}, AccountId: {accountId}, MailId: {mailId}");
+                return new Tuple<ErrorCode, MailDetailInfo>(ErrorCode.GetMailFailNotExist, null);
+            }
+
+            return new Tuple<ErrorCode, MailDetailInfo>(ErrorCode.None, mail);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+$"[GameDb.GetMailByMailId] ErrorCode: {ErrorCode.GetMailFailException}, AccountId: {accountId}, MailId: {mailId}");
+            return new Tuple<ErrorCode, MailDetailInfo>(ErrorCode.GetMailFailException, null);
         }
     }
 }
