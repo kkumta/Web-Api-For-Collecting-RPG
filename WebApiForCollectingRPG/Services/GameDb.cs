@@ -169,7 +169,7 @@ $"[GameDb.GetMailsByPage] ErrorCode: {ErrorCode.GetMailsFailException}, AccountI
         }
     }
 
-    public async Task<Tuple<ErrorCode, MailDetailInfo>> GetMailByMailId(Int64 accountId, Int64 mailId)
+    public async Task<Tuple<ErrorCode, MailDetailInfo, IEnumerable<MailItemInfo>>> GetMailByMailId(Int64 accountId, Int64 mailId)
     {
         try
         {
@@ -189,16 +189,21 @@ $"[GameDb.GetMailsByPage] ErrorCode: {ErrorCode.GetMailsFailException}, AccountI
             {
                 _logger.ZLogError(EventIdDic[EventType.GameDb],
     $"[GameDb.GetMailByMailId] ErrorCode: {ErrorCode.GetMailFailNotExist}, AccountId: {accountId}, MailId: {mailId}");
-                return new Tuple<ErrorCode, MailDetailInfo>(ErrorCode.GetMailFailNotExist, null);
+                return new Tuple<ErrorCode, MailDetailInfo, IEnumerable<MailItemInfo>>(ErrorCode.GetMailFailNotExist, null, null);
             }
 
-            return new Tuple<ErrorCode, MailDetailInfo>(ErrorCode.None, mail);
+            var items = await _queryFactory.Query("mail_item")
+                .Where("mail_id", mailId)
+                .Select("item_id AS ItemId", "item_count AS ItemCount")
+                .GetAsync<MailItemInfo>();
+
+            return new Tuple<ErrorCode, MailDetailInfo, IEnumerable<MailItemInfo>>(ErrorCode.None, mail, items);
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
 $"[GameDb.GetMailByMailId] ErrorCode: {ErrorCode.GetMailFailException}, AccountId: {accountId}, MailId: {mailId}");
-            return new Tuple<ErrorCode, MailDetailInfo>(ErrorCode.GetMailFailException, null);
+            return new Tuple<ErrorCode, MailDetailInfo, IEnumerable<MailItemInfo>>(ErrorCode.GetMailFailException, null, null);
         }
     }
 }

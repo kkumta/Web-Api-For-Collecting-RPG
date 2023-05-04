@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System;
+using System.Collections.Generic;
 
 namespace WebApiForCollectingRPG.DTO.Mail
 {
@@ -19,6 +20,7 @@ namespace WebApiForCollectingRPG.DTO.Mail
     {
         [Required] public ErrorCode Result { get; set; } = ErrorCode.None;
         [Required] public MailDetailInfo Mail { get; set; } = new();
+        [Required] public List<MailItemInfo> Items{ get; set; } = new();
     }
 
     public class MailDetailInfo
@@ -30,5 +32,11 @@ namespace WebApiForCollectingRPG.DTO.Mail
         public bool IsInAppProduct { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime ExpirationTime { get; set; }
+    }
+
+    public class MailItemInfo
+    {
+        public Int64 ItemId { get; set; }
+        public Int32 ItemCount { get; set; }
     }
 }

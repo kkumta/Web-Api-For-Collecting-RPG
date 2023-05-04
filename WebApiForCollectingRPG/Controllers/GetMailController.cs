@@ -6,6 +6,7 @@ using System;
 using System.Threading.Tasks;
 using WebApiForCollectingRPG.DTO.Mail;
 using WebApiForCollectingRPG.Services;
+using WebApiForCollectingRPG.Dtos.Game;
 
 namespace WebApiForCollectingRPG.Controllers;
 
@@ -43,11 +44,21 @@ public class GetMail : ControllerBase
         }
 
         // 해당하는 우편을 가져온다.
-        (errorCode, response.Mail) = await _gameDb.GetMailByMailId(accountId, mailId);
+        (errorCode, response.Mail, var items) = await _gameDb.GetMailByMailId(accountId, mailId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;
             return response;
+        }
+        foreach (var item in items)
+        {
+            var itemInfo = new MailItemInfo
+            {
+                ItemId = item.ItemId,
+                ItemCount = item.ItemCount,
+            };
+
+            response.Items.Add(itemInfo);
         }
 
         _logger.ZLogInformationWithPayload(EventIdDic[EventType.GetMail], $"GetMail Success");

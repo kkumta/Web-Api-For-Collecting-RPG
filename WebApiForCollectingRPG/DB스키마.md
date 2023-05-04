@@ -220,6 +220,7 @@ USE game_db;
 DROP TABLE IF EXISTS game_db.`mail_item`;
 CREATE TABLE IF NOT EXISTS game_db.`mail_item`
 (
+    mail_item_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '메일-아이템 번호',
     mail_id BIGINT NOT NULL COMMENT '메일 번호',
     item_id BIGINT NOT NULL COMMENT '아이템 번호',
     item_count INT NOT NULL COMMENT '아이템 개수'
