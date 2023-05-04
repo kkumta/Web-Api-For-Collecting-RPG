@@ -21,6 +21,10 @@ public class MasterDb : IMasterDb
     SqlKata.Compilers.MySqlCompiler _compiler;
     QueryFactory _queryFactory;
 
+    MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions()
+                .SetPriority(CacheItemPriority.NeverRemove)
+                .SetAbsoluteExpiration(DateTime.MaxValue);
+
     public MasterDb(ILogger<MasterDb> logger, IOptions<DbConfig> dbConfig, IMemoryCache memoryCache)
     {
         _dbConfig = dbConfig;
@@ -70,20 +74,15 @@ public class MasterDb : IMasterDb
                 "is_item_stackable AS IsItemStackable")
                 .GetAsync<Item>();
 
-
-            var cacheOptions = new MemoryCacheEntryOptions()
-                .SetPriority(CacheItemPriority.NeverRemove)
-                .SetAbsoluteExpiration(DateTime.MaxValue);
-
             _cache.Set(key, itemList, cacheOptions);
             _logger.ZLogDebug(EventIdDic[EventType.MasterDb],
-    $"[MasterDb.GetItemList] item_list: {_cache.Get("item_list")}");
+                $"[MasterDb.GetItemList] item_list: {_cache.Get("item_list")}");
 
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
-    $"[MasterDb.GetItemList] ErrorCode : {ErrorCode.GetItemListFail}");
+                $"[MasterDb.GetItemList] ErrorCode : {ErrorCode.GetItemListFail}");
         }
     }
 
@@ -98,19 +97,36 @@ public class MasterDb : IMasterDb
                 "name AS Name")
                 .GetAsync<ItemAttribute>();
 
-            var cacheOptions = new MemoryCacheEntryOptions()
-                .SetPriority(CacheItemPriority.NeverRemove)
-                .SetAbsoluteExpiration(DateTime.MaxValue);
-
             _cache.Set(key, itemAttributeList, cacheOptions);
             _logger.ZLogDebug(EventIdDic[EventType.MasterDb],
-    $"[MasterDb.GetItemAttributeList] item_attribute_list: {_cache.Get("item_attribute_list")}");
+                $"[MasterDb.GetItemAttributeList] item_attribute_list: {_cache.Get("item_attribute_list")}");
 
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
-    $"[MasterDb.GetItemAttributeList] ErrorCode : {ErrorCode.GetItemAttributeListFail}");
+                $"[MasterDb.GetItemAttributeList] ErrorCode : {ErrorCode.GetItemAttributeListFail}");
+        }
+    }
+
+    public async void GetAttendanceCompensation()
+    {
+        try
+        {
+            String key = "attendance_compensation";
+
+            var attendanceCompensation = await _queryFactory.Query("attendance_compensation")
+                .Select("compensation_id AS CompensationId", "item_id AS ItemId", "item_count AS ItemCount")
+                .GetAsync<AttendanceCompensation>();
+            
+            _cache.Set(key, attendanceCompensation, cacheOptions);
+            _logger.ZLogDebug(EventIdDic[EventType.MasterDb], 
+                $"[MasterDb.GetAttendanceCompensation] attendance_compensation: {_cache.Get("attendance_compensation")}");
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
+                $"[MasterDb.GetAttendanceCompensation] ErrorCode : {ErrorCode.GetAttendanceCompensationFail}");
         }
     }
 }

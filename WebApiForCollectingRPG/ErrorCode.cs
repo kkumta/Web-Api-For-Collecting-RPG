@@ -47,6 +47,7 @@ public enum ErrorCode : UInt16
     // MasterDb
     GetItemListFail = 5001,
     GetItemAttributeListFail = 5002,
+    GetAttendanceCompensationFail = 5003,
 
     // Version
     ClientVersionFailNotMatch = 6001,

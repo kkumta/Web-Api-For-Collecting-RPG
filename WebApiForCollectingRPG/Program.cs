@@ -54,6 +54,7 @@ void loadMasterData()
     var service = app.Services.GetService<IMasterDb>();
     service.GetItemList();
     service.GetItemAttributeList();
+    service.GetAttendanceCompensation();
 }
 
 void SettingLogger()
