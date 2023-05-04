@@ -28,6 +28,8 @@ public enum ErrorCode : UInt16
     CheckAuthFailNotMatch = 2016,
     CheckAuthFailException = 2017,
     GetAccountDbConnectionFail = 2018,
+    FindAccountIdByEmailFailNotExist = 2019,
+    FindAccountIdByEmailFailException = 2020,
 
     // GameDb
     GetGameDbConnectionFail = 4001,
@@ -37,6 +39,8 @@ public enum ErrorCode : UInt16
     GetAccountGameInfoFailException = 4102,
     GetAccountItemListFailNotExist = 4103,
     GetAccountItemListFailException = 4104,
+    GetMailsFailNotExistPage = 4105,
+    GetMailsFailException = 4106,
 
     // MasterDb
     GetItemListFail = 5001,

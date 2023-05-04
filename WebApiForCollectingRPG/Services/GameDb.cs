@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using WebApiForCollectingRPG.DAO;
+using WebApiForCollectingRPG.DTO.Mail;
 using WebApiForCollectingRPG.Dtos.Game;
 using ZLogger;
 using static LogManager;
@@ -15,6 +17,7 @@ namespace WebApiForCollectingRPG.Services;
 
 public class GameDb : IGameDb
 {
+    private const int PerPage = 20;
     readonly IOptions<DbConfig> _dbConfig;
     readonly ILogger<GameDb> _logger;
 
@@ -126,6 +129,34 @@ $"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetAccountGameInfoFailE
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
 $"[GameDb.GetAccountItemListAsync] ErrorCode: {ErrorCode.GetAccountItemListFailException}, AccountId: {accountId}");
             return new Tuple<ErrorCode, IEnumerable<AccountItem>>(ErrorCode.GetAccountItemListFailException, null);
+        }
+    }
+
+    public async Task<Tuple<ErrorCode, IEnumerable<MailListInfo>>> GetMailsByPage(Int64 accountId, Int32 page)
+    {
+        try
+        {
+            var mails = await _queryFactory.Query("mail")
+                .Where("account_id", accountId)
+                .Where("is_deleted", false)
+                .Select("title AS Title", "is_received AS IsReceived", "expiration_time AS ExpirationTime")
+                .OrderByDesc("created_at")
+                .PaginateAsync<MailListInfo>(page, PerPage);
+
+            if (mails.Count == 0)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+$"[GameDb.GetMailsByPage] ErrorCode: {ErrorCode.GetMailsFailNotExistPage}, AccountId: {accountId}, Page: {page}");
+                return new Tuple<ErrorCode, IEnumerable<MailListInfo>>(ErrorCode.GetMailsFailNotExistPage, null);
+            }
+
+            return new Tuple<ErrorCode, IEnumerable<MailListInfo>>(ErrorCode.None, null);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+$"[GameDb.GetMailsByPage] ErrorCode: {ErrorCode.GetMailsFailException}, AccountId: {accountId}, Page: {page}");
+            return new Tuple<ErrorCode, IEnumerable<MailListInfo>>(ErrorCode.GetMailsFailException, null);
         }
     }
 }

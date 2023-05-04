@@ -6,7 +6,7 @@ using System;
 using System.Data;
 using System.Threading.Tasks;
 using WebApiForCollectingRPG.Controllers;
-using WebApiForCollectingRPG.ModelDB;
+using WebApiForCollectingRPG.DAO;
 using ZLogger;
 using static LogManager;
 
@@ -90,14 +90,39 @@ $"[AccountDb.VerifyAccount] ErrorCode: {ErrorCode.LoginFailUserNotExist}, Accoun
                 return new Tuple<ErrorCode, Int64>(ErrorCode.LoginFailPasswordNotMatch, 0);
             }
 
-            return new Tuple<ErrorCode, long>(ErrorCode.None, accountInfo.AccountId);
-
+            return new Tuple<ErrorCode, Int64>(ErrorCode.None, accountInfo.AccountId);
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.AccountDb], ex,
     $"[AccountDb.VerifyAccount] ErrorCode: {ErrorCode.LoginFailException}, Email: {email}");
             return new Tuple<ErrorCode, Int64>(ErrorCode.LoginFailException, 0);
+        }
+    }
+
+    public async Task<Tuple<ErrorCode, Int64>> FindAccountIdByEmail(String email)
+    {
+        try
+        {
+            var accountId = await _queryFactory.Query("account")
+                    .Where("email", email)
+                    .Select("account_id AS AccountId")
+                    .FirstOrDefaultAsync<Int64>();
+
+            if (accountId == 0)
+            {
+                _logger.ZLogError(EventIdDic[EventType.AccountDb],
+$"[AccountDb.FindAccountIdByEmail] ErrorCode: {ErrorCode.FindAccountIdByEmailFailException}, Email: {email}");
+                return new Tuple<ErrorCode, Int64>(ErrorCode.FindAccountIdByEmailFailNotExist, 0);
+            }
+
+            return new Tuple<ErrorCode, Int64>(ErrorCode.None, accountId);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.AccountDb], ex,
+$"[AccountDb.FindAccountIdByEmail] ErrorCode: {ErrorCode.FindAccountIdByEmailFailException}, Email: {email}");
+            return new Tuple<ErrorCode, Int64>(ErrorCode.FindAccountIdByEmailFailException, 0);
         }
     }
 

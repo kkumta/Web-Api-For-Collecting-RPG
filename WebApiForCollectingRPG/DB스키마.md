@@ -204,10 +204,11 @@ CREATE TABLE IF NOT EXISTS game_db.`mail`
     account_id BIGINT NOT NULL COMMENT '계정 번호',
     title VARCHAR(50) NOT NULL COMMENT '메일 제목',
     content VARCHAR(200) NOT NULL COMMENT '메일 내용',
-    is_read BOOL NOT NULL COMMENT '읽음 여부',
     is_received BOOL NOT NULL COMMENT '아이템 수령 여부',
     is_in_app_product BOOL NOT NULL COMMENT '인앱 상품 여부',
-    expiratio_time DATETIME NOT NULL COMMENT '보관 만료 시간'
+    expiration_time DATETIME NOT NULL COMMENT '보관 만료 시간',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 날짜',
+    is_deleted BOOL NOT NULL COMMENT '삭제 여부'
 ) COMMENT '우편';
 ```
 
