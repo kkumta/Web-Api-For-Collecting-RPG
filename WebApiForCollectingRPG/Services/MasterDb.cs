@@ -5,7 +5,7 @@ using MySqlConnector;
 using SqlKata.Execution;
 using System;
 using System.Data;
-using WebApiForCollectingRPG.Dtos.MasterData;
+using WebApiForCollectingRPG.DAO.Master;
 using ZLogger;
 using static LogManager;
 
