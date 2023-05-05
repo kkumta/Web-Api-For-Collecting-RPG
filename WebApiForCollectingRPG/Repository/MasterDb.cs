@@ -4,13 +4,16 @@ using Microsoft.Extensions.Options;
 using MySqlConnector;
 using SqlKata.Execution;
 using System;
+using System.Collections.Generic;
 using System.Data;
-using System.Threading.Tasks;
+using System.Linq;
+using WebApiForCollectingRPG.DAO;
 using WebApiForCollectingRPG.DAO.Master;
+using WebApiForCollectingRPG.Services;
 using ZLogger;
 using static LogManager;
 
-namespace WebApiForCollectingRPG.Services;
+namespace WebApiForCollectingRPG.Repository;
 
 public class MasterDb : IMasterDb
 {
@@ -59,7 +62,7 @@ public class MasterDb : IMasterDb
     {
         try
         {
-            String key = "item_list";
+            string key = "item_list";
 
             var itemList = await _queryFactory.Query("item")
                 .Select("item_id AS ItemId",
@@ -91,7 +94,7 @@ public class MasterDb : IMasterDb
     {
         try
         {
-            String key = "item_attribute_list";
+            string key = "item_attribute_list";
 
             var itemAttributeList = await _queryFactory.Query("item_attribute")
                 .Select("attribute_id AS AttributeId",
@@ -114,14 +117,14 @@ public class MasterDb : IMasterDb
     {
         try
         {
-            String key = "attendance_compensation";
+            string key = "attendance_compensation";
 
             var attendanceCompensation = await _queryFactory.Query("attendance_compensation")
                 .Select("compensation_id AS CompensationId", "item_id AS ItemId", "item_count AS ItemCount")
                 .GetAsync<AttendanceCompensation>();
-            
+
             _cache.Set(key, attendanceCompensation, cacheOptions);
-            _logger.ZLogDebug(EventIdDic[EventType.MasterDb], 
+            _logger.ZLogDebug(EventIdDic[EventType.MasterDb],
                 $"[MasterDb.GetAttendanceCompensation] attendance_compensation: {_cache.Get("attendance_compensation")}");
         }
         catch (Exception ex)
@@ -135,7 +138,7 @@ public class MasterDb : IMasterDb
     {
         try
         {
-            String key = "in_app_product_list";
+            string key = "in_app_product_list";
 
             var inAppProductList = await _queryFactory.Query("in_app_product")
                 .Select("product_id AS ProductId", "item_id AS ItemId", "item_name AS ItemName", "item_count AS ItemCount")
@@ -149,6 +152,21 @@ public class MasterDb : IMasterDb
         {
             _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
                 $"[MasterDb.GetInAppProductListAsync] ErrorCode : {ErrorCode.GetInAppProductListFail}");
+        }
+    }
+
+    public AttendanceCompensation GetAttendanceCompensationByCompensationId(short compensationId)
+    {
+        try
+        {
+            List<AttendanceCompensation> attendanceCompensationlist = _cache.Get("attendance_compensation") as List<AttendanceCompensation>;
+            return attendanceCompensationlist.First(x => x.CompensationId == compensationId);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
+                $"[MasterDb.GetAttendanceCompensationByCompensationId] ErrorCode: {ErrorCode.GetAttendanceCompensationExeption}, CompensationId: {compensationId}");
+            return new AttendanceCompensation();
         }
     }
 }

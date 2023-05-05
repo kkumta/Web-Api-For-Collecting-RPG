@@ -33,10 +33,4 @@ namespace WebApiForCollectingRPG.DTO.Mail
         public DateTime CreatedAt { get; set; }
         public DateTime ExpirationTime { get; set; }
     }
-
-    public class MailItemInfo
-    {
-        public Int64 ItemId { get; set; }
-        public Int32 ItemCount { get; set; }
-    }
 }

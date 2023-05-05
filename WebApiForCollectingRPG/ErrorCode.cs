@@ -43,12 +43,17 @@ public enum ErrorCode : UInt16
     GetMailsFailException = 4202,
     GetMailFailNotExist = 4203,
     GetMailFailException = 4204,
+    SendRewardToMailboxException = 4205,
+    AttendanceInfoNotExist = 4301,
+    AttendanceInfoException = 4302,
+    DuplicateAttendance = 4303,
 
     // MasterDb
     GetItemListFail = 5001,
     GetItemAttributeListFail = 5002,
     GetAttendanceCompensationFail = 5003,
     GetInAppProductListFail = 5004,
+    GetAttendanceCompensationExeption = 5005,
 
     // Version
     ClientVersionFailNotMatch = 6001,

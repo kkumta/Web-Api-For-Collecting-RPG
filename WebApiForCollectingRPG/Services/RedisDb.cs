@@ -1,4 +1,4 @@
-﻿using WebApiForCollectingRPG.ModelDB;
+﻿using WebApiForCollectingRPG.DAO;
 using CloudStructures;
 using CloudStructures.Structures;
 using Microsoft.Extensions.Logging;

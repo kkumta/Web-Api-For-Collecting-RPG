@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebApiForCollectingRPG.ModelDB;
+namespace WebApiForCollectingRPG.DAO;
 
 public class Account
 {

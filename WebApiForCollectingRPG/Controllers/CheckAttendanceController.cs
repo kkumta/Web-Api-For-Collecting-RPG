@@ -4,20 +4,20 @@ using Microsoft.Extensions.Logging;
 using ZLogger;
 using System;
 using System.Threading.Tasks;
-using WebApiForCollectingRPG.DTO.Mail;
 using WebApiForCollectingRPG.Services;
+using WebApiForCollectingRPG.DTO.Attendance;
 
 namespace WebApiForCollectingRPG.Controllers;
 
 [ApiController]
 [Route("api")]
-public class GetMail : ControllerBase
+public class CheckAttendance : ControllerBase
 {
     readonly IGameDb _gameDb;
     readonly IAccountDb _accountDb;
-    readonly ILogger<GetMail> _logger;
+    readonly ILogger<CheckAttendance> _logger;
 
-    public GetMail(ILogger<GetMail> logger, IGameDb gameDb, IAccountDb accountDb)
+    public CheckAttendance(ILogger<CheckAttendance> logger, IGameDb gameDb, IAccountDb accountDb)
     {
         _logger = logger;
         _gameDb = gameDb;
@@ -25,14 +25,14 @@ public class GetMail : ControllerBase
     }
 
     /**
-     * parameter: mailId
-     * return: mail
-     */
+    * parameter: mailId
+    * return: mail
+    */
     [HttpPost]
-    [Route("mails/{mailId}")]
-    public async Task<GetMailRes> Post(GetMailReq request, Int64 mailId)
+    [Route("attendance/check")]
+    public async Task<CheckAttendanceRes> Post(CheckAttendanceReq request)
     {
-        var response = new GetMailRes();
+        var response = new CheckAttendanceRes();
 
         // request의 Email을 가지고 해당하는 AccountId를 찾는다.
         var (errorCode, accountId) = await _accountDb.FindAccountIdByEmail(request.Email);
@@ -42,25 +42,15 @@ public class GetMail : ControllerBase
             return response;
         }
 
-        // 해당하는 우편을 가져온다.
-        (errorCode, response.Mail, var items) = await _gameDb.GetMailByMailId(accountId, mailId);
+        // accountId를 가지고 출석 체크를 시도한다.
+        errorCode = await _gameDb.CheckAttendance(accountId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;
             return response;
         }
-        foreach (var item in items)
-        {
-            var itemInfo = new MailItemInfo
-            {
-                ItemId = item.ItemId,
-                ItemCount = item.ItemCount,
-            };
 
-            response.Items.Add(itemInfo);
-        }
-
-        _logger.ZLogInformationWithPayload(EventIdDic[EventType.GetMail], $"GetMail Success");
+        _logger.ZLogInformationWithPayload(EventIdDic[EventType.CheckAttendance], $"CheckAttendance Success");
         return response;
     }
 }

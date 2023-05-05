@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using WebApiForCollectingRPG.ModelDB;
+using WebApiForCollectingRPG.DAO;
 
 namespace WebApiForCollectingRPG.Services
 {

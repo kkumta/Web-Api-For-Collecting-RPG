@@ -236,7 +236,7 @@ DROP TABLE IF EXISTS game_db.`attendance`;
 CREATE TABLE IF NOT EXISTS game_db.`attendance`
 (
     account_id BIGINT NOT NULL PRIMARY KEY COMMENT '계정 번호',
-    data_id SMALLINT NOT NULL COMMENT '마지막으로 받은 보상 번호',
+    last_compensation_id SMALLINT NOT NULL COMMENT '마지막으로 받은 보상 번호',
     last_attendance_date DATETIME NOT NULL COMMENT '마지막으로 출석한 날짜'
 ) COMMENT '출석부';
 ```

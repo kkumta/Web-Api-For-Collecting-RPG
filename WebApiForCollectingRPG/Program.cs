@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using ZLogger;
 using Microsoft.Extensions.Caching.Memory;
 using SqlKata.Execution;
+using WebApiForCollectingRPG.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
