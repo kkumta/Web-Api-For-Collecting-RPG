@@ -242,6 +242,15 @@ public class GameDb : IGameDb
                         $"[GameDb.CheckAttendance] ErrorCode: {ErrorCode.DuplicateAttendance}, AccountId: {accountId}");
                     return ErrorCode.DuplicateAttendance;
                 }
+                // 연속 출석하지 않은 계정이거나 30일 출석 보상을 받은 계정일 때
+                else if (DateTime.Compare(lastAttendanceDate.AddDays(1), requestDate) != 0 || attendance.LastCompensationId == 30)
+                {
+                    await _queryFactory.Query("attendance").Where("account_id", accountId).UpdateAsync(new
+                    {
+                        last_compensation_id = 1,
+                        last_attendance_date = requestDate
+                    });
+                }
                 // 연속 출석한 계정일 때
                 else if (DateTime.Compare(lastAttendanceDate.AddDays(1), requestDate) == 0)
                 {
@@ -249,15 +258,6 @@ public class GameDb : IGameDb
                     await _queryFactory.Query("attendance").Where("account_id", accountId).UpdateAsync(new
                     {
                         last_compensation_id = attendance.LastCompensationId++,
-                        last_attendance_date = requestDate
-                    });
-                }
-                // 연속 출석하지 않은 계정일 때
-                else
-                {
-                    await _queryFactory.Query("attendance").Where("account_id", accountId).UpdateAsync(new
-                    {
-                        last_compensation_id = 1,
                         last_attendance_date = requestDate
                     });
                 }
