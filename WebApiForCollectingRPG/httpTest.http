@@ -32,19 +32,19 @@ Content-Type: application/json
 
 {
   "Email":"qqqqq@naver.com",
-  "AuthToken":"tylet0cr9rhkcls07tbfmt7gk",
+  "AuthToken":"whe86clgl3e1e29th3r6lkdrh",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0",
   "Page":1
 }
 
 ###
-POST http://localhost:11500/api/mails/63
+POST http://localhost:11500/api/mails/70
 Content-Type: application/json
 
 {
   "Email":"qqqqq@naver.com",
-  "AuthToken":"tylet0cr9rhkcls07tbfmt7gk",
+  "AuthToken":"whe86clgl3e1e29th3r6lkdrh",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
 }
@@ -55,18 +55,33 @@ Content-Type: application/json
 
 {
   "Email":"qqqqq@naver.com",
-  "AuthToken":"tylet0cr9rhkcls07tbfmt7gk",
+  "AuthToken":"ad7mwhuez39f39t7jho8vmrij",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
 }
 
 ###
-POST http://localhost:11500/api/mails/64/items
+POST http://localhost:11500/api/mails/61/items
 Content-Type: application/json
 
 {
   "Email":"qqqqq@naver.com",
-  "AuthToken":"tylet0cr9rhkcls07tbfmt7gk",
+  "AuthToken":"r9t908cqpdl4lpz2x1qlocgfu",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
+}
+
+###
+POST http://localhost:11500/api/receipts
+Content-Type: application/json
+
+{
+  "Email": "qqqqq@naver.com",
+  "AuthToken": "whe86clgl3e1e29th3r6lkdrh",
+  "ClientVersion": "1.0.0",
+  "MasterDataVersion": "1.0.0",
+  "ReceiptInfo":{
+    "ReceiptId": 27,
+    "ProductId": 2
+  }
 }

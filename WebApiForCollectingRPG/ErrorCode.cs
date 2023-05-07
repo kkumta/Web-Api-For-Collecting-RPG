@@ -39,6 +39,8 @@ public enum ErrorCode : UInt16
     GetAccountGameInfoFailException = 4102,
     GetAccountItemListFailNotExist = 4103,
     GetAccountItemListFailException = 4104,
+    
+    // Mail
     GetMailsFailNotExistPage = 4201,
     GetMailsFailException = 4202,
     GetMailFailNotExist = 4203,
@@ -47,9 +49,15 @@ public enum ErrorCode : UInt16
     ReceiveMailItemsFailNotExist = 4206,
     ReceiveMailItemsFailMailNotExist = 4207,
     ReceiveMailItemsException = 4208,
+    
+    // CheckAttendance
     AttendanceInfoNotExist = 4301,
     AttendanceInfoException = 4302,
     DuplicateAttendance = 4303,
+
+    // InAppProduct
+    ReceiptAlreadyUsed = 4401,
+    SendInAppProductException = 4402,
 
     // MasterDb
     GetItemListFail = 5001,
@@ -57,8 +65,9 @@ public enum ErrorCode : UInt16
     GetAttendanceCompensationFail = 5003,
     GetInAppProductListFail = 5004,
     GetAttendanceCompensationExeption = 5005,
-    IsMoneyException = 5006,
-    IsStackableItemException = 5007,
+    GetInAppItemsByProductIdExeption = 5006,
+    IsMoneyException = 5007,
+    IsStackableItemException = 5008,
 
     // Version
     ClientVersionFailNotMatch = 6001,

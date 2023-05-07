@@ -6,7 +6,6 @@ using SqlKata.Execution;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlTypes;
 using System.Threading.Tasks;
 using WebApiForCollectingRPG.DAO;
 using WebApiForCollectingRPG.DTO.Attendance;
@@ -15,6 +14,7 @@ using WebApiForCollectingRPG.DTO.Game;
 using WebApiForCollectingRPG.Repository;
 using ZLogger;
 using static LogManager;
+using WebApiForCollectingRPG.DTO.InAppProduct;
 
 namespace WebApiForCollectingRPG.Services;
 
@@ -150,7 +150,8 @@ public class GameDb : IGameDb
         try
         {
             var mails = await _queryFactory.Query("mail")
-                .Where(new {
+                .Where(new
+                {
                     account_id = accountId,
                     is_deleted = false,
                 })
@@ -229,7 +230,7 @@ public class GameDb : IGameDb
                 "last_attendance_date AS LastAttendanceDate")
                 .FirstOrDefaultAsync<AttendanceInfo>();
 
-            var requestDate = Convert.ToDateTime(DateTime.Now.ToString("yy-MM-dd"));
+            var requestDate = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd"));
 
             // 한 번도 출석하지 않은 계정일 때
             if (attendance == null)
@@ -243,7 +244,7 @@ public class GameDb : IGameDb
             }
             else
             {
-                var lastAttendanceDate = Convert.ToDateTime(attendance.LastAttendanceDate.ToString("yy-MM-dd"));
+                var lastAttendanceDate = Convert.ToDateTime(attendance.LastAttendanceDate.ToString("yyyy-MM-dd"));
 
                 // 출석 요청일이 마지막 출석일과 일치할 경우
                 if (DateTime.Compare(requestDate, lastAttendanceDate) == 0)
@@ -297,44 +298,6 @@ public class GameDb : IGameDb
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
                 $"[GameDb.CheckAttendance] ErrorCode: {ErrorCode.AttendanceInfoException}, AccountId: {accountId}");
             return ErrorCode.AttendanceInfoException;
-        }
-    }
-
-    private async Task<ErrorCode> SendRewardToMailbox(Int64 accountId, SendMailInfo mail, List<MailItemInfo> mailItems)
-    {
-        try
-        {
-            Int64 mailId = await _queryFactory.Query("mail").InsertGetIdAsync<Int64>(new
-            {
-                account_id = accountId,
-                title = mail.Title,
-                content = mail.Content,
-                is_received = mail.IsReceived,
-                is_in_app_product = mail.IsInAppProduct,
-                expiration_time = mail.ExpirationTime,
-                is_deleted = mail.IsDeleted
-            });
-
-            foreach (MailItemInfo item in mailItems)
-            {
-                await _queryFactory.Query("mail_item").InsertAsync(new
-                {
-                    mail_id = mailId,
-                    item_id = item.ItemId,
-                    item_count = item.ItemCount
-                });
-            }
-
-            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
-                $"[GameDb.SendRewardToMailbox] AccountId: {accountId}, MailId: {mailId}, MailItemCount: {mailItems.Count}");
-
-            return ErrorCode.None;
-        }
-        catch (Exception ex)
-        {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
-                $"[GameDb.SendRewardToMailbox] ErrorCode: {ErrorCode.SendRewardToMailboxException}, AccountId: {accountId}, MailTitle: {mail.Title}, MailItemCount: {mailItems.Count}");
-            return ErrorCode.SendRewardToMailboxException;
         }
     }
 
@@ -398,7 +361,7 @@ public class GameDb : IGameDb
             foreach (MailItemInfo item in mailItems)
             {
                 // 아이템이 돈일 경우
-                if(_masterDb.IsMoney(item.ItemId))
+                if (_masterDb.IsMoney(item.ItemId))
                 {
                     var money = await _queryFactory.Query("account_game")
                         .Where("account_id", accountId)
@@ -407,7 +370,7 @@ public class GameDb : IGameDb
 
                     await _queryFactory.Query("account_game").Where("account_id", accountId).UpdateAsync(new
                     {
-                        money = money + item.ItemCount 
+                        money = money + item.ItemCount
                     });
                 }
                 // 겹칠 수 있는 아이템일 경우
@@ -467,6 +430,96 @@ public class GameDb : IGameDb
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
                 $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsException}, AccountId: {accountId}");
             return ErrorCode.ReceiveMailItemsException;
+        }
+    }
+
+    public async Task<ErrorCode> SendInAppProduct(Int64 accountId, Int64 receiptId, Int16 productId)
+    {
+        try
+        {
+            var receipt = await _queryFactory.Query("receipt")
+                .Where("receipt_id", receiptId)
+                .FirstOrDefaultAsync<Receipt>();
+
+            if (receipt != null)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                    $"[GameDb.SendInAppProduct] ErrorCode: {ErrorCode.ReceiptAlreadyUsed}, ReceiptId: {receiptId}");
+                return ErrorCode.ReceiptAlreadyUsed;
+            }
+
+            await _queryFactory.Query("receipt").InsertAsync(new
+            {
+                receipt_id = receiptId,
+                account_id = accountId,
+                product_id = productId,
+            });
+
+            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
+                $"[GameDb.SendInAppProduct] Add Receipt Success! ReceiptId: {receiptId} AccountId: {accountId}, ProductId: {productId}");
+
+            SendMailInfo mail = new SendMailInfo(accountId,
+                "인앱 상품(" + productId + ")" + " 구입에 따른 아이템 지급",
+                "영수증 번호: " + receiptId +
+                "\n상품 번호: " + productId,
+                true,
+                Convert.ToDateTime(DateTime.MaxValue.ToString("yyyy-MM-dd HH:mm:ss")));
+
+            var inAppItems = _masterDb.GetInAppItemsByProductId(productId);
+            var mailItems = inAppItems.ConvertAll(inAppItem =>
+            {
+                return new MailItemInfo()
+                {
+                    ItemId = inAppItem.ItemId,
+                    ItemCount = inAppItem.ItemCount
+                };
+            });
+
+            return await SendRewardToMailbox(accountId, mail, mailItems);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+                $"[GameDb.SendInAppProduct] ErrorCode: {ErrorCode.SendInAppProductException}, ReceiptId: {receiptId}");
+            return ErrorCode.SendInAppProductException;
+        }
+    }
+
+    private async Task<ErrorCode> SendRewardToMailbox(Int64 accountId, SendMailInfo mail, List<MailItemInfo> mailItems)
+    {
+        try
+        {
+            var mailId = await _queryFactory.Query("mail").InsertGetIdAsync<Int64>(new
+            {
+                account_id = accountId,
+                title = mail.Title,
+                content = mail.Content,
+                is_received = mail.IsReceived,
+                is_in_app_product = mail.IsInAppProduct,
+                expiration_time = mail.ExpirationTime,
+                is_deleted = mail.IsDeleted
+            });
+
+            foreach (MailItemInfo item in mailItems)
+            {
+                await _queryFactory.Query("mail_item").InsertAsync(new
+                {
+                    mail_id = mailId,
+                    item_id = item.ItemId,
+                    item_count = item.ItemCount
+                });
+            }
+
+            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
+                $"[GameDb.SendRewardToMailbox] AccountId: {accountId}, MailId: {mailId}, MailItemCount: {mailItems.Count}");
+
+            return ErrorCode.None;
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+                $"[GameDb.SendRewardToMailbox] ErrorCode: {ErrorCode.SendRewardToMailboxException}, AccountId: {accountId}, MailTitle: {mail.Title}, MailItemCount: {mailItems.Count}");
+            return ErrorCode.SendRewardToMailboxException;
         }
     }
 }

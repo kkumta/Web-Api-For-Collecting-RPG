@@ -9,6 +9,7 @@ using System.Data;
 using System.Linq;
 using WebApiForCollectingRPG.DAO;
 using WebApiForCollectingRPG.DAO.Master;
+using WebApiForCollectingRPG.DTO.InAppProduct;
 using WebApiForCollectingRPG.Services;
 using ZLogger;
 using static LogManager;
@@ -167,6 +168,30 @@ public class MasterDb : IMasterDb
             _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
                 $"[MasterDb.GetAttendanceCompensationByCompensationId] ErrorCode: {ErrorCode.GetAttendanceCompensationExeption}, CompensationId: {compensationId}");
             return new AttendanceCompensation();
+        }
+    }
+
+    public List<InAppItem> GetInAppItemsByProductId(Int16 productId)
+    {
+        try
+        {
+            List<InAppProduct> itemList = _cache.Get("in_app_product_list") as List<InAppProduct>;
+            var seletedItemList = itemList.FindAll(x => x.ProductId == productId);
+            return seletedItemList.ConvertAll(product =>
+            {
+                return new InAppItem()
+                {
+                    ItemId = product.ItemId,
+                    ItemName = product.ItemName,
+                    ItemCount = product.ItemCount
+                };
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
+                $"[MasterDb.GetInAppItemsByProductId] ErrorCode: {ErrorCode.GetInAppItemsByProductIdExeption}, ProductId: {productId}");
+            return new List<InAppItem>();
         }
     }
 

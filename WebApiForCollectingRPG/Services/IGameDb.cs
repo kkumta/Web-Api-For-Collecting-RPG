@@ -14,5 +14,6 @@ public interface IGameDb : IDisposable
     public Task<Tuple<ErrorCode, IEnumerable<MailListInfo>>> GetMailsByPage(Int64 accountId, Int32 page);
     public Task<Tuple<ErrorCode, MailDetailInfo, IEnumerable<MailItemInfo>>> GetMailByMailId(Int64 accountId, Int64 mailId);
     public Task<ErrorCode> CheckAttendance(Int64 accountId);
+    public Task<ErrorCode> SendInAppProduct(Int64 accountId, Int64 receiptId, Int16 productId);
     public Task<ErrorCode> ReceiveMailItems(Int64 accountId, Int64 mailId);
 }
