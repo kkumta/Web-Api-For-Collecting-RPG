@@ -13,4 +13,6 @@ public interface IMasterDb
     public void GetAttendanceCompensation();
     public void GetInAppProductListAsync();
     public AttendanceCompensation GetAttendanceCompensationByCompensationId(Int16 compensationId);
+    public bool IsMoney(Int64 itemId);
+    public bool IsStackableItem(Int64 itemId);
 }

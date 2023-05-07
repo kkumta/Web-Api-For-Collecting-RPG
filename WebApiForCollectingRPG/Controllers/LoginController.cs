@@ -6,7 +6,7 @@ using WebApiForCollectingRPG.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using ZLogger;
-using WebApiForCollectingRPG.Dtos.Game;
+using WebApiForCollectingRPG.DTO.Game;
 
 namespace WebApiForCollectingRPG.Controllers
 {
@@ -67,15 +67,15 @@ namespace WebApiForCollectingRPG.Controllers
             response.GameInfo = gameInfo;
 
             // 계정 검증에 성공한 경우, 계정 아이템 데이터 반환
-            (errorCode, var itemList) = await _gameDb.GetAccountItemListAsync(accountId);
+            (errorCode, var itemInfoList) = await _gameDb.GetAccoutItemInfoListAsync(accountId);
             if (errorCode != ErrorCode.None)
             {
                 response.Result = errorCode;
                 return response;
             }
-            foreach (var item in itemList)
+            foreach (var item in itemInfoList)
             {
-                var itemInfo = new AccountItem
+                var itemInfo = new AccountItemInfo
                 {
                     ItemId = item.ItemId,
                     ItemCount = item.ItemCount,

@@ -6,10 +6,12 @@ using SqlKata.Execution;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlTypes;
 using System.Threading.Tasks;
+using WebApiForCollectingRPG.DAO;
 using WebApiForCollectingRPG.DTO.Attendance;
 using WebApiForCollectingRPG.DTO.Mail;
-using WebApiForCollectingRPG.Dtos.Game;
+using WebApiForCollectingRPG.DTO.Game;
 using WebApiForCollectingRPG.Repository;
 using ZLogger;
 using static LogManager;
@@ -88,7 +90,7 @@ public class GameDb : IGameDb
         return ErrorCode.CreateAccountGameFailException;
     }
 
-    public async Task<Tuple<ErrorCode, AccountGame>> GetAccountGameInfoAsync(Int64 accountId)
+    public async Task<Tuple<ErrorCode, AccountGameInfo>> GetAccountGameInfoAsync(Int64 accountId)
     {
         try
         {
@@ -96,26 +98,26 @@ public class GameDb : IGameDb
                 .Where("account_id", accountId)
                 .Select("money AS Money",
                 "exp AS Exp")
-                .FirstOrDefaultAsync<AccountGame>();
+                .FirstOrDefaultAsync<AccountGameInfo>();
 
             if (accountGameInfo is null)
             {
                 _logger.ZLogError(EventIdDic[EventType.GameDb],
                     $"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetAccountGameInfoFailNotExist}, AccountId: {accountId}");
-                return new Tuple<ErrorCode, AccountGame>(ErrorCode.GetAccountGameInfoFailNotExist, null);
+                return new Tuple<ErrorCode, AccountGameInfo>(ErrorCode.GetAccountGameInfoFailNotExist, null);
             }
 
-            return new Tuple<ErrorCode, AccountGame>(ErrorCode.None, accountGameInfo);
+            return new Tuple<ErrorCode, AccountGameInfo>(ErrorCode.None, accountGameInfo);
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
                 $"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetAccountGameInfoFailException}, AccountId: {accountId}");
-            return new Tuple<ErrorCode, AccountGame>(ErrorCode.GetAccountGameInfoFailException, null);
+            return new Tuple<ErrorCode, AccountGameInfo>(ErrorCode.GetAccountGameInfoFailException, null);
         }
     }
 
-    public async Task<Tuple<ErrorCode, IEnumerable<AccountItem>>> GetAccountItemListAsync(Int64 accountId)
+    public async Task<Tuple<ErrorCode, IEnumerable<AccountItemInfo>>> GetAccoutItemInfoListAsync(Int64 accountId)
     {
         try
         {
@@ -124,15 +126,15 @@ public class GameDb : IGameDb
                 .Select("item_id AS ItemId",
                 "item_count AS ItemCount",
                 "enhance_count AS EnhanceCount")
-                .GetAsync<AccountItem>();
+                .GetAsync<AccountItemInfo>();
 
-            return new Tuple<ErrorCode, IEnumerable<AccountItem>>(ErrorCode.None, accountItemList);
+            return new Tuple<ErrorCode, IEnumerable<AccountItemInfo>>(ErrorCode.None, accountItemList);
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
                 $"[GameDb.GetAccountItemListAsync] ErrorCode: {ErrorCode.GetAccountItemListFailException}, AccountId: {accountId}");
-            return new Tuple<ErrorCode, IEnumerable<AccountItem>>(ErrorCode.GetAccountItemListFailException, null);
+            return new Tuple<ErrorCode, IEnumerable<AccountItemInfo>>(ErrorCode.GetAccountItemListFailException, null);
         }
     }
 
@@ -178,6 +180,7 @@ public class GameDb : IGameDb
             var mail = await _queryFactory.Query("mail")
                 .Where("account_id", accountId)
                 .Where("mail_id", mailId)
+                .Where("is_deleted", false)
                 .Select("mail_id AS MailId",
                 "title AS Title",
                 "content AS Content",
@@ -325,6 +328,134 @@ public class GameDb : IGameDb
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
                 $"[GameDb.SendRewardToMailbox] ErrorCode: {ErrorCode.SendRewardToMailboxException}, AccountId: {accountId}, MailTitle: {mail.Title}, MailItemCount: {mailItems.Count}");
             return ErrorCode.SendRewardToMailboxException;
+        }
+    }
+
+    public async Task<ErrorCode> ReceiveMailItems(Int64 accountId, Int64 mailId)
+    {
+        try
+        {
+            // 우편 조회
+            var mail = await _queryFactory.Query("mail")
+                .Where("account_id", accountId)
+                .Where("mail_id", mailId)
+                .Where("is_deleted", false)
+                .Select("mail_id AS MailId",
+                "account_id AS AccountId",
+                "title AS Title",
+                "content AS Content",
+                "is_received AS IsReceived",
+                "is_in_app_product AS IsInAppProduct",
+                "created_at AS CreatedAt",
+                "expiration_time AS ExpirationTime",
+                "is_deleted AS IsDeleted")
+                .FirstOrDefaultAsync<Mail>();
+
+            if (mail == null || mail.MailId == 0)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                    $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsFailMailNotExist}, AccountId: {accountId}, MailId: {mailId}");
+                return ErrorCode.ReceiveMailItemsFailMailNotExist;
+            }
+            else if (mail.IsReceived)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                    $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsFailNotExist}, AccountId: {accountId}, MailId: {mailId}");
+                return ErrorCode.ReceiveMailItemsFailNotExist;
+            }
+
+            // 우편 아이템 조회
+            var mailItems = await _queryFactory.Query("mail_item")
+                .Where("mail_id", mailId)
+                .Select("item_id AS ItemId", "item_count AS ItemCount")
+                .GetAsync<MailItemInfo>();
+
+            if (mailItems == null)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                    $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsFailNotExist}, AccountId: {accountId}, MailId: {mailId}");
+                return ErrorCode.ReceiveMailItemsFailNotExist;
+            }
+
+            // 우편 아이템 수령 처리
+            await _queryFactory.Query("mail").Where("mail_id", mailId).UpdateAsync(new
+            {
+                is_received = true
+            });
+
+
+            foreach (MailItemInfo item in mailItems)
+            {
+                // 아이템이 돈일 경우
+                if(_masterDb.IsMoney(item.ItemId))
+                {
+                    var money = await _queryFactory.Query("account_game")
+                        .Where("account_id", accountId)
+                        .Select("money AS Money")
+                        .FirstOrDefaultAsync<Int64>();
+
+                    await _queryFactory.Query("account_game").Where("account_id", accountId).UpdateAsync(new
+                    {
+                        money = money + item.ItemCount 
+                    });
+                }
+                // 겹칠 수 있는 아이템일 경우
+                else if (_masterDb.IsStackableItem(item.ItemId))
+                {
+                    var accountItem = await _queryFactory.Query("account_item")
+                        .Where("item_id", item.ItemId)
+                        .Select("account_item_id AS AccountItemId",
+                        "account_id AS AccountId",
+                        "item_id AS ItemId",
+                        "item_count AS ItemCount",
+                        "enhance_count AS EnhanceCount")
+                        .FirstOrDefaultAsync<AccountItem>();
+
+                    // 해당 아이템을 보유하고 있지 않을 경우 AccountItem 생성
+                    if (accountItem == null || accountItem.AccountItemId == 0)
+                    {
+                        await _queryFactory.Query("account_item").InsertAsync(new
+                        {
+                            account_id = accountId,
+                            item_id = item.ItemId,
+                            item_count = item.ItemCount,
+                            enhance_count = 0
+                        });
+                    }
+                    // 보유하고 있을 경우 현재 보유 수량에 더한다.
+                    else
+                    {
+                        await _queryFactory.Query("account_item")
+                            .Where("account_item_id", accountItem.AccountItemId)
+                            .UpdateAsync(new
+                            {
+                                item_count = accountItem.ItemCount + item.ItemCount
+                            });
+                    }
+                }
+                // 겹칠 수 없는 아이템일 경우 AccountItem 생성
+                else
+                {
+                    await _queryFactory.Query("account_item").InsertAsync(new
+                    {
+                        account_id = accountId,
+                        item_id = item.ItemId,
+                        item_count = item.ItemCount,
+                        enhance_count = 0
+                    });
+                }
+            }
+
+            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
+                $"[GameDb.ReceiveMailItems] AccountId: {accountId}, MailId: {mailId}");
+
+            return ErrorCode.None;
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+                $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsException}, AccountId: {accountId}");
+            return ErrorCode.ReceiveMailItemsException;
         }
     }
 }

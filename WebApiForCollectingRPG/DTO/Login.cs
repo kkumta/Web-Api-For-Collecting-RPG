@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using WebApiForCollectingRPG.Dtos.Game;
+using WebApiForCollectingRPG.DTO.Game;
 
 namespace WebApiForCollectingRPG.Dtos;
 
@@ -24,6 +24,6 @@ public class LoginRes
 {
     [Required] public ErrorCode Result { get; set; } = ErrorCode.None;
     [Required] public String AuthToken { get; set; } = "";
-    [Required] public AccountGame GameInfo { get; set; } = new();
-    [Required] public List<AccountItem> ItemInfoList { get; set; } = new();
+    [Required] public AccountGameInfo GameInfo { get; set; } = new();
+    [Required] public List<AccountItemInfo> ItemInfoList { get; set; } = new();
 }

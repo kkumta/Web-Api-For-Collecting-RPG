@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using WebApiForCollectingRPG.ModelDB;
+using WebApiForCollectingRPG.DAO;
 
 namespace WebApiForCollectingRPG.Dtos
 {

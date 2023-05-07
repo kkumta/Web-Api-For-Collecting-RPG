@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace WebApiForCollectingRPG.Dtos.Game;
+namespace WebApiForCollectingRPG.DTO.Game;
 
-public class AccountItem
+public class AccountItemInfo
 {
     public Int64 ItemId { get; set; }
     public Int32 ItemCount { get; set; }

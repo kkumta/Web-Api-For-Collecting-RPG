@@ -44,6 +44,9 @@ public enum ErrorCode : UInt16
     GetMailFailNotExist = 4203,
     GetMailFailException = 4204,
     SendRewardToMailboxException = 4205,
+    ReceiveMailItemsFailNotExist = 4206,
+    ReceiveMailItemsFailMailNotExist = 4207,
+    ReceiveMailItemsException = 4208,
     AttendanceInfoNotExist = 4301,
     AttendanceInfoException = 4302,
     DuplicateAttendance = 4303,
@@ -54,6 +57,8 @@ public enum ErrorCode : UInt16
     GetAttendanceCompensationFail = 5003,
     GetInAppProductListFail = 5004,
     GetAttendanceCompensationExeption = 5005,
+    IsMoneyException = 5006,
+    IsStackableItemException = 5007,
 
     // Version
     ClientVersionFailNotMatch = 6001,

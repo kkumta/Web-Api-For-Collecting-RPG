@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace WebApiForCollectingRPG.Dtos.Game;
+namespace WebApiForCollectingRPG.DTO.Game;
 
-public class AccountGame
+public class AccountGameInfo
 {
     public Int64 Money { get; set; }
     public Int64 Exp { get; set; }

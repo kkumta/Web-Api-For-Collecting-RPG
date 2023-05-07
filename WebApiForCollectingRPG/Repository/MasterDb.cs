@@ -155,7 +155,7 @@ public class MasterDb : IMasterDb
         }
     }
 
-    public AttendanceCompensation GetAttendanceCompensationByCompensationId(short compensationId)
+    public AttendanceCompensation GetAttendanceCompensationByCompensationId(Int16 compensationId)
     {
         try
         {
@@ -167,6 +167,36 @@ public class MasterDb : IMasterDb
             _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
                 $"[MasterDb.GetAttendanceCompensationByCompensationId] ErrorCode: {ErrorCode.GetAttendanceCompensationExeption}, CompensationId: {compensationId}");
             return new AttendanceCompensation();
+        }
+    }
+
+    public bool IsMoney(Int64 itemId)
+    {
+        try
+        {
+            List<Item> itemList = _cache.Get("item_list") as List<Item>;
+            return itemId == itemList.First(x => x.Name.Equals("돈")).ItemId;
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
+                $"[MasterDb.IsMoney] ErrorCode: {ErrorCode.IsMoneyException}, ItemId: {itemId}");
+            return new bool();
+        }
+    }
+
+    public bool IsStackableItem(Int64 itemId)
+    {
+        try
+        {
+            List<Item> itemList = _cache.Get("item_list") as List<Item>;
+            return itemList.First(x => x.ItemId == itemId).IsItemStackable;
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
+                $"[MasterDb.IsMoney] ErrorCode: {ErrorCode.IsStackableItemException}, ItemId: {itemId}");
+            return new bool();
         }
     }
 }
