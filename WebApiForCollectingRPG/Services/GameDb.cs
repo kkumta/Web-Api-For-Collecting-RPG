@@ -150,8 +150,11 @@ public class GameDb : IGameDb
         try
         {
             var mails = await _queryFactory.Query("mail")
-                .Where("account_id", accountId)
-                .Where("is_deleted", false)
+                .Where(new {
+                    account_id = accountId,
+                    is_deleted = false,
+                })
+                .Where("expiration_time", ">", DateTime.Now)
                 .Select("mail_id AS MailId", "title AS Title", "is_received AS IsReceived", "expiration_time AS ExpirationTime")
                 .OrderByDesc("created_at")
                 .PaginateAsync<MailListInfo>(page, PerPage);
@@ -178,9 +181,13 @@ public class GameDb : IGameDb
         try
         {
             var mail = await _queryFactory.Query("mail")
-                .Where("account_id", accountId)
-                .Where("mail_id", mailId)
-                .Where("is_deleted", false)
+                .Where(new
+                {
+                    account_id = accountId,
+                    mail_id = mailId,
+                    is_deleted = false,
+                })
+                .Where("expiration_time", ">", DateTime.Now)
                 .Select("mail_id AS MailId",
                 "title AS Title",
                 "content AS Content",
@@ -337,9 +344,13 @@ public class GameDb : IGameDb
         {
             // 우편 조회
             var mail = await _queryFactory.Query("mail")
-                .Where("account_id", accountId)
-                .Where("mail_id", mailId)
-                .Where("is_deleted", false)
+                .Where(new
+                {
+                    account_id = accountId,
+                    mail_id = mailId,
+                    is_deleted = false,
+                })
+                .Where("expiration_time", ">", DateTime.Now)
                 .Select("mail_id AS MailId",
                 "account_id AS AccountId",
                 "title AS Title",
