@@ -12,7 +12,9 @@ Content-Type: application/json
 
 {
   "Email":"qqqqq@naver.com",
-  "Password":"dsd"
+  "Password":"dsd",
+  "ClientVersion":"1.0.0",
+  "MasterDataVersion":"1.0.0"
 }
 
 ###
@@ -21,7 +23,7 @@ Content-Type: application/json
 
 {
   "Email":"qqqqq@naver.com",
-  "AuthToken":"tylet0cr9rhkcls07tbfmt7gk",
+  "AuthToken":"usy9fghdwsqepa809rrfluwhc",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
 }

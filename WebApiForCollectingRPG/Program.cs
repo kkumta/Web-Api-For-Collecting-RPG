@@ -5,11 +5,8 @@ using WebApiForCollectingRPG.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ZLogger;
-using Microsoft.Extensions.Caching.Memory;
-using SqlKata.Execution;
 using WebApiForCollectingRPG.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +18,7 @@ builder.Services.Configure<DbConfig>(configuration.GetSection(nameof(DbConfig)))
 // Add services to the container.
 builder.Services.AddMemoryCache();
 builder.Services.AddTransient<IAccountDb, AccountDb>();
-builder.Services.AddSingleton<IMasterDb, MasterDb>(); // 앱 시작 시에만(1번) 호출되는 서비스이므로, 싱글톤으로 구현하여도 무방하다.
+builder.Services.AddTransient<IMasterDb, MasterDb>();
 builder.Services.AddTransient<IGameDb, GameDb>();
 builder.Services.AddSingleton<IMemoryDb, RedisDb>();
 builder.Services.AddControllers();
@@ -37,7 +34,8 @@ LogManager.SetLoggerFactory(loggerFactory, "Global");
 // 앱 실행 시 마스터 데이터 로드
 loadMasterData();
 
-app.UseMiddleware<WebApiForCollectingRPG.Middleware.SecurityAuthentication>();
+app.UseMiddleware<WebApiForCollectingRPG.Middleware.VersionCheck>();
+app.UseMiddleware<WebApiForCollectingRPG.Middleware.AuthCheck>();
 
 // Configure the HTTP request pipeline.
 app.UseRouting();

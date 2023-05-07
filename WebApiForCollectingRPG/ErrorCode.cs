@@ -9,6 +9,7 @@ public enum ErrorCode : UInt16
     RedisFailException = 1002,
     InValidRequestHttpBody = 1003,
     AuthTokenFailWrongAuthToken = 1006,
+    VersionFailWrongKeyword = 1007,
 
     // Account
     CreateAccountFailException = 2001,

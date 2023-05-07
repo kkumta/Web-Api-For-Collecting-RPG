@@ -18,6 +18,10 @@ public class LoginReq
     [StringLength(30, ErrorMessage = "PASSWORD IS TOO LONG")]
     [DataType(DataType.Password)]
     public String Password { get; set; }
+
+    [Required] public String ClientVersion { get; set; }
+
+    [Required] public String MasterDataVersion { get; set; }
 }
 
 public class LoginRes

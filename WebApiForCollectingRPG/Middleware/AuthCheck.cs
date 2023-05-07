@@ -8,12 +8,12 @@ using Microsoft.AspNetCore.Http;
 
 namespace WebApiForCollectingRPG.Middleware;
 
-public class SecurityAuthentication
+public class AuthCheck
 {
     private readonly Services.IMemoryDb _memoryDb;
     private readonly RequestDelegate _next;
 
-    public SecurityAuthentication(RequestDelegate next, Services.IMemoryDb memoryDb)
+    public AuthCheck(RequestDelegate next, Services.IMemoryDb memoryDb)
     {
         _memoryDb = memoryDb;
         _next = next;
@@ -38,8 +38,6 @@ public class SecurityAuthentication
         string email;
         string AuthToken;
         string userLockKey = "";
-        string clientVersion;
-        string masterDataVersion;
 
         using (var reader = new StreamReader(context.Request.Body, Encoding.UTF8, true, 4096, true))
         {
@@ -54,23 +52,10 @@ public class SecurityAuthentication
 
             var document = JsonDocument.Parse(bodyStr);
 
-            if (IsInvalidJsonFormatThenSendError(context, document, out email, out AuthToken, out clientVersion, out masterDataVersion))
+            if (IsInvalidJsonFormatThenSendError(context, document, out email, out AuthToken))
             {
                 return;
             }
-
-            // 클라이언트 버전 확인
-            if (await IsInvalidClientVersionThenSendError(context, clientVersion))
-            {
-                return;
-            }
-
-            // 마스터 데이터 버전 확인
-            if (await IsInvalidMasterDataVersionThenSendError(context, masterDataVersion))
-            {
-                return;
-            }
-
 
             var (isOk, userInfo) = await _memoryDb.GetUserAsync(email);
             if (isOk == false)
@@ -99,42 +84,6 @@ public class SecurityAuthentication
 
         // 트랜잭션 해제(Redis 동기화 해제)
         await _memoryDb.DelUserReqLockAsync(userLockKey);
-    }
-
-    private static async Task<bool> IsInvalidClientVersionThenSendError(HttpContext context, string clientVersion)
-    {
-        string ClientVersion = "1.0.0";
-        if (clientVersion.CompareTo(ClientVersion) == 0)
-        {
-            return false;
-        }
-
-        var errorJsonResponse = JsonSerializer.Serialize(new MiddlewareResponse
-        {
-            result = ErrorCode.ClientVersionFailNotMatch
-        });
-        var bytes = Encoding.UTF8.GetBytes(errorJsonResponse);
-        await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
-
-        return true;
-    }
-
-    private static async Task<bool> IsInvalidMasterDataVersionThenSendError(HttpContext context, string masterDataVersion)
-    {
-        string MasterDataVersion = "1.0.0";
-        if (masterDataVersion.CompareTo(MasterDataVersion) == 0)
-        {
-            return false;
-        }
-
-        var errorJsonResponse = JsonSerializer.Serialize(new MiddlewareResponse
-        {
-            result = ErrorCode.MasterDataVersionFailNotMatch
-        });
-        var bytes = Encoding.UTF8.GetBytes(errorJsonResponse);
-        await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
-
-        return true;
     }
 
     private async Task<bool> SetLockAndIsFailThenSendError(HttpContext context, string AuthToken)
@@ -175,20 +124,18 @@ public class SecurityAuthentication
     }
 
     private bool IsInvalidJsonFormatThenSendError(HttpContext context, JsonDocument document, out string email,
-        out string authToken, out string clientVersion, out string masterDataVersion)
+        out string authToken)
     {
         try
         {
             email = document.RootElement.GetProperty("Email").GetString();
             authToken = document.RootElement.GetProperty("AuthToken").GetString();
-            clientVersion = document.RootElement.GetProperty("ClientVersion").GetString();
-            masterDataVersion = document.RootElement.GetProperty("MasterDataVersion").GetString();
 
             return false;
         }
         catch
         {
-            email = ""; authToken = ""; clientVersion = ""; masterDataVersion = "";
+            email = ""; authToken = "";
 
             var errorJsonResponse = JsonSerializer.Serialize(new MiddlewareResponse
             {
