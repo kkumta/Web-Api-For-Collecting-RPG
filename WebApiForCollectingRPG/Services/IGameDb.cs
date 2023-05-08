@@ -16,4 +16,5 @@ public interface IGameDb : IDisposable
     public Task<ErrorCode> CheckAttendance(Int64 accountId);
     public Task<ErrorCode> SendInAppProduct(Int64 accountId, Int64 receiptId, Int16 productId);
     public Task<ErrorCode> ReceiveMailItems(Int64 accountId, Int64 mailId);
+    public Task<Tuple<ErrorCode, bool>> EnhanceItem(Int64 accountId, Int64 accountItemId);
 }

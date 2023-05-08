@@ -224,4 +224,19 @@ public class MasterDb : IMasterDb
             return new bool();
         }
     }
+
+    public Item GetItemByItemId(Int64 itemId)
+    {
+        try
+        {
+            List<Item> itemList = _cache.Get("item_list") as List<Item>;
+            return itemList.First(x => x.ItemId == itemId);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
+                $"[MasterDb.GetItemByItemId] ErrorCode: {ErrorCode.GetItemByItemIdException}, ItemId: {itemId}");
+            return new Item();
+        }
+    }
 }

@@ -49,7 +49,6 @@ CREATE TABLE IF NOT EXISTS master_db.`item`
     magic BIGINT COMMENT '마력',
     enhance_max_count SMALLINT COMMENT '최대 강화 횟수', 
     is_item_stackable BOOL COMMENT '아이템 겹침 보관 가능 여부'
-
 ) COMMENT '아이템 정보';
 
 insert into Item (name, attribute_id, sell_price, buy_price, use_lv, attack, defence, magic, enhance_max_count, is_item_stackable) values
@@ -188,7 +187,10 @@ CREATE TABLE IF NOT EXISTS game_db.`account_item`
     account_id BIGINT NOT NULL COMMENT '계정 번호',
     item_id BIGINT NOT NULL COMMENT '아이템 번호',
     item_count INT NOT NULL COMMENT '아이템 개수',
-    enhance_count SMALLINT NOT NULL COMMENT '강화횟수'
+    enhance_count SMALLINT NOT NULL COMMENT '강화횟수',
+    attack BIGINT COMMENT '공격력',
+    defence BIGINT  COMMENT '방어력',
+    magic BIGINT COMMENT '마력'
 ) COMMENT '유저별 아이템 데이터';
 ```
 

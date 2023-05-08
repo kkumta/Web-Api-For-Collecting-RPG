@@ -60,6 +60,12 @@ public enum ErrorCode : UInt16
     ReceiptAlreadyUsed = 4401,
     SendInAppProductException = 4402,
 
+    // Enhance
+    AccountItemNotExist = 4501,
+    NotEnchantableItem = 4502,
+    OverMaxEnhanceCount = 4503,
+    EnhanceItemException = 4504,
+
     // MasterDb
     GetItemListFail = 5001,
     GetItemAttributeListFail = 5002,
@@ -69,6 +75,7 @@ public enum ErrorCode : UInt16
     GetInAppItemsByProductIdExeption = 5006,
     IsMoneyException = 5007,
     IsStackableItemException = 5008,
+    GetItemByItemIdException = 5009,
 
     // Version
     ClientVersionFailNotMatch = 6001,

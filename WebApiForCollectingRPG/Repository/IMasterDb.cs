@@ -17,4 +17,5 @@ public interface IMasterDb
     public List<InAppItem> GetInAppItemsByProductId(Int16 productId);
     public bool IsMoney(Int64 itemId);
     public bool IsStackableItem(Int64 itemId);
+    public Item GetItemByItemId(Int64 itemId);
 }

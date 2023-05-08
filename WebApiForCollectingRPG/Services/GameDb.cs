@@ -125,7 +125,10 @@ public class GameDb : IGameDb
                 .Where("account_id", accountId)
                 .Select("item_id AS ItemId",
                 "item_count AS ItemCount",
-                "enhance_count AS EnhanceCount")
+                "enhance_count AS EnhanceCount",
+                "attack AS Attack",
+                "defence AS Defence",
+                "magic AS Magic")
                 .GetAsync<AccountItemInfo>();
 
             return new Tuple<ErrorCode, IEnumerable<AccountItemInfo>>(ErrorCode.None, accountItemList);
@@ -358,10 +361,12 @@ public class GameDb : IGameDb
             });
 
 
-            foreach (MailItemInfo item in mailItems)
+            foreach (MailItemInfo mailItemInfo in mailItems)
             {
+                var itemInfo = _masterDb.GetItemByItemId(mailItemInfo.ItemId);
+
                 // 아이템이 돈일 경우
-                if (_masterDb.IsMoney(item.ItemId))
+                if (_masterDb.IsMoney(mailItemInfo.ItemId))
                 {
                     var money = await _queryFactory.Query("account_game")
                         .Where("account_id", accountId)
@@ -370,19 +375,22 @@ public class GameDb : IGameDb
 
                     await _queryFactory.Query("account_game").Where("account_id", accountId).UpdateAsync(new
                     {
-                        money = money + item.ItemCount
+                        money = money + mailItemInfo.ItemCount
                     });
                 }
                 // 겹칠 수 있는 아이템일 경우
-                else if (_masterDb.IsStackableItem(item.ItemId))
+                else if (_masterDb.IsStackableItem(mailItemInfo.ItemId))
                 {
                     var accountItem = await _queryFactory.Query("account_item")
-                        .Where("item_id", item.ItemId)
+                        .Where("item_id", mailItemInfo.ItemId)
                         .Select("account_item_id AS AccountItemId",
                         "account_id AS AccountId",
                         "item_id AS ItemId",
                         "item_count AS ItemCount",
-                        "enhance_count AS EnhanceCount")
+                        "enhance_count AS EnhanceCount",
+                        "attack AS Attack",
+                        "defence AS Defence",
+                        "magic AS Magic")
                         .FirstOrDefaultAsync<AccountItem>();
 
                     // 해당 아이템을 보유하고 있지 않을 경우 AccountItem 생성
@@ -391,9 +399,12 @@ public class GameDb : IGameDb
                         await _queryFactory.Query("account_item").InsertAsync(new
                         {
                             account_id = accountId,
-                            item_id = item.ItemId,
-                            item_count = item.ItemCount,
-                            enhance_count = 0
+                            item_id = mailItemInfo.ItemId,
+                            item_count = mailItemInfo.ItemCount,
+                            enhance_count = 0,
+                            attack = itemInfo.Attack,
+                            defence = itemInfo.Defence,
+                            magic = itemInfo.Magic
                         });
                     }
                     // 보유하고 있을 경우 현재 보유 수량에 더한다.
@@ -403,7 +414,7 @@ public class GameDb : IGameDb
                             .Where("account_item_id", accountItem.AccountItemId)
                             .UpdateAsync(new
                             {
-                                item_count = accountItem.ItemCount + item.ItemCount
+                                item_count = accountItem.ItemCount + mailItemInfo.ItemCount
                             });
                     }
                 }
@@ -413,9 +424,12 @@ public class GameDb : IGameDb
                     await _queryFactory.Query("account_item").InsertAsync(new
                     {
                         account_id = accountId,
-                        item_id = item.ItemId,
-                        item_count = item.ItemCount,
-                        enhance_count = 0
+                        item_id = mailItemInfo.ItemId,
+                        item_count = mailItemInfo.ItemCount,
+                        enhance_count = 0,
+                        attack = itemInfo.Attack,
+                        defence = itemInfo.Defence,
+                        magic = itemInfo.Magic
                     });
                 }
             }
@@ -520,6 +534,126 @@ public class GameDb : IGameDb
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
                 $"[GameDb.SendRewardToMailbox] ErrorCode: {ErrorCode.SendRewardToMailboxException}, AccountId: {accountId}, MailTitle: {mail.Title}, MailItemCount: {mailItems.Count}");
             return ErrorCode.SendRewardToMailboxException;
+        }
+    }
+
+    public async Task<Tuple<ErrorCode, bool>> EnhanceItem(Int64 accountId, Int64 accountItemId)
+    {
+        try
+        {
+            // 로그인한 계정이 소유한 아이템이 맞는지 확인
+            var accountItem = await _queryFactory.Query("account_item")
+                .Where(new
+                {
+                    account_id = accountId,
+                    account_item_id = accountItemId,
+                })
+                .Select("account_item_id AS AccountItemId",
+                "account_id AS AccountId",
+                "item_id AS ItemId",
+                "item_count AS ItemCount",
+                "enhance_count AS EnhanceCount",
+                "attack AS Attack",
+                "defence AS Defence",
+                "magic AS Magic")
+                .FirstOrDefaultAsync<AccountItem>();
+
+            if (accountItem == null)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                    $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.AccountItemNotExist}, AccountId: {accountId}, AccountItemId: {accountItemId}");
+                return new Tuple<ErrorCode, bool>(ErrorCode.AccountItemNotExist, false);
+            }
+
+            var item = _masterDb.GetItemByItemId(accountItem.ItemId);
+
+            // 강화 가능한 아이템인지 확인
+            if (item.EnhanceMaxCount == 0)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                    $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.NotEnchantableItem}, AccountId: {accountId}, AccountItemId: {accountItemId}, ItemId: {item.ItemId}");
+                return new Tuple<ErrorCode, bool>(ErrorCode.NotEnchantableItem, false);
+            }
+
+            // 강화 횟수가 남아있는지 확인
+            if (item.EnhanceMaxCount <= accountItem.EnhanceCount)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                    $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.OverMaxEnhanceCount}, AccountId: {accountId}, AccountItemId: {accountItemId}, ItemId: {item.ItemId}");
+                return new Tuple<ErrorCode, bool>(ErrorCode.OverMaxEnhanceCount, false);
+            }
+
+            // 강화 단계에 따른 강화 성공 확률 적용
+            /**
+                강화 성공 확률(5단계까지) = 내림(1/목표 강화단계)
+                강화 성공 확률(6단계부터) = 내림(내림(1/목표 강화단계)/2)  
+                강화 성공 확률(10단계부터) = 내림(내림(내림(1/목표 강화단계)/2)/2)
+                1단계: 100%
+                2단계: 50%
+                3단계: 33%
+                4단계: 25%
+                5단계: 20%
+                6단계: 8%
+                7단계: 7%
+                8단계: 6%
+                9단계: 5%
+                10단계: 2%
+            **/
+            var targetEnhanceCount = accountItem.EnhanceCount + 1;
+            var successPercent = Math.Truncate((double)1 / targetEnhanceCount * 100);
+            if (targetEnhanceCount > 5)
+            {
+                successPercent = Math.Truncate(successPercent / 2);
+            }
+            if (targetEnhanceCount > 9)
+            {
+                successPercent = Math.Truncate(successPercent / 2);
+            }
+
+            // 강화 성공 확률에 따른 강화 시도
+            double[] probs;
+            var isSuccess = false;
+            if (successPercent <= 50)
+            {
+                probs = new double[] { successPercent, 100 - successPercent };
+                if (Util.Game.Choose(probs) == 0)
+                {
+                    isSuccess = true;
+                }
+            }
+            else
+            {
+                probs = new double[] { 100 - successPercent, successPercent };
+                if (Util.Game.Choose(probs) == 1)
+                {
+                    isSuccess = true;
+                }
+            }
+
+            // 강화 성공
+            if (isSuccess)
+            {
+                accountItem.Attack = (Int64)Math.Ceiling((double)accountItem.Attack * 1.1);
+                accountItem.Defence = (Int64)Math.Ceiling((double)accountItem.Defence * 1.1);
+                await _queryFactory.Query("account_item").Where("account_item_id", accountItemId).UpdateAsync(new
+                {
+                    attack = accountItem.Attack,
+                    defence = accountItem.Defence,
+                    enhance_count = accountItem.EnhanceCount + 1,
+                });
+
+                return new Tuple<ErrorCode, bool>(ErrorCode.None, true);
+            }
+
+            // 강화 실패
+            await _queryFactory.Query("account_item").Where("account_item_id", accountItemId).DeleteAsync();
+            return new Tuple<ErrorCode, bool>(ErrorCode.None, false);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.EnhanceItemException}, AccountId: {accountId}, AccountItemId: {accountItemId}");
+            return new Tuple<ErrorCode, bool>(ErrorCode.EnhanceItemException, false);
         }
     }
 }

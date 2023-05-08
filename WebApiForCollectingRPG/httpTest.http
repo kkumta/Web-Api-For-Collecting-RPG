@@ -23,7 +23,7 @@ Content-Type: application/json
 
 {
   "Email":"qqqqq@naver.com",
-  "AuthToken":"usy9fghdwsqepa809rrfluwhc",
+  "AuthToken":"sa7lphtyx3q8h1m3c6eqbxujt",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
 }
@@ -34,19 +34,19 @@ Content-Type: application/json
 
 {
   "Email":"qqqqq@naver.com",
-  "AuthToken":"whe86clgl3e1e29th3r6lkdrh",
+  "AuthToken":"sa7lphtyx3q8h1m3c6eqbxujt",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0",
   "Page":1
 }
 
 ###
-POST http://localhost:11500/api/mails/70
+POST http://localhost:11500/api/mails/2
 Content-Type: application/json
 
 {
   "Email":"qqqqq@naver.com",
-  "AuthToken":"whe86clgl3e1e29th3r6lkdrh",
+  "AuthToken":"sa7lphtyx3q8h1m3c6eqbxujt",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
 }
@@ -57,18 +57,18 @@ Content-Type: application/json
 
 {
   "Email":"qqqqq@naver.com",
-  "AuthToken":"ad7mwhuez39f39t7jho8vmrij",
+  "AuthToken":"sa7lphtyx3q8h1m3c6eqbxujt",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
 }
 
 ###
-POST http://localhost:11500/api/mails/61/items
+POST http://localhost:11500/api/mails/4/items
 Content-Type: application/json
 
 {
   "Email":"qqqqq@naver.com",
-  "AuthToken":"r9t908cqpdl4lpz2x1qlocgfu",
+  "AuthToken":"sa7lphtyx3q8h1m3c6eqbxujt",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
 }
@@ -79,11 +79,23 @@ Content-Type: application/json
 
 {
   "Email": "qqqqq@naver.com",
-  "AuthToken": "whe86clgl3e1e29th3r6lkdrh",
+  "AuthToken": "sa7lphtyx3q8h1m3c6eqbxujt",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
   "ReceiptInfo":{
-    "ReceiptId": 27,
+    "ReceiptId": 30,
     "ProductId": 2
   }
+}
+
+
+###
+POST http://localhost:11500/api/account-items/7/enhancements
+Content-Type: application/json
+
+{
+  "Email": "qqqqq@naver.com",
+  "AuthToken": "sa7lphtyx3q8h1m3c6eqbxujt",
+  "ClientVersion": "1.0.0",
+  "MasterDataVersion": "1.0.0"
 }
