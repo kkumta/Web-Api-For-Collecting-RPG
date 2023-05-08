@@ -7,18 +7,16 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using WebApiForCollectingRPG.DAO;
 using WebApiForCollectingRPG.DAO.Master;
 using WebApiForCollectingRPG.DTO.InAppProduct;
-using WebApiForCollectingRPG.Services;
 using ZLogger;
 using static LogManager;
 
-namespace WebApiForCollectingRPG.Repository;
+namespace WebApiForCollectingRPG.Services;
 
-public class MasterDb : IMasterDb
+public class MasterService : IMasterService
 {
-    readonly ILogger<MasterDb> _logger;
+    readonly ILogger<MasterService> _logger;
     readonly IOptions<DbConfig> _dbConfig;
     readonly IMemoryCache _cache;
 
@@ -30,7 +28,7 @@ public class MasterDb : IMasterDb
                 .SetPriority(CacheItemPriority.NeverRemove)
                 .SetAbsoluteExpiration(DateTime.MaxValue);
 
-    public MasterDb(ILogger<MasterDb> logger, IOptions<DbConfig> dbConfig, IMemoryCache memoryCache)
+    public MasterService(ILogger<MasterService> logger, IOptions<DbConfig> dbConfig, IMemoryCache memoryCache)
     {
         _dbConfig = dbConfig;
         _logger = logger;
@@ -59,7 +57,7 @@ public class MasterDb : IMasterDb
         _dbConn.Close();
     }
 
-    public async void GetItemList()
+    public async void LoadItemList()
     {
         try
         {
@@ -80,18 +78,18 @@ public class MasterDb : IMasterDb
                 .GetAsync<Item>();
 
             _cache.Set(key, itemList, cacheOptions);
-            _logger.ZLogDebug(EventIdDic[EventType.MasterDb],
-                $"[MasterDb.GetItemList] item_list: {_cache.Get("item_list")}");
+            _logger.ZLogDebug(EventIdDic[EventType.MasterService],
+                $"[MasterService.LoadItemList] item_list: {_cache.Get("item_list")}");
 
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
-                $"[MasterDb.GetItemList] ErrorCode : {ErrorCode.GetItemListFail}");
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.LoadItemList] ErrorCode : {ErrorCode.LoadItemListFail}");
         }
     }
 
-    public async void GetItemAttributeList()
+    public async void LoadItemAttributeList()
     {
         try
         {
@@ -103,18 +101,18 @@ public class MasterDb : IMasterDb
                 .GetAsync<ItemAttribute>();
 
             _cache.Set(key, itemAttributeList, cacheOptions);
-            _logger.ZLogDebug(EventIdDic[EventType.MasterDb],
-                $"[MasterDb.GetItemAttributeList] item_attribute_list: {_cache.Get("item_attribute_list")}");
+            _logger.ZLogDebug(EventIdDic[EventType.MasterService],
+                $"[MasterService.LoadItemAttributeList] item_attribute_list: {_cache.Get("item_attribute_list")}");
 
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
-                $"[MasterDb.GetItemAttributeList] ErrorCode : {ErrorCode.GetItemAttributeListFail}");
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.LoadItemAttributeList] ErrorCode : {ErrorCode.LoadItemAttributeListFail}");
         }
     }
 
-    public async void GetAttendanceCompensation()
+    public async void LoadAttendanceCompensation()
     {
         try
         {
@@ -125,17 +123,17 @@ public class MasterDb : IMasterDb
                 .GetAsync<AttendanceCompensation>();
 
             _cache.Set(key, attendanceCompensation, cacheOptions);
-            _logger.ZLogDebug(EventIdDic[EventType.MasterDb],
-                $"[MasterDb.GetAttendanceCompensation] attendance_compensation: {_cache.Get("attendance_compensation")}");
+            _logger.ZLogDebug(EventIdDic[EventType.MasterService],
+                $"[MasterService.LoadAttendanceCompensation] attendance_compensation: {_cache.Get("attendance_compensation")}");
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
-                $"[MasterDb.GetAttendanceCompensation] ErrorCode : {ErrorCode.GetAttendanceCompensationFail}");
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.LoadAttendanceCompensation] ErrorCode : {ErrorCode.LoadAttendanceCompensationFail}");
         }
     }
 
-    public async void GetInAppProductListAsync()
+    public async void LoadInAppProductListAsync()
     {
         try
         {
@@ -146,13 +144,13 @@ public class MasterDb : IMasterDb
                 .GetAsync<InAppProduct>();
 
             _cache.Set(key, inAppProductList, cacheOptions);
-            _logger.ZLogDebug(EventIdDic[EventType.MasterDb],
-                $"[MasterDb.GetInAppProductListAsync] in_app_product_list: {_cache.Get("in_app_product_list")}");
+            _logger.ZLogDebug(EventIdDic[EventType.MasterService],
+                $"[MasterService.LoadInAppProductListAsync] in_app_product_list: {_cache.Get("in_app_product_list")}");
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
-                $"[MasterDb.GetInAppProductListAsync] ErrorCode : {ErrorCode.GetInAppProductListFail}");
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.LoadInAppProductListAsync] ErrorCode : {ErrorCode.LoadInAppProductListFail}");
         }
     }
 
@@ -165,8 +163,8 @@ public class MasterDb : IMasterDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
-                $"[MasterDb.GetAttendanceCompensationByCompensationId] ErrorCode: {ErrorCode.GetAttendanceCompensationExeption}, CompensationId: {compensationId}");
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.GetAttendanceCompensationByCompensationId] ErrorCode: {ErrorCode.GetAttendanceCompensationExeption}, CompensationId: {compensationId}");
             return new AttendanceCompensation();
         }
     }
@@ -189,8 +187,8 @@ public class MasterDb : IMasterDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
-                $"[MasterDb.GetInAppItemsByProductId] ErrorCode: {ErrorCode.GetInAppItemsByProductIdExeption}, ProductId: {productId}");
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.GetInAppItemsByProductId] ErrorCode: {ErrorCode.GetInAppItemsByProductIdExeption}, ProductId: {productId}");
             return new List<InAppItem>();
         }
     }
@@ -204,8 +202,8 @@ public class MasterDb : IMasterDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
-                $"[MasterDb.IsMoney] ErrorCode: {ErrorCode.IsMoneyException}, ItemId: {itemId}");
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.IsMoney] ErrorCode: {ErrorCode.IsMoneyException}, ItemId: {itemId}");
             return new bool();
         }
     }
@@ -219,8 +217,8 @@ public class MasterDb : IMasterDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
-                $"[MasterDb.IsMoney] ErrorCode: {ErrorCode.IsStackableItemException}, ItemId: {itemId}");
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.IsMoney] ErrorCode: {ErrorCode.IsStackableItemException}, ItemId: {itemId}");
             return new bool();
         }
     }
@@ -234,8 +232,8 @@ public class MasterDb : IMasterDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.MasterDb], ex,
-                $"[MasterDb.GetItemByItemId] ErrorCode: {ErrorCode.GetItemByItemIdException}, ItemId: {itemId}");
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.GetItemByItemId] ErrorCode: {ErrorCode.GetItemByItemIdException}, ItemId: {itemId}");
             return new Item();
         }
     }

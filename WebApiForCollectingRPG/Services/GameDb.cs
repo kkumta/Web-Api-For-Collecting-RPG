@@ -11,7 +11,6 @@ using WebApiForCollectingRPG.DAO;
 using WebApiForCollectingRPG.DTO.Attendance;
 using WebApiForCollectingRPG.DTO.Mail;
 using WebApiForCollectingRPG.DTO.Game;
-using WebApiForCollectingRPG.Repository;
 using ZLogger;
 using static LogManager;
 using WebApiForCollectingRPG.DTO.InAppProduct;
@@ -23,16 +22,16 @@ public class GameDb : IGameDb
     private const Int32 PerPage = 20;
     readonly IOptions<DbConfig> _dbConfig;
     readonly ILogger<GameDb> _logger;
-    readonly IMasterDb _masterDb;
+    readonly IMasterService _masterService;
 
     IDbConnection _dbConn;
     MySqlCompiler _compiler;
     QueryFactory _queryFactory;
 
-    public GameDb(ILogger<GameDb> logger, IOptions<DbConfig> dbConfig, IMasterDb masterDb)
+    public GameDb(ILogger<GameDb> logger, IOptions<DbConfig> dbConfig, IMasterService masterService)
     {
         _dbConfig = dbConfig;
-        _masterDb = masterDb;
+        _masterService = masterService;
         _logger = logger;
 
         Open();
@@ -291,7 +290,7 @@ public class GameDb : IGameDb
                 DateTime.Now.AddDays(7));
 
             List<MailItemInfo> mailItems = new();
-            var compensation = _masterDb.GetAttendanceCompensationByCompensationId(attendance.LastCompensationId);
+            var compensation = _masterService.GetAttendanceCompensationByCompensationId(attendance.LastCompensationId);
             mailItems.Add(new MailItemInfo(compensation.ItemId, compensation.ItemCount));
 
             return await SendRewardToMailbox(accountId, mail, mailItems);
@@ -363,10 +362,10 @@ public class GameDb : IGameDb
 
             foreach (MailItemInfo mailItemInfo in mailItems)
             {
-                var itemInfo = _masterDb.GetItemByItemId(mailItemInfo.ItemId);
+                var itemInfo = _masterService.GetItemByItemId(mailItemInfo.ItemId);
 
                 // 아이템이 돈일 경우
-                if (_masterDb.IsMoney(mailItemInfo.ItemId))
+                if (_masterService.IsMoney(mailItemInfo.ItemId))
                 {
                     var money = await _queryFactory.Query("account_game")
                         .Where("account_id", accountId)
@@ -379,7 +378,7 @@ public class GameDb : IGameDb
                     });
                 }
                 // 겹칠 수 있는 아이템일 경우
-                else if (_masterDb.IsStackableItem(mailItemInfo.ItemId))
+                else if (_masterService.IsStackableItem(mailItemInfo.ItemId))
                 {
                     var accountItem = await _queryFactory.Query("account_item")
                         .Where("item_id", mailItemInfo.ItemId)
@@ -479,7 +478,7 @@ public class GameDb : IGameDb
                 true,
                 Convert.ToDateTime(DateTime.MaxValue.ToString("yyyy-MM-dd HH:mm:ss")));
 
-            var inAppItems = _masterDb.GetInAppItemsByProductId(productId);
+            var inAppItems = _masterService.GetInAppItemsByProductId(productId);
             var mailItems = inAppItems.ConvertAll(inAppItem =>
             {
                 return new MailItemInfo()
@@ -565,7 +564,7 @@ public class GameDb : IGameDb
                 return new Tuple<ErrorCode, bool>(ErrorCode.AccountItemNotExist, false);
             }
 
-            var item = _masterDb.GetItemByItemId(accountItem.ItemId);
+            var item = _masterService.GetItemByItemId(accountItem.ItemId);
 
             // 강화 가능한 아이템인지 확인
             if (item.EnhanceMaxCount == 0)

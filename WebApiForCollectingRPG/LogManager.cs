@@ -18,7 +18,7 @@ public class LogManager
         EnhanceItem = 602,
         AccountDb = 1001,
         GameDb = 1002,
-        MasterDb = 1003,
+        MasterService = 1003,
         RedisDb = 1004
     }
 
@@ -38,7 +38,7 @@ public class LogManager
         {EventType.EnhanceItem, new EventId((int)EventType.EnhanceItem, "EnhanceItem") },
         {EventType.AccountDb, new EventId((int)EventType.AccountDb, "AccountDb") },
         {EventType.GameDb, new EventId((int)EventType.GameDb, "GameDb") },
-        {EventType.MasterDb, new EventId((int)EventType.MasterDb, "MasterDb") },
+        {EventType.MasterService, new EventId((int)EventType.MasterService, "MasterService") },
         {EventType.RedisDb, new EventId((int)EventType.RedisDb, "RedisDb") }
     };
 

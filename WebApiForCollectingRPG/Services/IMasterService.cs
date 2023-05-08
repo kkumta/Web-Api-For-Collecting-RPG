@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using WebApiForCollectingRPG.DAO.Master;
 using WebApiForCollectingRPG.DTO.InAppProduct;
-using WebApiForCollectingRPG.DTO.Mail;
 
-namespace WebApiForCollectingRPG.Repository;
+namespace WebApiForCollectingRPG.Services;
 
-public interface IMasterDb
+public interface IMasterService
 {
-    public void GetItemList();
-    public void GetItemAttributeList();
-    public void GetAttendanceCompensation();
-    public void GetInAppProductListAsync();
+    public void LoadItemList();
+    public void LoadItemAttributeList();
+    public void LoadAttendanceCompensation();
+    public void LoadInAppProductListAsync();
     public AttendanceCompensation GetAttendanceCompensationByCompensationId(Int16 compensationId);
     public List<InAppItem> GetInAppItemsByProductId(Int16 productId);
     public bool IsMoney(Int64 itemId);

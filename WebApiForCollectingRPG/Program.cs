@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ZLogger;
-using WebApiForCollectingRPG.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +17,7 @@ builder.Services.Configure<DbConfig>(configuration.GetSection(nameof(DbConfig)))
 // Add services to the container.
 builder.Services.AddMemoryCache();
 builder.Services.AddTransient<IAccountDb, AccountDb>();
-builder.Services.AddTransient<IMasterDb, MasterDb>();
+builder.Services.AddTransient<IMasterService, MasterService>();
 builder.Services.AddTransient<IGameDb, GameDb>();
 builder.Services.AddSingleton<IMemoryDb, RedisDb>();
 builder.Services.AddControllers();
@@ -50,11 +49,11 @@ app.Run(configuration["ServerAddress"]);
 
 void loadMasterData()
 {
-    var service = app.Services.GetService<IMasterDb>();
-    service.GetItemList();
-    service.GetItemAttributeList();
-    service.GetAttendanceCompensation();
-    service.GetInAppProductListAsync();
+    var service = app.Services.GetService<IMasterService>();
+    service.LoadItemList();
+    service.LoadItemAttributeList();
+    service.LoadAttendanceCompensation();
+    service.LoadInAppProductListAsync();
 }
 
 void SettingLogger()

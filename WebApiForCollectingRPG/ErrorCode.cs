@@ -67,10 +67,10 @@ public enum ErrorCode : UInt16
     EnhanceItemException = 4504,
 
     // MasterDb
-    GetItemListFail = 5001,
-    GetItemAttributeListFail = 5002,
-    GetAttendanceCompensationFail = 5003,
-    GetInAppProductListFail = 5004,
+    LoadItemListFail = 5001,
+    LoadItemAttributeListFail = 5002,
+    LoadAttendanceCompensationFail = 5003,
+    LoadInAppProductListFail = 5004,
     GetAttendanceCompensationExeption = 5005,
     GetInAppItemsByProductIdExeption = 5006,
     IsMoneyException = 5007,
