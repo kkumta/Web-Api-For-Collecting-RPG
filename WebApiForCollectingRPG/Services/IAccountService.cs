@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace WebApiForCollectingRPG.Services;
 
-public interface IAccountDb : IDisposable
+public interface IAccountService
 {
     public Task<Tuple<ErrorCode, Int64>> CreateAccountAsync(String email, String password);
 

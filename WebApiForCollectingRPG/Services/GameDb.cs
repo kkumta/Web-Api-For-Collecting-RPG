@@ -14,6 +14,7 @@ using WebApiForCollectingRPG.DTO.Game;
 using ZLogger;
 using static LogManager;
 using WebApiForCollectingRPG.DTO.InAppProduct;
+using WebApiForCollectingRPG.Repository;
 
 namespace WebApiForCollectingRPG.Services;
 
@@ -57,7 +58,6 @@ public class GameDb : IGameDb
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
                 $"[Open GameDb Fail] ErrorCode: {ErrorCode.GetGameDbConnectionFail}");
         }
-
     }
 
     private void Close()

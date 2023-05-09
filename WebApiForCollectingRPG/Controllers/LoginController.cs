@@ -14,14 +14,14 @@ namespace WebApiForCollectingRPG.Controllers
     [Route("api")]
     public class Login : ControllerBase
     {
-        readonly IAccountDb _accountDb;
+        readonly IAccountService _accountService;
         readonly IMemoryDb _memoryDb;
         readonly IGameDb _gameDb;
         readonly ILogger<Login> _logger;
-        public Login(ILogger<Login> logger, IAccountDb accountDb, IMemoryDb memoryDb, IGameDb gameDb)
+        public Login(ILogger<Login> logger, IAccountService accountService, IMemoryDb memoryDb, IGameDb gameDb)
         {
             _logger = logger;
-            _accountDb = accountDb;
+            _accountService = accountService;
             _memoryDb = memoryDb;
             _gameDb = gameDb;
         }

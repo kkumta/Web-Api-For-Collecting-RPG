@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ZLogger;
+using WebApiForCollectingRPG.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,8 @@ builder.Services.Configure<DbConfig>(configuration.GetSection(nameof(DbConfig)))
 
 // Add services to the container.
 builder.Services.AddMemoryCache();
-builder.Services.AddTransient<IAccountDb, AccountDb>();
+builder.Services.AddTransient<IAccountRepository, AccountRepository>();
+builder.Services.AddTransient<IAccountService, AccountService>();
 builder.Services.AddTransient<IMasterService, MasterService>();
 builder.Services.AddTransient<IGameDb, GameDb>();
 builder.Services.AddSingleton<IMemoryDb, RedisDb>();

@@ -14,14 +14,14 @@ namespace WebApiForCollectingRPG.Controllers;
 public class GetMails : ControllerBase
 {
     readonly IGameDb _gameDb;
-    readonly IAccountDb _accountDb;
+    readonly IAccountService _accountService;
     readonly ILogger<GetMails> _logger;
 
-    public GetMails(ILogger<GetMails> logger, IGameDb gameDb, IAccountDb accountDb)
+    public GetMails(ILogger<GetMails> logger, IGameDb gameDb, IAccountService accountService)
     {
         _logger = logger;
         _gameDb = gameDb;
-        _accountDb = accountDb;
+        _accountService = accountService;
     }
 
     /**

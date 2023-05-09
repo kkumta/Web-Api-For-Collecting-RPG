@@ -14,14 +14,14 @@ namespace WebApiForCollectingRPG.Controllers;
 public class RegisterReceipt : ControllerBase
 {
     readonly IGameDb _gameDb;
-    readonly IAccountDb _accountDb;
+    readonly IAccountService _accountService;
     readonly ILogger<RegisterReceipt> _logger;
 
-    public RegisterReceipt(ILogger<RegisterReceipt> logger, IGameDb gameDb, IAccountDb accountDb)
+    public RegisterReceipt(ILogger<RegisterReceipt> logger, IGameDb gameDb, IAccountService accountService)
     {
         _logger = logger;
         _gameDb = gameDb;
-        _accountDb = accountDb;
+        _accountService = accountService;
     }
 
     [HttpPost]
