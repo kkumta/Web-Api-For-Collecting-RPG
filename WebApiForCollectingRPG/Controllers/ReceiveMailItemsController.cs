@@ -35,7 +35,7 @@ public class ReceiveMailItems : ControllerBase
         var response = new ReceiveMailItemsRes();
 
         // request의 Email을 가지고 해당하는 AccountId를 찾는다.
-        var (errorCode, accountId) = await _accountDb.FindAccountIdByEmail(request.Email);
+        var (errorCode, accountId) = await _accountService.FindAccountIdByEmail(request.Email);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

@@ -30,7 +30,7 @@ public class RegisterReceipt : ControllerBase
     {
         var response = new ReceiptRes();
 
-        var (errorCode, accountId) = await _accountDb.FindAccountIdByEmail(request.Email);
+        var (errorCode, accountId) = await _accountService.FindAccountIdByEmail(request.Email);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

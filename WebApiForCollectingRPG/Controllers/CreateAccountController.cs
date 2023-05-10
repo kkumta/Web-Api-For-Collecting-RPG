@@ -30,7 +30,7 @@ public class CreateAccount : ControllerBase
     {
         var response = new CreateAccountRes();
 
-        var (errorCode, accountId) = await _accountDb.CreateAccountAsync(request.Email, request.Password);
+        var (errorCode, accountId) = await _accountService.CreateAccountAsync(request.Email, request.Password);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

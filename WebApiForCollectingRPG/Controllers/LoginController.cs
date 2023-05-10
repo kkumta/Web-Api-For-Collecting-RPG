@@ -38,7 +38,7 @@ namespace WebApiForCollectingRPG.Controllers
             var response = new LoginRes();
 
             // Email, Password 검증
-            var (errorCode, accountId) = await _accountDb.VerifyAccount(request.Email, request.Password);
+            var (errorCode, accountId) = await _accountService.VerifyAccount(request.Email, request.Password);
             if (errorCode != ErrorCode.None)
             {
                 response.Result = errorCode;

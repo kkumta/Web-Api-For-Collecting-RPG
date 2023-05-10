@@ -16,10 +16,11 @@ public class LogManager
         CheckAttendance = 501,
         RegisterReceipt = 601,
         EnhanceItem = 602,
-        AccountDb = 1001,
+        AccountService = 1001,
         GameDb = 1002,
         MasterService = 1003,
-        RedisDb = 1004
+        RedisDb = 1004,
+        AccountRepository = 1005,
     }
 
     private static ILoggerFactory s_loggerFactory;
@@ -36,10 +37,11 @@ public class LogManager
         {EventType.CheckAttendance, new EventId((int)EventType.CheckAttendance, "CheckAttendance") },
         {EventType.RegisterReceipt, new EventId((int)EventType.RegisterReceipt, "RegisterReceipt") },
         {EventType.EnhanceItem, new EventId((int)EventType.EnhanceItem, "EnhanceItem") },
-        {EventType.AccountDb, new EventId((int)EventType.AccountDb, "AccountDb") },
+        {EventType.AccountService, new EventId((int)EventType.AccountService, "AccountService") },
         {EventType.GameDb, new EventId((int)EventType.GameDb, "GameDb") },
         {EventType.MasterService, new EventId((int)EventType.MasterService, "MasterService") },
-        {EventType.RedisDb, new EventId((int)EventType.RedisDb, "RedisDb") }
+        {EventType.RedisDb, new EventId((int)EventType.RedisDb, "RedisDb") },
+        {EventType.AccountRepository, new EventId((int)EventType.AccountRepository, "AccountRepository") }
     };
 
     public static ILogger Logger { get; private set; }
