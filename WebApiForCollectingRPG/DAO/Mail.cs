@@ -5,7 +5,7 @@ namespace WebApiForCollectingRPG.DAO;
 public class Mail
 {
     public Int64 MailId { get; set; }
-    public Int64 AccountId { get; set; }
+    public Int64 PlayerId { get; set; }
     public String Title { get; set; }
     public String Content { get; set; }
     public bool IsReceived { get; set; } = false;

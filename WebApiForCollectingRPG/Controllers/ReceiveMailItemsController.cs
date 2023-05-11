@@ -34,16 +34,8 @@ public class ReceiveMailItems : ControllerBase
     {
         var response = new ReceiveMailItemsRes();
 
-        // request의 Email을 가지고 해당하는 AccountId를 찾는다.
-        var (errorCode, accountId) = await _accountService.FindAccountIdByEmail(request.Email);
-        if (errorCode != ErrorCode.None)
-        {
-            response.Result = errorCode;
-            return response;
-        }
-
         // 해당되는 아이템들을 수령한다. 
-        errorCode = await _gameDb.ReceiveMailItems(accountId, mailId);
+        var errorCode = await _gameDb.ReceiveMailItems(mailId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

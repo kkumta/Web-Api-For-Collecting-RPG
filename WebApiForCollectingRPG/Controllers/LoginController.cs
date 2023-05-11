@@ -26,7 +26,6 @@ namespace WebApiForCollectingRPG.Controllers
             _gameDb = gameDb;
         }
 
-
         /**
          * parameter: LoginRequest
          * return: ErrorCode, AccountGame, AccountItem
@@ -37,19 +36,25 @@ namespace WebApiForCollectingRPG.Controllers
         {
             var response = new LoginRes();
 
-            // Email, Password 검증
             var (errorCode, accountId) = await _accountService.VerifyAccount(request.Email, request.Password);
             if (errorCode != ErrorCode.None)
             {
                 response.Result = errorCode;
                 return response;
             }
-
             _logger.ZLogInformationWithPayload(EventIdDic[EventType.Login], new { Email = request.Email }, $"VerifyAccount Success");
 
-            // 계정 검증에 성공한 경우, Token을 만들어 Redis에 저장 후 반환
+            (errorCode, var playerId) = await _gameDb.FindPlayerIdByAccountId(accountId);
+            if (errorCode != ErrorCode.None)
+            {
+                response.Result = errorCode;
+                return response;
+            }
+            _logger.ZLogInformationWithPayload(EventIdDic[EventType.Login], $"FindPlayerIdByAccountId Success");
+
+            // Token을 만들어 Redis에 저장
             var authToken = Security.CreateAuthToken();
-            errorCode = await _memoryDb.RegistUserAsync(request.Email, authToken, accountId);
+            errorCode = await _memoryDb.RegistUserAsync(request.Email, authToken, accountId, playerId);
             if (errorCode != ErrorCode.None)
             {
                 response.Result = errorCode;
@@ -57,8 +62,8 @@ namespace WebApiForCollectingRPG.Controllers
             }
             response.AuthToken = authToken;
 
-            // 계정 검증에 성공한 경우, 계정 게임 데이터 반환
-            (errorCode, var gameInfo) = await _gameDb.GetAccountGameInfoAsync(accountId);
+            // 아직 HttpContext에 player_id 등록 안돼있으니까 매개변수로 player_id 넘기기
+            (errorCode, var gameInfo) = await _gameDb.GetPlayerGameInfoAsync(playerId);
             if (errorCode != ErrorCode.None)
             {
                 response.Result = errorCode;
@@ -66,8 +71,7 @@ namespace WebApiForCollectingRPG.Controllers
             }
             response.GameInfo = gameInfo;
 
-            // 계정 검증에 성공한 경우, 계정 아이템 데이터 반환
-            (errorCode, var itemInfoList) = await _gameDb.GetAccoutItemInfoListAsync(accountId);
+            (errorCode, var itemInfoList) = await _gameDb.GetPlayerItemInfoListAsync(playerId);
             if (errorCode != ErrorCode.None)
             {
                 response.Result = errorCode;
@@ -75,11 +79,14 @@ namespace WebApiForCollectingRPG.Controllers
             }
             foreach (var item in itemInfoList)
             {
-                var itemInfo = new AccountItemInfo
+                var itemInfo = new PlayerItemInfo
                 {
                     ItemId = item.ItemId,
                     ItemCount = item.ItemCount,
-                    EnhanceCount = item.EnhanceCount
+                    EnhanceCount = item.EnhanceCount,
+                    Attack = item.Attack,
+                    Defence = item.Defence,
+                    Magic = item.Magic
                 };
 
                 response.ItemInfoList.Add(itemInfo);

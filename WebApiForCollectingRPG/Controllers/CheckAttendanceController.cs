@@ -34,16 +34,8 @@ public class CheckAttendance : ControllerBase
     {
         var response = new CheckAttendanceRes();
 
-        // request의 Email을 가지고 해당하는 AccountId를 찾는다.
-        var (errorCode, accountId) = await _accountService.FindAccountIdByEmail(request.Email);
-        if (errorCode != ErrorCode.None)
-        {
-            response.Result = errorCode;
-            return response;
-        }
-
         // accountId를 가지고 출석 체크를 시도한다.
-        errorCode = await _gameDb.CheckAttendance(accountId);
+        var errorCode = await _gameDb.CheckAttendance();
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

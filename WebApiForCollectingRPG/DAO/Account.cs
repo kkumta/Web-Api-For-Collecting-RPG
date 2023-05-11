@@ -10,21 +10,6 @@ public class Account
     public String SaltValue { get; set; }
 }
 
-public class AuthUser
-{
-    public String Email { get; set; } = "";
-    public String AuthToken { get; set; } = "";
-    public Int64 AccountId { get; set; } = 0;
-    public String State { get; set; } = "";
-}
-
-public enum UserState
-{
-    Default = 0,
-    Login = 1,
-    Playing = 2
-}
-
 public class RediskeyExpireTime
 {
     public const ushort NxKeyExpireSecond = 3;

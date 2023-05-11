@@ -29,21 +29,13 @@ public class EnhanceItem : ControllerBase
      * return: errorCode
      */
     [HttpPost]
-    [Route("account-items/{accountItemId}/enhancements")]
-    public async Task<EnhanceItemRes> Post(EnhanceItemReq request, Int64 accountItemId)
+    [Route("account-items/{playerItemId}/enhancements")]
+    public async Task<EnhanceItemRes> Post(EnhanceItemReq request, Int64 playerItemId)
     {
         var response = new EnhanceItemRes();
 
-        // request의 Email을 가지고 해당하는 AccountId를 찾는다.
-        var (errorCode, accountId) = await _accountService.FindAccountIdByEmail(request.Email);
-        if (errorCode != ErrorCode.None)
-        {
-            response.Result = errorCode;
-            return response;
-        }
-
         // 해당하는 아이템을 강화한다.
-        (errorCode, response.IsSuccess) = await _gameDb.EnhanceItem(accountId, accountItemId);
+        (var errorCode, response.IsSuccess) = await _gameDb.EnhanceItem(playerItemId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

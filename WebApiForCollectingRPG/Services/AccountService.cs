@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
+using WebApiForCollectingRPG.DAO;
 using WebApiForCollectingRPG.Repository;
 using ZLogger;
 using static LogManager;
@@ -47,9 +48,6 @@ public class AccountService : IAccountService
 
             var accountInfo = await _accountRepository.FindAccountByEmailAsync(email);
 
-            _logger.ZLogDebug(EventIdDic[EventType.AccountService],
-                    $"[VerifyAccount] AccountId: {accountInfo.AccountId} Email: {accountInfo.Email}");
-
             if (accountInfo is null || accountInfo.AccountId == 0)
             {
                 _logger.ZLogError(EventIdDic[EventType.AccountService],
@@ -64,6 +62,9 @@ public class AccountService : IAccountService
                     $"[AccountService.VerifyAccount] ErrorCode: {ErrorCode.LoginFailPasswordNotMatch}, Email: {email}");
                 return new Tuple<ErrorCode, Int64>(ErrorCode.LoginFailPasswordNotMatch, 0);
             }
+
+            _logger.ZLogDebug(EventIdDic[EventType.AccountService],
+                $"[VerifyAccount Success] AccountId: {accountInfo.AccountId}, Email: {accountInfo.Email}");
 
             return new Tuple<ErrorCode, Int64>(ErrorCode.None, accountInfo.AccountId);
         }

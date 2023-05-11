@@ -22,7 +22,7 @@ public class RedisDb : IMemoryDb
         s_logger.ZLogDebug($"userDbAddress:{address}");
     }
 
-    public async Task<ErrorCode> RegistUserAsync(String email, String authToken, Int64 accountId)
+    public async Task<ErrorCode> RegistUserAsync(String email, String authToken, Int64 accountId, Int64 playerId)
     {
         var key = MemoryDbKeyMaker.MakeUIDKey(email);
         var result = ErrorCode.None;
@@ -32,7 +32,7 @@ public class RedisDb : IMemoryDb
             Email = email,
             AuthToken = authToken,
             AccountId = accountId,
-            State = UserState.Default.ToString()
+            PlayerId = playerId
         };
 
         try
@@ -91,28 +91,6 @@ public class RedisDb : IMemoryDb
         }
 
         return result;
-    }
-
-    public async Task<bool> SetUserStateAsync(AuthUser user, UserState userState)
-    {
-        var uid = MemoryDbKeyMaker.MakeUIDKey(user.Email);
-        try
-        {
-            var redis = new RedisString<AuthUser>(_redisConn, uid, null);
-
-            user.State = userState.ToString();
-
-            if (await redis.SetAsync(user) == false)
-            {
-                return false;
-            }
-
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
     }
 
     public async Task<(bool, AuthUser)> GetUserAsync(string id)

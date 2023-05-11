@@ -34,16 +34,7 @@ public class GetMail : ControllerBase
     {
         var response = new GetMailRes();
 
-        // request의 Email을 가지고 해당하는 AccountId를 찾는다.
-        var (errorCode, accountId) = await _accountService.FindAccountIdByEmail(request.Email);
-        if (errorCode != ErrorCode.None)
-        {
-            response.Result = errorCode;
-            return response;
-        }
-
-        // 해당하는 우편을 가져온다.
-        (errorCode, response.Mail, var items) = await _gameDb.GetMailByMailId(accountId, mailId);
+        (var errorCode, response.Mail, var items) = await _gameDb.GetMailByMailId(mailId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

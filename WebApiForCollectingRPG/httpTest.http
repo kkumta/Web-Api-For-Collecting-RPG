@@ -2,7 +2,7 @@
 Content-Type: application/json
 
 {
-  "Email":"qqqqq@naver.com",
+  "Email":"asdf@naver.com",
   "Password":"dsd"
 }
 
@@ -11,7 +11,7 @@ POST http://localhost:11500/api/login
 Content-Type: application/json
 
 {
-  "Email":"qqqqq@naver.com",
+  "Email":"asdf@naver.com",
   "Password":"dsd",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
@@ -22,8 +22,8 @@ POST http://localhost:11500/api/notice
 Content-Type: application/json
 
 {
-  "Email":"qqqqq@naver.com",
-  "AuthToken":"sa7lphtyx3q8h1m3c6eqbxujt",
+  "Email":"asdf@naver.com",
+  "AuthToken":"4ky5nju6ywmlrq1x73ce01cjm",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
 }
@@ -33,20 +33,20 @@ POST http://localhost:11500/api/mails
 Content-Type: application/json
 
 {
-  "Email":"qqqqq@naver.com",
-  "AuthToken":"sa7lphtyx3q8h1m3c6eqbxujt",
+  "Email":"asdf@naver.com",
+  "AuthToken":"de0zhyml6pcv6wmrsjcbrlu5v",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0",
   "Page":1
 }
 
 ###
-POST http://localhost:11500/api/mails/2
+POST http://localhost:11500/api/mails/1
 Content-Type: application/json
 
 {
-  "Email":"qqqqq@naver.com",
-  "AuthToken":"sa7lphtyx3q8h1m3c6eqbxujt",
+  "Email":"asdf@naver.com",
+  "AuthToken":"4ky5nju6ywmlrq1x73ce01cjm",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
 }
@@ -56,19 +56,19 @@ POST http://localhost:11500/api/attendance/check
 Content-Type: application/json
 
 {
-  "Email":"qqqqq@naver.com",
-  "AuthToken":"sa7lphtyx3q8h1m3c6eqbxujt",
+  "Email":"asdf@naver.com",
+  "AuthToken":"4ky5nju6ywmlrq1x73ce01cjm",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
 }
 
 ###
-POST http://localhost:11500/api/mails/4/items
+POST http://localhost:11500/api/mails/3/items
 Content-Type: application/json
 
 {
-  "Email":"qqqqq@naver.com",
-  "AuthToken":"sa7lphtyx3q8h1m3c6eqbxujt",
+  "Email":"asdf@naver.com",
+  "AuthToken":"bpza39a00qm9fe5hex11wjul2",
   "ClientVersion":"1.0.0",
   "MasterDataVersion":"1.0.0"
 }
@@ -78,24 +78,23 @@ POST http://localhost:11500/api/receipts
 Content-Type: application/json
 
 {
-  "Email": "qqqqq@naver.com",
-  "AuthToken": "sa7lphtyx3q8h1m3c6eqbxujt",
+  "Email":"asdf@naver.com",
+  "AuthToken": "de0zhyml6pcv6wmrsjcbrlu5v",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
   "ReceiptInfo":{
-    "ReceiptId": 30,
+    "ReceiptId": 2,
     "ProductId": 2
   }
 }
 
-
 ###
-POST http://localhost:11500/api/account-items/7/enhancements
+POST http://localhost:11500/api/account-items/4/enhancements
 Content-Type: application/json
 
 {
-  "Email": "qqqqq@naver.com",
-  "AuthToken": "sa7lphtyx3q8h1m3c6eqbxujt",
+  "Email":"asdf@naver.com",
+  "AuthToken": "bpza39a00qm9fe5hex11wjul2",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0"
 }

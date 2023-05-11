@@ -36,18 +36,23 @@ public class CreateAccount : ControllerBase
             response.Result = errorCode;
             return response;
         }
-
         _logger.ZLogInformationWithPayload(EventIdDic[EventType.CreateAccount], new { Email = request.Email }, $"CreateAccount Success");
 
-        // 계정이 정상적으로 생성된 경우, 계정 게임 데이터 생성
-        errorCode = await _gameDb.CreateAccountGameDataAsync(accountId);
+        (errorCode, var playerId) = await _gameDb.CreatePlayerAsync(accountId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;
             return response;
         }
+        _logger.ZLogInformationWithPayload(EventIdDic[EventType.CreateAccount], $"CreatePlayer Success");
 
-        _logger.ZLogInformationWithPayload(EventIdDic[EventType.CreateAccount], new { Email = request.Email }, $"CreateAccountGame Success");
+        errorCode = await _gameDb.CreatePlayerGameDataAsync(playerId);
+        if (errorCode != ErrorCode.None)
+        {
+            response.Result = errorCode;
+            return response;
+        }
+        _logger.ZLogInformationWithPayload(EventIdDic[EventType.CreateAccount], $"CreatePlayerGameData Success");
 
         return response;
     }

@@ -28,6 +28,6 @@ public class LoginRes
 {
     [Required] public ErrorCode Result { get; set; } = ErrorCode.None;
     [Required] public String AuthToken { get; set; } = "";
-    [Required] public AccountGameInfo GameInfo { get; set; } = new();
-    [Required] public List<AccountItemInfo> ItemInfoList { get; set; } = new();
+    [Required] public PlayerGameInfo GameInfo { get; set; } = new();
+    [Required] public List<PlayerItemInfo> ItemInfoList { get; set; } = new();
 }

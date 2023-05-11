@@ -40,7 +40,7 @@ public enum ErrorCode : UInt16
     GetAccountGameInfoFailException = 4102,
     GetAccountItemListFailNotExist = 4103,
     GetAccountItemListFailException = 4104,
-    
+
     // Mail
     GetMailsFailNotExistPage = 4201,
     GetMailsFailException = 4202,
@@ -65,6 +65,11 @@ public enum ErrorCode : UInt16
     NotEnchantableItem = 4502,
     OverMaxEnhanceCount = 4503,
     EnhanceItemException = 4504,
+
+    // Player
+    CreatePlayerFailException = 4601,
+    FindPlayerIdByAccountIdException = 4602,
+    PlayerIdNotExist = 4603,
 
     // MasterDb
     LoadItemListFail = 5001,

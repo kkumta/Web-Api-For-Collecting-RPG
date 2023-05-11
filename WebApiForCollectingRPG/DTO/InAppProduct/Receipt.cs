@@ -13,7 +13,7 @@ public class ReceiptReq
     [Required] public String AuthToken { get; set; }
     [Required] public String ClientVersion { get; set; }
     [Required] public String MasterDataVersion { get; set; }
-    [Required] public ReceiptInfo receiptInfo { get; set; }
+    [Required] public ReceiptInfo ReceiptInfo { get; set; }
 }
 
 public class ReceiptRes
