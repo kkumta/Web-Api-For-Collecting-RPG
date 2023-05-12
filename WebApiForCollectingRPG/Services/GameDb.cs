@@ -169,7 +169,8 @@ public class GameDb : IGameDb
         {
             var accountItemList = await _queryFactory.Query("player_item")
                 .Where("player_id", playerId)
-                .Select("item_id AS ItemId",
+                .Select("player_item_id AS PlayerItemId",
+                "item_id AS ItemId",
                 "item_count AS ItemCount",
                 "enhance_count AS EnhanceCount",
                 "attack AS Attack",

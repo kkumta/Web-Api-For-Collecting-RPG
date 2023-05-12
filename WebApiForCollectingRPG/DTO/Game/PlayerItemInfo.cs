@@ -4,6 +4,7 @@ namespace WebApiForCollectingRPG.DTO.Game;
 
 public class PlayerItemInfo
 {
+    public Int64 PlayerItemId { get; set; }
     public Int64 ItemId { get; set; }
     public Int32 ItemCount { get; set; }
     public Int16 EnhanceCount { get; set; }

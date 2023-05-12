@@ -52,7 +52,6 @@ namespace WebApiForCollectingRPG.Controllers
             }
             _logger.ZLogInformationWithPayload(EventIdDic[EventType.Login], $"FindPlayerIdByAccountId Success");
 
-            // Token을 만들어 Redis에 저장
             var authToken = Security.CreateAuthToken();
             errorCode = await _memoryDb.RegistUserAsync(request.Email, authToken, accountId, playerId);
             if (errorCode != ErrorCode.None)
@@ -62,7 +61,6 @@ namespace WebApiForCollectingRPG.Controllers
             }
             response.AuthToken = authToken;
 
-            // 아직 HttpContext에 player_id 등록 안돼있으니까 매개변수로 player_id 넘기기
             (errorCode, var gameInfo) = await _gameDb.GetPlayerGameInfoAsync(playerId);
             if (errorCode != ErrorCode.None)
             {
@@ -81,6 +79,7 @@ namespace WebApiForCollectingRPG.Controllers
             {
                 var itemInfo = new PlayerItemInfo
                 {
+                    PlayerItemId = item.PlayerItemId,
                     ItemId = item.ItemId,
                     ItemCount = item.ItemCount,
                     EnhanceCount = item.EnhanceCount,
