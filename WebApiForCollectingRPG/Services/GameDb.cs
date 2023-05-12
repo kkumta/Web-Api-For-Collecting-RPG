@@ -463,7 +463,11 @@ public class GameDb : IGameDb
                 else if (_masterService.IsStackableItem(mailItemInfo.ItemId))
                 {
                     var playerItem = await _queryFactory.Query("player_item")
-                        .Where("item_id", mailItemInfo.ItemId)
+                        .Where(new
+                        {
+                            item_id = mailItemInfo.ItemId,
+                            player_id = playerId,
+                        })
                         .Select("player_item_id AS PlayerItemId",
                         "player_id AS PlayerId",
                         "item_id AS ItemId",
