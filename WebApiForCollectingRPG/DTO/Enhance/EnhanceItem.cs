@@ -13,6 +13,7 @@ namespace WebApiForCollectingRPG.DTO.Enhance
         [Required] public String AuthToken { get; set; }
         [Required] public String ClientVersion { get; set; }
         [Required] public String MasterDataVersion { get; set; }
+        [Required] public Int64 PlayerItemId { get; set; }
     }
 
     public class EnhanceItemRes

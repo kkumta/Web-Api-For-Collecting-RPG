@@ -29,7 +29,7 @@ public class GetMails : ControllerBase
      * return: mailList
      */
     [HttpPost]
-    [Route("mails")]
+    [Route("getMails")]
     public async Task<GetMailsRes> Post(GetMailsReq request)
     {
         var response = new GetMailsRes();

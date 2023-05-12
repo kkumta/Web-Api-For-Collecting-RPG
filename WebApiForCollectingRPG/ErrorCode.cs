@@ -34,12 +34,12 @@ public enum ErrorCode : UInt16
 
     // GameDb
     GetGameDbConnectionFail = 4001,
-    CreateAccountGameFailException = 4002,
-    CreateAccountItemFailException = 4003,
-    GetAccountGameInfoFailNotExist = 4101,
-    GetAccountGameInfoFailException = 4102,
-    GetAccountItemListFailNotExist = 4103,
-    GetAccountItemListFailException = 4104,
+    CreatePlayerGameFailException = 4002,
+    CreatePlayerItemFailException = 4003,
+    GetPlayerGameInfoFailNotExist = 4101,
+    GetPlayerGameInfoFailException = 4102,
+    GetPlayerItemListFailNotExist = 4103,
+    GetPlayerItemListFailException = 4104,
 
     // Mail
     GetMailsFailNotExistPage = 4201,
@@ -61,7 +61,7 @@ public enum ErrorCode : UInt16
     SendInAppProductException = 4402,
 
     // Enhance
-    AccountItemNotExist = 4501,
+    PlayerItemNotExist = 4501,
     NotEnchantableItem = 4502,
     OverMaxEnhanceCount = 4503,
     EnhanceItemException = 4504,

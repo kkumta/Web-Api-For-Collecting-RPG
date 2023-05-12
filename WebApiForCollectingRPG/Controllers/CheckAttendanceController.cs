@@ -2,7 +2,6 @@
 using static LogManager;
 using Microsoft.Extensions.Logging;
 using ZLogger;
-using System;
 using System.Threading.Tasks;
 using WebApiForCollectingRPG.Services;
 using WebApiForCollectingRPG.DTO.Attendance;
@@ -29,7 +28,7 @@ public class CheckAttendance : ControllerBase
     * return: mail
     */
     [HttpPost]
-    [Route("attendance/check")]
+    [Route("checkAttendance")]
     public async Task<CheckAttendanceRes> Post(CheckAttendanceReq request)
     {
         var response = new CheckAttendanceRes();

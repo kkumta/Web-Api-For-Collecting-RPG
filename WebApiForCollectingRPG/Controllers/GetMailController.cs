@@ -29,12 +29,12 @@ public class GetMail : ControllerBase
      * return: mail
      */
     [HttpPost]
-    [Route("mails/{mailId}")]
-    public async Task<GetMailRes> Post(GetMailReq request, Int64 mailId)
+    [Route("getMail")]
+    public async Task<GetMailRes> Post(GetMailReq request)
     {
         var response = new GetMailRes();
 
-        (var errorCode, response.Mail, var items) = await _gameDb.GetMailByMailId(mailId);
+        (var errorCode, response.Mail, var items) = await _gameDb.GetMailByMailId(request.MailId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

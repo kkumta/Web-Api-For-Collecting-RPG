@@ -16,7 +16,6 @@ using static LogManager;
 using WebApiForCollectingRPG.DTO.InAppProduct;
 using WebApiForCollectingRPG.Repository;
 using Microsoft.AspNetCore.Http;
-using WebApiForCollectingRPG.Controllers;
 
 namespace WebApiForCollectingRPG.Services;
 
@@ -132,9 +131,9 @@ public class GameDb : IGameDb
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
-                $"[GameDb.CreatePlayerGameDataAsync] ErrorCode: {ErrorCode.CreateAccountGameFailException}");
+                $"[GameDb.CreatePlayerGameDataAsync] ErrorCode: {ErrorCode.CreatePlayerGameFailException}");
         }
-        return ErrorCode.CreateAccountGameFailException;
+        return ErrorCode.CreatePlayerGameFailException;
     }
 
     public async Task<Tuple<ErrorCode, PlayerGameInfo>> GetPlayerGameInfoAsync(Int64 playerId)
@@ -150,8 +149,8 @@ public class GameDb : IGameDb
             if (accountGameInfo is null)
             {
                 _logger.ZLogError(EventIdDic[EventType.GameDb],
-                    $"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetAccountGameInfoFailNotExist}, PlayerId: {playerId}");
-                return new Tuple<ErrorCode, PlayerGameInfo>(ErrorCode.GetAccountGameInfoFailNotExist, null);
+                    $"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetPlayerGameInfoFailNotExist}, PlayerId: {playerId}");
+                return new Tuple<ErrorCode, PlayerGameInfo>(ErrorCode.GetPlayerGameInfoFailNotExist, null);
             }
 
             return new Tuple<ErrorCode, PlayerGameInfo>(ErrorCode.None, accountGameInfo);
@@ -159,8 +158,8 @@ public class GameDb : IGameDb
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
-                $"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetAccountGameInfoFailException}");
-            return new Tuple<ErrorCode, PlayerGameInfo>(ErrorCode.GetAccountGameInfoFailException, null);
+                $"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetPlayerGameInfoFailException}");
+            return new Tuple<ErrorCode, PlayerGameInfo>(ErrorCode.GetPlayerGameInfoFailException, null);
         }
     }
 
@@ -183,8 +182,8 @@ public class GameDb : IGameDb
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
-                $"[GameDb.GetAccountItemListAsync] ErrorCode: {ErrorCode.GetAccountItemListFailException}");
-            return new Tuple<ErrorCode, IEnumerable<PlayerItemInfo>>(ErrorCode.GetAccountItemListFailException, null);
+                $"[GameDb.GetAccountItemListAsync] ErrorCode: {ErrorCode.GetPlayerItemListFailException}");
+            return new Tuple<ErrorCode, IEnumerable<PlayerItemInfo>>(ErrorCode.GetPlayerItemListFailException, null);
         }
     }
 
@@ -650,8 +649,8 @@ public class GameDb : IGameDb
             if (playerItem == null)
             {
                 _logger.ZLogError(EventIdDic[EventType.GameDb],
-                    $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.AccountItemNotExist}, PlayerId: {playerId}, PlayerItemId: {playerItemId}");
-                return new Tuple<ErrorCode, bool>(ErrorCode.AccountItemNotExist, false);
+                    $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.PlayerItemNotExist}, PlayerId: {playerId}, PlayerItemId: {playerItemId}");
+                return new Tuple<ErrorCode, bool>(ErrorCode.PlayerItemNotExist, false);
             }
 
             var item = _masterService.GetItemByItemId(playerItem.ItemId);

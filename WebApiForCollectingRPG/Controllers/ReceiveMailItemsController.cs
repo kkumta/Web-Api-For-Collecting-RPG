@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using System;
 using WebApiForCollectingRPG.DTO.Mail;
 using WebApiForCollectingRPG.Services;
 using static LogManager;
@@ -29,13 +28,13 @@ public class ReceiveMailItems : ControllerBase
      * parameter: mailId
      */
     [HttpPost]
-    [Route("mails/{mailId}/items")]
-    public async Task<ReceiveMailItemsRes> Post(ReceiveMailItemsReq request, Int64 mailId)
+    [Route("ReceiveMailItems")]
+    public async Task<ReceiveMailItemsRes> Post(ReceiveMailItemsReq request)
     {
         var response = new ReceiveMailItemsRes();
 
         // 해당되는 아이템들을 수령한다. 
-        var errorCode = await _gameDb.ReceiveMailItems(mailId);
+        var errorCode = await _gameDb.ReceiveMailItems(request.MailId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

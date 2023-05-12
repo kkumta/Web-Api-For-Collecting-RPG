@@ -25,7 +25,7 @@ public class ReceiveNotice : ControllerBase
      * return: notice
      */
     [HttpPost]
-    [Route("notice")]
+    [Route("receiveNotice")]
     public async Task<ReceiveNoticeRes> Post(ReceiveNoticeReq request)
     {
         var response = new ReceiveNoticeRes();

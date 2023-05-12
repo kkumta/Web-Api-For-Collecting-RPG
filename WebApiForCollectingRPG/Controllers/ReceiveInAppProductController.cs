@@ -2,7 +2,6 @@
 using static LogManager;
 using Microsoft.Extensions.Logging;
 using ZLogger;
-using System;
 using System.Threading.Tasks;
 using WebApiForCollectingRPG.Services;
 using WebApiForCollectingRPG.DTO.InAppProduct;
@@ -11,13 +10,13 @@ namespace WebApiForCollectingRPG.Controllers;
 
 [ApiController]
 [Route("api")]
-public class RegisterReceipt : ControllerBase
+public class ReceiveInAppProduct : ControllerBase
 {
     readonly IGameDb _gameDb;
     readonly IAccountService _accountService;
-    readonly ILogger<RegisterReceipt> _logger;
+    readonly ILogger<ReceiveInAppProduct> _logger;
 
-    public RegisterReceipt(ILogger<RegisterReceipt> logger, IGameDb gameDb, IAccountService accountService)
+    public ReceiveInAppProduct(ILogger<ReceiveInAppProduct> logger, IGameDb gameDb, IAccountService accountService)
     {
         _logger = logger;
         _gameDb = gameDb;
@@ -25,7 +24,7 @@ public class RegisterReceipt : ControllerBase
     }
 
     [HttpPost]
-    [Route("receipts")]
+    [Route("receiveInAppProduct")]
     public async Task<ReceiptRes> Post(ReceiptReq request)
     {
         var response = new ReceiptRes();
@@ -37,7 +36,7 @@ public class RegisterReceipt : ControllerBase
             return response;
         }
 
-        _logger.ZLogInformationWithPayload(EventIdDic[EventType.RegisterReceipt], $"RegisterReceipt Success");
+        _logger.ZLogInformationWithPayload(EventIdDic[EventType.ReceiveInAppProduct], $"RegisterReceipt Success");
         return response;
     }
 }

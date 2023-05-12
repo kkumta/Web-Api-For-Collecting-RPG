@@ -23,7 +23,7 @@ public class AuthCheck
     {
         var formString = context.Request.Path.Value;
         if (string.Compare(formString, "/api/login", StringComparison.OrdinalIgnoreCase) == 0 ||
-            string.Compare(formString, "/api/account", StringComparison.OrdinalIgnoreCase) == 0)
+            string.Compare(formString, "/api/createAccount", StringComparison.OrdinalIgnoreCase) == 0)
         {
             // Call the next delegate/middleware in the pipeline
             await _next(context);

@@ -13,6 +13,7 @@ public class ReceiveMailItemsReq
     [Required] public String AuthToken { get; set; }
     [Required] public String ClientVersion { get; set; }
     [Required] public String MasterDataVersion { get; set; }
+    [Required] public Int64 MailId { get; set; }
 }
 
 public class ReceiveMailItemsRes

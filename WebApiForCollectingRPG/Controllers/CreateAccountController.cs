@@ -25,7 +25,7 @@ public class CreateAccount : ControllerBase
     }
 
     [HttpPost]
-    [Route("account")]
+    [Route("createAccount")]
     public async Task<CreateAccountRes> Post(CreateAccountReq request)
     {
         var response = new CreateAccountRes();
