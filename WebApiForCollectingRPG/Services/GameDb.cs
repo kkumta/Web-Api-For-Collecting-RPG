@@ -737,8 +737,15 @@ public class GameDb : IGameDb
                 return new Tuple<ErrorCode, bool>(ErrorCode.None, false);
             }
 
-            playerItem.Attack = (Int64)Math.Ceiling((double)playerItem.Attack * 1.1);
-            playerItem.Defence = (Int64)Math.Ceiling((double)playerItem.Defence * 1.1);
+            // 장비 특성에 따른 강화
+            if (item.AttributeId == 1)
+            {
+                playerItem.Attack = (Int64)Math.Ceiling((double)playerItem.Attack * 1.1);
+            }
+            else if (item.AttributeId == 2)
+            {
+                playerItem.Defence = (Int64)Math.Ceiling((double)playerItem.Defence * 1.1);
+            }
             await _queryFactory.Query("player_item").Where("player_item_id", playerItemId).UpdateAsync(new
             {
                 attack = playerItem.Attack,
@@ -747,7 +754,6 @@ public class GameDb : IGameDb
             });
 
             return new Tuple<ErrorCode, bool>(ErrorCode.None, true);
-
         }
         catch (Exception ex)
         {
