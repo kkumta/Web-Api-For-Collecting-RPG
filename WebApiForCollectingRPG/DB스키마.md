@@ -222,7 +222,9 @@ CREATE TABLE IF NOT EXISTS game_db.`mail`
     is_in_app_product BOOL NOT NULL COMMENT '인앱 상품 여부',
     expiration_time DATETIME NOT NULL COMMENT '보관 만료 시간',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 날짜',
-    is_deleted BOOL NOT NULL COMMENT '삭제 여부'
+    is_deleted BOOL NOT NULL COMMENT '삭제 여부',
+    is_read BOOL NOT NULL COMMENT '읽음 여부',
+    has_item BOOL NOT NULL COMMENT '아이템 포함 여부'
 ) COMMENT '우편';
 ```
 

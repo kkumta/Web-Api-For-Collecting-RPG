@@ -211,7 +211,12 @@ public class GameDb : IGameDb
                     is_deleted = false,
                 })
                 .Where("expiration_time", ">", DateTime.Now)
-                .Select("mail_id AS MailId", "title AS Title", "is_received AS IsReceived", "expiration_time AS ExpirationTime")
+                .Select("mail_id AS MailId",
+                "title AS Title",
+                "is_received AS IsReceived",
+                "expiration_time AS ExpirationTime",
+                "is_read AS IsRead",
+                "has_item AS HasItem")
                 .OrderByDesc("created_at")
                 .PaginateAsync<MailListInfo>(page, PerPage);
 
@@ -270,6 +275,11 @@ public class GameDb : IGameDb
                 .Where("mail_id", mailId)
                 .Select("item_id AS ItemId", "item_count AS ItemCount")
                 .GetAsync<MailItemInfo>();
+
+            await _queryFactory.Query("mail").Where("mail_id", mailId).UpdateAsync(new
+            {
+                is_read = true
+            });
 
             return new Tuple<ErrorCode, MailDetailInfo, IEnumerable<MailItemInfo>>(ErrorCode.None, mail, items);
         }
@@ -348,10 +358,11 @@ public class GameDb : IGameDb
                 "last_attendance_date AS LastAttendanceDate")
                 .FirstOrDefaultAsync<AttendanceInfo>();
 
-            SendMailInfo mail = new SendMailInfo(playerId.Value,
+            SendMailInfo mail = new(playerId.Value,
                 attendance.LastCompensationId + "일 차 출석 보상",
                 attendance.LastCompensationId + "일 차 출석 보상입니다.",
                 false,
+                true,
                 DateTime.Now.AddDays(7));
 
             List<MailItemInfo> mailItems = new();
@@ -411,7 +422,6 @@ public class GameDb : IGameDb
                 return ErrorCode.ReceiveMailItemsFailNotExist;
             }
 
-            // 우편 아이템 조회
             var mailItems = await _queryFactory.Query("mail_item")
                 .Where("mail_id", mailId)
                 .Select("item_id AS ItemId", "item_count AS ItemCount")
@@ -424,12 +434,12 @@ public class GameDb : IGameDb
                 return ErrorCode.ReceiveMailItemsFailNotExist;
             }
 
-            // 우편 아이템 수령 처리
             await _queryFactory.Query("mail").Where("mail_id", mailId).UpdateAsync(new
             {
-                is_received = true
+                is_read = true,
+                is_received = true,
+                has_item = false
             });
-
 
             foreach (MailItemInfo mailItemInfo in mailItems)
             {
@@ -548,10 +558,11 @@ public class GameDb : IGameDb
             _logger.ZLogDebug(EventIdDic[EventType.GameDb],
                 $"[GameDb.SendInAppProduct] Add Receipt Success! ReceiptId: {receiptId} PlayerId: {playerId}, ProductId: {productId}");
 
-            SendMailInfo mail = new SendMailInfo(playerId.Value,
+            SendMailInfo mail = new(playerId.Value,
                 "인앱 상품(" + productId + ")" + " 구입에 따른 아이템 지급",
                 "영수증 번호: " + receiptId +
                 "\n상품 번호: " + productId,
+                true,
                 true,
                 Convert.ToDateTime(DateTime.MaxValue.ToString("yyyy-MM-dd HH:mm:ss")));
 
@@ -592,6 +603,8 @@ public class GameDb : IGameDb
                 content = mail.Content,
                 is_received = mail.IsReceived,
                 is_in_app_product = mail.IsInAppProduct,
+                has_item = mail.HasItem,
+                is_read = mail.IsRead,
                 expiration_time = mail.ExpirationTime,
                 is_deleted = mail.IsDeleted
             });

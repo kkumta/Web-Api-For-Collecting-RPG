@@ -13,4 +13,6 @@ public class Mail
     public DateTime CreatedAt { get; set; }
     public DateTime ExpirationTime { get; set; }
     public bool IsDeleted { get; set; } = false;
+    public bool IsRead { get; set; } = false;
+    public bool HasItem { get; set; } = false;
 }

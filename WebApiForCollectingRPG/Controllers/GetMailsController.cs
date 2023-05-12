@@ -48,6 +48,8 @@ public class GetMails : ControllerBase
                 MailId = mail.MailId,
                 Title = mail.Title,
                 IsReceived = mail.IsReceived,
+                IsRead = mail.IsRead,
+                HasItem = mail.HasItem,
                 ExpirationTime = mail.ExpirationTime
             };
 
