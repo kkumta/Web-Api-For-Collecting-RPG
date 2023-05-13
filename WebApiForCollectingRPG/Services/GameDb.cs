@@ -16,6 +16,8 @@ using static LogManager;
 using WebApiForCollectingRPG.DTO.InAppProduct;
 using WebApiForCollectingRPG.Repository;
 using Microsoft.AspNetCore.Http;
+using WebApiForCollectingRPG.DTO.Enhance;
+using WebApiForCollectingRPG.DAO.Master;
 
 namespace WebApiForCollectingRPG.Services;
 
@@ -136,7 +138,7 @@ public class GameDb : IGameDb
         return ErrorCode.CreatePlayerGameFailException;
     }
 
-    public async Task<Tuple<ErrorCode, PlayerGameInfo>> GetPlayerGameInfoAsync(Int64 playerId)
+    public async Task<Tuple<ErrorCode, PlayerGameDTO>> GetPlayerGameInfoAsync(Int64 playerId)
     {
         try
         {
@@ -144,26 +146,26 @@ public class GameDb : IGameDb
                 .Where("player_id", playerId)
                 .Select("money AS Money",
                 "exp AS Exp")
-                .FirstOrDefaultAsync<PlayerGameInfo>();
+                .FirstOrDefaultAsync<PlayerGameDTO>();
 
             if (accountGameInfo is null)
             {
                 _logger.ZLogError(EventIdDic[EventType.GameDb],
                     $"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetPlayerGameInfoFailNotExist}, PlayerId: {playerId}");
-                return new Tuple<ErrorCode, PlayerGameInfo>(ErrorCode.GetPlayerGameInfoFailNotExist, null);
+                return new Tuple<ErrorCode, PlayerGameDTO>(ErrorCode.GetPlayerGameInfoFailNotExist, null);
             }
 
-            return new Tuple<ErrorCode, PlayerGameInfo>(ErrorCode.None, accountGameInfo);
+            return new Tuple<ErrorCode, PlayerGameDTO>(ErrorCode.None, accountGameInfo);
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
                 $"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetPlayerGameInfoFailException}");
-            return new Tuple<ErrorCode, PlayerGameInfo>(ErrorCode.GetPlayerGameInfoFailException, null);
+            return new Tuple<ErrorCode, PlayerGameDTO>(ErrorCode.GetPlayerGameInfoFailException, null);
         }
     }
 
-    public async Task<Tuple<ErrorCode, IEnumerable<PlayerItemInfo>>> GetPlayerItemInfoListAsync(Int64 playerId)
+    public async Task<Tuple<ErrorCode, IEnumerable<PlayerItemDTO>>> GetPlayerItemInfoListAsync(Int64 playerId)
     {
         try
         {
@@ -176,15 +178,15 @@ public class GameDb : IGameDb
                 "attack AS Attack",
                 "defence AS Defence",
                 "magic AS Magic")
-                .GetAsync<PlayerItemInfo>();
+                .GetAsync<PlayerItemDTO>();
 
-            return new Tuple<ErrorCode, IEnumerable<PlayerItemInfo>>(ErrorCode.None, accountItemList);
+            return new Tuple<ErrorCode, IEnumerable<PlayerItemDTO>>(ErrorCode.None, accountItemList);
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
                 $"[GameDb.GetAccountItemListAsync] ErrorCode: {ErrorCode.GetPlayerItemListFailException}");
-            return new Tuple<ErrorCode, IEnumerable<PlayerItemInfo>>(ErrorCode.GetPlayerItemListFailException, null);
+            return new Tuple<ErrorCode, IEnumerable<PlayerItemDTO>>(ErrorCode.GetPlayerItemListFailException, null);
         }
     }
 
@@ -238,14 +240,14 @@ public class GameDb : IGameDb
         }
     }
 
-    public async Task<Tuple<ErrorCode, MailDetailInfo, IEnumerable<MailItemInfo>>> GetMailByMailId(Int64 mailId)
+    public async Task<Tuple<ErrorCode, MailDetail, IEnumerable<MailItemDTO>>> GetMailByMailId(Int64 mailId)
     {
         try
         {
             var (errorCode, playerId) = GetPlayerIdFromHttpContext();
             if (errorCode != ErrorCode.None)
             {
-                return new Tuple<ErrorCode, MailDetailInfo, IEnumerable<MailItemInfo>>(errorCode, null, null);
+                return new Tuple<ErrorCode, MailDetail, IEnumerable<MailItemDTO>>(errorCode, null, null);
             }
 
             var mail = await _queryFactory.Query("mail")
@@ -263,46 +265,49 @@ public class GameDb : IGameDb
                 "is_in_app_product AS IsInAppProduct",
                 "created_at AS CreatedAt",
                 "expiration_time AS ExpirationTime")
-                .FirstOrDefaultAsync<MailDetailInfo>();
+                .FirstOrDefaultAsync<MailDetail>();
 
             if (mail == null || mailId == 0)
             {
                 _logger.ZLogError(EventIdDic[EventType.GameDb],
                     $"[GameDb.GetMailByMailId] ErrorCode: {ErrorCode.GetMailFailNotExist}, PlayerId: {playerId}, MailId: {mailId}");
-                return new Tuple<ErrorCode, MailDetailInfo, IEnumerable<MailItemInfo>>(ErrorCode.GetMailFailNotExist, null, null);
+                return new Tuple<ErrorCode, MailDetail, IEnumerable<MailItemDTO>>(ErrorCode.GetMailFailNotExist, null, null);
             }
 
             var items = await _queryFactory.Query("mail_item")
                 .Where("mail_id", mailId)
                 .Select("item_id AS ItemId", "item_count AS ItemCount")
-                .GetAsync<MailItemInfo>();
+                .GetAsync<MailItemDTO>();
 
             await _queryFactory.Query("mail").Where("mail_id", mailId).UpdateAsync(new
             {
                 is_read = true
             });
 
-            return new Tuple<ErrorCode, MailDetailInfo, IEnumerable<MailItemInfo>>(ErrorCode.None, mail, items);
+            return new Tuple<ErrorCode, MailDetail, IEnumerable<MailItemDTO>>(ErrorCode.None, mail, items);
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
                 $"[GameDb.GetMailByMailId] ErrorCode: {ErrorCode.GetMailFailException}, MailId: {mailId}");
-            return new Tuple<ErrorCode, MailDetailInfo, IEnumerable<MailItemInfo>>(ErrorCode.GetMailFailException, null, null);
+            return new Tuple<ErrorCode, MailDetail, IEnumerable<MailItemDTO>>(ErrorCode.GetMailFailException, null, null);
         }
     }
 
     public async Task<ErrorCode> CheckAttendance()
     {
+        Int16 todayCompensationId = 1;
+        AttendanceInfo attendance = null;
+        Int64? playerId = 0;
         try
         {
-            var (errorCode, playerId) = GetPlayerIdFromHttpContext();
+            (var errorCode, playerId) = GetPlayerIdFromHttpContext();
             if (errorCode != ErrorCode.None)
             {
                 return errorCode;
             }
 
-            var attendance = await _queryFactory.Query("attendance")
+            attendance = await _queryFactory.Query("attendance")
                 .Where("player_id", playerId)
                 .Select("last_compensation_id AS LastCompensationId",
                 "last_attendance_date AS LastAttendanceDate")
@@ -316,7 +321,7 @@ public class GameDb : IGameDb
                 await _queryFactory.Query("attendance").InsertAsync(new
                 {
                     player_id = playerId,
-                    last_compensation_id = 1,
+                    last_compensation_id = todayCompensationId,
                     last_attendance_date = requestDate
                 });
             }
@@ -336,47 +341,88 @@ public class GameDb : IGameDb
                 {
                     await _queryFactory.Query("attendance").Where("player_id", playerId).UpdateAsync(new
                     {
-                        last_compensation_id = 1,
+                        last_compensation_id = todayCompensationId,
                         last_attendance_date = requestDate
                     });
                 }
                 // 연속 출석한 계정일 때
                 else if (DateTime.Compare(lastAttendanceDate.AddDays(1), requestDate) == 0)
                 {
-                    attendance.LastCompensationId++;
+                    todayCompensationId = (short)(attendance.LastCompensationId + 1);
                     await _queryFactory.Query("attendance").Where("player_id", playerId).UpdateAsync(new
                     {
-                        last_compensation_id = attendance.LastCompensationId++,
+                        last_compensation_id = todayCompensationId,
                         last_attendance_date = requestDate
                     });
                 }
             }
 
             // 보상과 함께 우편 보내기
-            attendance = await _queryFactory.Query("attendance")
-                .Where("player_id", playerId)
-                .Select("last_compensation_id AS LastCompensationId",
-                "last_attendance_date AS LastAttendanceDate")
-                .FirstOrDefaultAsync<AttendanceInfo>();
-
-            SendMailInfo mail = new(playerId.Value,
-                attendance.LastCompensationId + "일 차 출석 보상",
-                attendance.LastCompensationId + "일 차 출석 보상입니다.",
+            SendMailDTO mail = new(playerId.Value,
+                todayCompensationId + "일 차 출석 보상",
+                todayCompensationId + "일 차 출석 보상입니다.",
                 false,
                 true,
                 DateTime.Now.AddDays(7));
 
-            List<MailItemInfo> mailItems = new();
-            var compensation = _masterService.GetAttendanceCompensationByCompensationId(attendance.LastCompensationId);
-            mailItems.Add(new MailItemInfo(compensation.ItemId, compensation.ItemCount));
+            List<MailItemDTO> mailItems = new();
+            var compensation = _masterService.GetAttendanceCompensationByCompensationId(todayCompensationId);
+            mailItems.Add(new MailItemDTO(compensation.ItemId, compensation.ItemCount));
 
-            return await SendRewardToMailbox(mail, mailItems);
+            errorCode = await SendRewardToMailbox(mail, mailItems);
+            if (errorCode != ErrorCode.None)
+            {
+                // 우편 보내는 중 오류 발생했을 경우 출석부 rollback
+                if (attendance == null) // 출석 기록 행을 새로 만들었을 경우 삭제
+                {
+                    attendance = await _queryFactory.Query("attendance")
+                        .Where("player_id", playerId)
+                        .Select("last_compensation_id AS LastCompensationId",
+                        "last_attendance_date AS LastAttendanceDate")
+                        .FirstOrDefaultAsync<AttendanceInfo>();
+                    if (attendance != null)
+                    {
+                        await _queryFactory.Query("attendance").Where("player_id", playerId).DeleteAsync();
+                    }
+                }
+                else if (todayCompensationId == 1) // 기존 출석 기록이 있는 경우 기존 기록으로 갱신
+                {
+                    await _queryFactory.Query("attendance").Where("player_id", playerId).UpdateAsync(new
+                    {
+                        last_compensation_id = attendance.LastCompensationId,
+                        last_attendance_date = attendance.LastAttendanceDate
+                    });
+                }
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                    $"[GameDb.CheckAttendance] ErrorCode: {ErrorCode.SendRewardToMailboxError}, " +
+                    $"Message: An error occurred while check attendance, so has been rolled back.");
+                return ErrorCode.SendRewardToMailboxError;
+            }
+            return ErrorCode.None;
         }
         catch (Exception ex)
         {
+            // 출석체크 도중 예외 발생했을 경우 rollback
+            if (playerId != 0)
+            {
+                if (attendance == null) // 출석 기록이 없는 경우
+                {
+                    await _queryFactory.Query("attendance").Where("player_id", playerId).DeleteAsync();
+                }
+                else if (todayCompensationId == 1) // 출석 기록이 있는 경우
+                {
+                    await _queryFactory.Query("attendance").Where("player_id", playerId).UpdateAsync(new
+                    {
+                        last_compensation_id = attendance.LastCompensationId,
+                        last_attendance_date = attendance.LastAttendanceDate
+                    });
+                }
+            }
+
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
-                $"[GameDb.CheckAttendance] ErrorCode: {ErrorCode.AttendanceInfoException}");
-            return ErrorCode.AttendanceInfoException;
+                $"[GameDb.CheckAttendance] ErrorCode: {ErrorCode.CheckAttendanceException}, " +
+                $"Message: An error occurred while check attendance, so has been rolled back.");
+            return ErrorCode.CheckAttendanceException;
         }
     }
 
@@ -390,7 +436,6 @@ public class GameDb : IGameDb
                 return errorCode;
             }
 
-            // 우편 조회
             var mail = await _queryFactory.Query("mail")
                 .Where(new
                 {
@@ -400,15 +445,9 @@ public class GameDb : IGameDb
                 })
                 .Where("expiration_time", ">", DateTime.Now)
                 .Select("mail_id AS MailId",
-                "player_id AS PlayerId",
-                "title AS Title",
-                "content AS Content",
                 "is_received AS IsReceived",
-                "is_in_app_product AS IsInAppProduct",
-                "created_at AS CreatedAt",
-                "expiration_time AS ExpirationTime",
-                "is_deleted AS IsDeleted")
-                .FirstOrDefaultAsync<Mail>();
+                "has_item AS HasItem")
+                .FirstOrDefaultAsync<MailDTO>();
 
             if (mail == null || mail.MailId == 0)
             {
@@ -416,7 +455,7 @@ public class GameDb : IGameDb
                     $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsFailMailNotExist}, PlayerId: {playerId}, MailId: {mailId}");
                 return ErrorCode.ReceiveMailItemsFailMailNotExist;
             }
-            else if (mail.IsReceived)
+            else if (mail.IsReceived || !mail.HasItem)
             {
                 _logger.ZLogError(EventIdDic[EventType.GameDb],
                     $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsFailNotExist}, PlayerId: {playerId}, MailId: {mailId}");
@@ -426,7 +465,7 @@ public class GameDb : IGameDb
             var mailItems = await _queryFactory.Query("mail_item")
                 .Where("mail_id", mailId)
                 .Select("item_id AS ItemId", "item_count AS ItemCount")
-                .GetAsync<MailItemInfo>();
+                .GetAsync<MailItemDTO>();
 
             if (mailItems == null)
             {
@@ -442,11 +481,40 @@ public class GameDb : IGameDb
                 has_item = false
             });
 
-            foreach (MailItemInfo mailItemInfo in mailItems)
+            errorCode = await ReceiveMailItemActions(playerId, mailItems);
+            if (errorCode != ErrorCode.None)
+            {
+                // mail rollback
+                await _queryFactory.Query("mail").Where("mail_id", mailId).UpdateAsync(new
+                {
+                    is_read = false,
+                    is_received = false,
+                    has_item = true
+                });
+            }
+            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
+                $"[GameDb.ReceiveMailItems] PlayerId: {playerId}, MailId: {mailId}");
+
+            return ErrorCode.None;
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+                $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsException}");
+            return ErrorCode.ReceiveMailItemsException;
+        }
+    }
+
+    private async Task<ErrorCode> ReceiveMailItemActions(long? playerId, IEnumerable<MailItemDTO> mailItems)
+    {
+        // 롤백을 위해 동작 번호와 사용된 데이터(Money, PlayerItemId, ItemCount)를 가진다. 
+        List<(Int16, Int64, Int64, Int32)> rollbacks = new();
+        try
+        {
+            foreach (MailItemDTO mailItemInfo in mailItems)
             {
                 var itemInfo = _masterService.GetItemByItemId(mailItemInfo.ItemId);
 
-                // 아이템이 돈일 경우
                 if (_masterService.IsMoney(mailItemInfo.ItemId))
                 {
                     var money = await _queryFactory.Query("player_game")
@@ -458,8 +526,8 @@ public class GameDb : IGameDb
                     {
                         money = money + mailItemInfo.ItemCount
                     });
+                    rollbacks.Add((1, money, 0, 0)); // Money 갱신 동작, 기존 Money 데이터
                 }
-                // 겹칠 수 있는 아이템일 경우
                 else if (_masterService.IsStackableItem(mailItemInfo.ItemId))
                 {
                     var playerItem = await _queryFactory.Query("player_item")
@@ -471,28 +539,24 @@ public class GameDb : IGameDb
                         .Select("player_item_id AS PlayerItemId",
                         "player_id AS PlayerId",
                         "item_id AS ItemId",
-                        "item_count AS ItemCount",
-                        "enhance_count AS EnhanceCount",
-                        "attack AS Attack",
-                        "defence AS Defence",
-                        "magic AS Magic")
-                        .FirstOrDefaultAsync<PlayerItem>();
+                        "item_count AS ItemCount")
+                        .FirstOrDefaultAsync<PlayerStackableItemDTO>();
 
-                    // 해당 아이템을 보유하고 있지 않을 경우 AccountItem 생성
+                    // 해당 아이템을 보유하고 있지 않을 경우 PlayerItem 생성
                     if (playerItem == null || playerItem.PlayerItemId == 0)
                     {
-                        await _queryFactory.Query("player_item").InsertAsync(new
+                        var playerItemId = await _queryFactory.Query("player_item").InsertGetIdAsync<Int64>(new
                         {
                             player_id = playerId,
                             item_id = mailItemInfo.ItemId,
                             item_count = mailItemInfo.ItemCount,
-                            enhance_count = 0,
+                            enhance_count = itemInfo.EnhanceMaxCount,
                             attack = itemInfo.Attack,
                             defence = itemInfo.Defence,
                             magic = itemInfo.Magic
                         });
+                        rollbacks.Add((2, 0, playerItemId, mailItemInfo.ItemCount)); // PlayerItem 생성 동작
                     }
-                    // 보유하고 있을 경우 현재 보유 수량에 더한다.
                     else
                     {
                         await _queryFactory.Query("player_item")
@@ -501,12 +565,12 @@ public class GameDb : IGameDb
                             {
                                 item_count = playerItem.ItemCount + mailItemInfo.ItemCount
                             });
+                        rollbacks.Add((3, 0, playerItem.PlayerItemId, playerItem.ItemCount)); // PlayerItem 갱신 동작, 기존 ItemCount 데이터
                     }
                 }
-                // 겹칠 수 없는 아이템일 경우 AccountItem 생성
                 else
                 {
-                    await _queryFactory.Query("player_item").InsertAsync(new
+                    var playerItemId = await _queryFactory.Query("player_item").InsertGetIdAsync<Int64>(new
                     {
                         player_id = playerId,
                         item_id = mailItemInfo.ItemId,
@@ -516,19 +580,48 @@ public class GameDb : IGameDb
                         defence = itemInfo.Defence,
                         magic = itemInfo.Magic
                     });
+                    rollbacks.Add((2, 0, playerItemId, mailItemInfo.ItemCount)); // PlayerItem 생성 동작
                 }
             }
-
-            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
-                $"[GameDb.ReceiveMailItems] PlayerId: {playerId}, MailId: {mailId}");
-
             return ErrorCode.None;
         }
         catch (Exception ex)
         {
+            try
+            {
+                foreach (var rollback in rollbacks)
+                {
+                    var (actionId, OriginMoney, playerItemId, OriginItemCount) = rollback;
+                    switch (actionId)
+                    {
+                        case 1: // Money 갱신 롤백
+                            await _queryFactory.Query("player_game").Where("player_id", playerId).UpdateAsync(new
+                            {
+                                money = OriginMoney
+                            });
+                            break;
+                        case 2: // Item 생성 롤백
+                            await _queryFactory.Query("player_item").Where("player_item_id", playerItemId).DeleteAsync();
+                            break;
+                        case 3: // ItemCount 갱신 롤백
+                            await _queryFactory.Query("player_item").Where("player_item_id", playerItemId).UpdateAsync(new
+                            {
+                                item_count = OriginItemCount
+                            });
+                            break;
+                    }
+                }
+            }
+            catch (Exception rollbackEx)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameDb], rollbackEx,
+                    $"[GameDb.ReceiveMailItemActions] ErrorCode: {ErrorCode.ReceiveMailItemActionsRollbackException}, Message: Exception occurred during rollback.");
+                return ErrorCode.ReceiveMailItemActionsRollbackException;
+            }
+
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
-                $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsException}");
-            return ErrorCode.ReceiveMailItemsException;
+                $"[GameDb.ReceiveMailItemActions] ErrorCode: {ErrorCode.ReceiveMailItemsException}, Message: An error occurred while receiving items, so has been rolled back.");
+            return ErrorCode.ReceiveMailItemActionsException;
         }
     }
 
@@ -563,7 +656,7 @@ public class GameDb : IGameDb
             _logger.ZLogDebug(EventIdDic[EventType.GameDb],
                 $"[GameDb.SendInAppProduct] Add Receipt Success! ReceiptId: {receiptId} PlayerId: {playerId}, ProductId: {productId}");
 
-            SendMailInfo mail = new(playerId.Value,
+            SendMailDTO mail = new(playerId.Value,
                 "인앱 상품(" + productId + ")" + " 구입에 따른 아이템 지급",
                 "영수증 번호: " + receiptId +
                 "\n상품 번호: " + productId,
@@ -574,25 +667,44 @@ public class GameDb : IGameDb
             var inAppItems = _masterService.GetInAppItemsByProductId(productId);
             var mailItems = inAppItems.ConvertAll(inAppItem =>
             {
-                return new MailItemInfo()
+                return new MailItemDTO()
                 {
                     ItemId = inAppItem.ItemId,
                     ItemCount = inAppItem.ItemCount
                 };
             });
 
-            return await SendRewardToMailbox(mail, mailItems);
+            errorCode = await SendRewardToMailbox(mail, mailItems);
+            if (errorCode != ErrorCode.None)
+            {
+                // receipt 삽입 rollback
+                await _queryFactory.Query("receipt").Where("receipt_id", receiptId).DeleteAsync();
+                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                    $"[GameDb.SendInAppProduct] ErrorCode: {ErrorCode.SendRewardToMailboxError}, ReceiptId: {receiptId}," +
+                    $"Message: An error occurred while send in app product, so has been rolled back.");
+                return ErrorCode.SendRewardToMailboxError;
+            }
+
+            return ErrorCode.None;
         }
         catch (Exception ex)
         {
+            // receipt가 이미 저장되었다면 rollback
+            if (await _queryFactory.Query("receipt").Where("receipt_id", receiptId).CountAsync<Int32>() != 0)
+            {
+                await _queryFactory.Query("receipt").Where("receipt_id", receiptId).DeleteAsync();
+            }
+
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
-                $"[GameDb.SendInAppProduct] ErrorCode: {ErrorCode.SendInAppProductException}, ReceiptId: {receiptId}");
+                $"[GameDb.SendInAppProduct] ErrorCode: {ErrorCode.SendInAppProductException}, ReceiptId: {receiptId}," +
+                $"Message: An error occurred while send in app product, so has been rolled back.");
             return ErrorCode.SendInAppProductException;
         }
     }
 
-    private async Task<ErrorCode> SendRewardToMailbox(SendMailInfo mail, List<MailItemInfo> mailItems)
+    private async Task<ErrorCode> SendRewardToMailbox(SendMailDTO mail, List<MailItemDTO> mailItems)
     {
+        var mailId = 0L;
         try
         {
             var (errorCode, playerId) = GetPlayerIdFromHttpContext();
@@ -601,7 +713,7 @@ public class GameDb : IGameDb
                 return errorCode;
             }
 
-            var mailId = await _queryFactory.Query("mail").InsertGetIdAsync<Int64>(new
+            mailId = await _queryFactory.Query("mail").InsertGetIdAsync<Int64>(new
             {
                 player_id = playerId,
                 title = mail.Title,
@@ -614,7 +726,7 @@ public class GameDb : IGameDb
                 is_deleted = mail.IsDeleted
             });
 
-            foreach (MailItemInfo item in mailItems)
+            foreach (MailItemDTO item in mailItems)
             {
                 await _queryFactory.Query("mail_item").InsertAsync(new
                 {
@@ -631,8 +743,22 @@ public class GameDb : IGameDb
         }
         catch (Exception ex)
         {
+            // Mail은 저장됐는데 MailItem 저장 도중 Exception이 발생한 경우 Mail 롤백
+            if (mailId != 0)
+            {
+                await _queryFactory.Query("mail").Where("mail_id", mailId).DeleteAsync();
+
+                // 이미 저장된 MailItem이 있는데 도중에 Exception이 발생한 경우 MailItem 롤백
+                var itemCount = await _queryFactory.Query("mail_item").Where("mail_id", mailId).CountAsync<Int32>();
+                if (itemCount > 0)
+                {
+                    await _queryFactory.Query("mail_item").Where("mail_id", mailId).DeleteAsync();
+                }
+            }
+
             _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
-                $"[GameDb.SendRewardToMailbox] ErrorCode: {ErrorCode.SendRewardToMailboxException}, MailTitle: {mail.Title}, MailItemCount: {mailItems.Count}");
+                $"[GameDb.SendRewardToMailbox] ErrorCode: {ErrorCode.SendRewardToMailboxException}, MailTitle: {mail.Title}, MailItemCount: {mailItems.Count}, " +
+                $"Message: An error occurred while send reward to mailbox, so has been rolled back.");
             return ErrorCode.SendRewardToMailboxException;
         }
     }
@@ -647,46 +773,18 @@ public class GameDb : IGameDb
                 return new Tuple<ErrorCode, bool>(errorCode, false);
             }
 
-            // 로그인한 계정이 소유한 아이템이 맞는지 확인
-            var playerItem = await _queryFactory.Query("player_item")
-                .Where(new
-                {
-                    player_id = playerId,
-                    player_item_id = playerItemId,
-                })
-                .Select("player_item_id AS PlayerItemId",
-                "player_id AS PlayerId",
-                "item_id AS ItemId",
-                "item_count AS ItemCount",
-                "enhance_count AS EnhanceCount",
-                "attack AS Attack",
-                "defence AS Defence",
-                "magic AS Magic")
-                .FirstOrDefaultAsync<PlayerItem>();
-
-            if (playerItem == null)
+            (errorCode, var playerItem) = await GetPlayerItemEnhanceDTO(playerId, playerItemId);
+            if (errorCode != ErrorCode.None)
             {
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
-                    $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.PlayerItemNotExist}, PlayerId: {playerId}, PlayerItemId: {playerItemId}");
-                return new Tuple<ErrorCode, bool>(ErrorCode.PlayerItemNotExist, false);
+                return new Tuple<ErrorCode, bool>(errorCode, false);
             }
 
             var item = _masterService.GetItemByItemId(playerItem.ItemId);
 
-            // 강화 가능한 아이템인지 확인
-            if (item.EnhanceMaxCount == 0)
+            errorCode = CanEnhance(item.EnhanceMaxCount, playerItem.EnhanceCount);
+            if (errorCode != ErrorCode.None)
             {
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
-                    $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.NotEnchantableItem}, PlayerId: {playerId}, PlayerItemId: {playerItemId}, ItemId: {item.ItemId}");
-                return new Tuple<ErrorCode, bool>(ErrorCode.NotEnchantableItem, false);
-            }
-
-            // 강화 횟수가 남아있는지 확인
-            if (item.EnhanceMaxCount <= playerItem.EnhanceCount)
-            {
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
-                    $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.OverMaxEnhanceCount}, PlayerId: {playerId}, PlayerItemId: {playerItemId}, ItemId: {item.ItemId}");
-                return new Tuple<ErrorCode, bool>(ErrorCode.OverMaxEnhanceCount, false);
+                return new Tuple<ErrorCode, bool>(errorCode, false);
             }
 
             // 강화 단계에 따른 강화 성공 확률 적용
@@ -705,36 +803,9 @@ public class GameDb : IGameDb
                 9단계: 5%
                 10단계: 2%
             **/
-            var targetEnhanceCount = playerItem.EnhanceCount + 1;
-            var successPercent = Math.Truncate((double)1 / targetEnhanceCount * 100);
-            if (targetEnhanceCount > 5)
-            {
-                successPercent = Math.Truncate(successPercent / 2);
-            }
-            if (targetEnhanceCount > 9)
-            {
-                successPercent = Math.Truncate(successPercent / 2);
-            }
 
-            // 강화 성공 확률에 따른 강화 시도
-            double[] probs;
-            var isSuccess = false;
-            if (successPercent <= 50)
-            {
-                probs = new double[] { successPercent, 100 - successPercent };
-                if (Util.Game.Choose(probs) == 0)
-                {
-                    isSuccess = true;
-                }
-            }
-            else
-            {
-                probs = new double[] { 100 - successPercent, successPercent };
-                if (Util.Game.Choose(probs) == 1)
-                {
-                    isSuccess = true;
-                }
-            }
+            // 강화 성공 확률 구하기
+            bool isSuccess = IsEnhancementSuccessful(playerItem.EnhanceCount + 1);
 
             if (!isSuccess)
             {
@@ -742,12 +813,12 @@ public class GameDb : IGameDb
                 return new Tuple<ErrorCode, bool>(ErrorCode.None, false);
             }
 
-            // 장비 특성에 따른 강화
-            if (item.AttributeId == 1)
+            // 강화 적용
+            if (item.AttributeId == 1) // 무기
             {
                 playerItem.Attack = (Int64)Math.Ceiling((double)playerItem.Attack * 1.1);
             }
-            else if (item.AttributeId == 2)
+            else if (item.AttributeId == 2) // 방어구
             {
                 playerItem.Defence = (Int64)Math.Ceiling((double)playerItem.Defence * 1.1);
             }
@@ -768,6 +839,84 @@ public class GameDb : IGameDb
         }
     }
 
+    private bool IsEnhancementSuccessful(int targetEnhanceCount)
+    {
+        var successPercent = Math.Truncate((double)1 / targetEnhanceCount * 100);
+        if (targetEnhanceCount > 5)
+        {
+            successPercent = Math.Truncate(successPercent / 2);
+        }
+        if (targetEnhanceCount > 9)
+        {
+            successPercent = Math.Truncate(successPercent / 2);
+        }
+
+        double[] probs;
+        if (successPercent <= 50)
+        {
+            probs = new double[] { successPercent, 100 - successPercent };
+            if (Util.Game.Choose(probs) == 0)
+            {
+                return true;
+            }
+        }
+        else
+        {
+            probs = new double[] { 100 - successPercent, successPercent };
+            if (Util.Game.Choose(probs) == 1)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ErrorCode CanEnhance(Int64 enhanceMaxCount, Int16 enhanceCount)
+    {
+        // 강화 가능한 아이템인지 확인
+        if (enhanceMaxCount == 0)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb],
+                $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.NotEnchantableItem}");
+            return ErrorCode.NotEnchantableItem;
+        }
+
+        // 강화 횟수가 남아있는지 확인
+        if (enhanceMaxCount <= enhanceCount)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb],
+                $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.OverMaxEnhanceCount}");
+            return ErrorCode.OverMaxEnhanceCount;
+        }
+        return ErrorCode.None;
+    }
+
+    private async Task<Tuple<ErrorCode, PlayerItemEnhanceDTO>> GetPlayerItemEnhanceDTO(long? playerId, long playerItemId)
+    {
+        // 로그인한 계정이 소유한 아이템이 맞는지 확인
+        var playerItem = await _queryFactory.Query("player_item")
+            .Where(new
+            {
+                player_id = playerId,
+                player_item_id = playerItemId,
+            })
+            .Select("player_item_id AS PlayerItemId",
+            "item_id AS ItemId",
+            "enhance_count AS EnhanceCount",
+            "attack AS Attack",
+            "defence AS Defence",
+            "magic AS Magic")
+            .FirstOrDefaultAsync<PlayerItemEnhanceDTO>();
+
+        if (playerItem == null)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb],
+                $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.PlayerItemNotExist}, PlayerId: {playerId}, PlayerItemId: {playerItemId}");
+            return new Tuple<ErrorCode, PlayerItemEnhanceDTO>(ErrorCode.PlayerItemNotExist, null);
+        }
+        return new Tuple<ErrorCode, PlayerItemEnhanceDTO>(ErrorCode.None, playerItem);
+    }
+
     private (ErrorCode, Int64?) GetPlayerIdFromHttpContext()
     {
         var playerId = (_httpContextAccessor.HttpContext.Items[nameof(AuthUser)] as AuthUser)?.PlayerId;
@@ -780,5 +929,21 @@ public class GameDb : IGameDb
         }
 
         return (ErrorCode.None, playerId);
+    }
+
+    public async Task<ErrorCode> DeletePlayerAsync(Int64 playerId)
+    {
+        try
+        {
+            await _queryFactory.Query("account_player").Where("player_id", playerId).DeleteAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+                $"[GameDb.GetPlayerIdFromHttpContext] ErrorCode: {ErrorCode.PlayerIdNotExist}");
+            return ErrorCode.DeletePlayerAsyncException;
+        }
+
+        return ErrorCode.None;
     }
 }

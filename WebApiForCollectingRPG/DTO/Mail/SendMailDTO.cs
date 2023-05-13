@@ -2,7 +2,7 @@
 
 namespace WebApiForCollectingRPG.DTO.Mail;
 
-public class SendMailInfo
+public class SendMailDTO
 {
     public Int64 AccountId { get; }
     public String Title { get; }
@@ -14,12 +14,12 @@ public class SendMailInfo
     public DateTime ExpirationTime { get; }
     public bool IsDeleted { get; } = false;
 
-    public SendMailInfo()
+    public SendMailDTO()
     {
 
     }
 
-    public SendMailInfo(Int64 accountId, String title, String content, bool isInAppProduct, bool hasItem, DateTime expirationTime)
+    public SendMailDTO(Int64 accountId, String title, String content, bool isInAppProduct, bool hasItem, DateTime expirationTime)
     {
         this.AccountId = accountId;
         this.Title = title;

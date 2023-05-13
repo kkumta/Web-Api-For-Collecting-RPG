@@ -18,7 +18,6 @@ public class GetMailsReq
 
 }
 
-
 public class GetMailsRes
 {
     [Required] public ErrorCode Result { get; set; } = ErrorCode.None;

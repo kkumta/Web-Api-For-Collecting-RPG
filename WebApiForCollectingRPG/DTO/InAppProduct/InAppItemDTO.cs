@@ -2,7 +2,7 @@
 
 namespace WebApiForCollectingRPG.DTO.InAppProduct;
 
-public class InAppItem
+public class InAppItemDTO
 {
     public Int64 ItemId { get; set; } = 0;
     public String ItemName { get; set; } = "";

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using SqlKata.Execution;
 using System;
 using System.Threading.Tasks;
 using WebApiForCollectingRPG.DAO;
@@ -97,5 +98,22 @@ public class AccountService : IAccountService
                 $"[AccountService.FindAccountIdByEmail] ErrorCode: {ErrorCode.FindAccountIdByEmailFailException}, Email: {email}");
             return new Tuple<ErrorCode, Int64>(ErrorCode.FindAccountIdByEmailFailException, 0);
         }
+    }
+
+    public async Task<ErrorCode> DeleteAccountAsync(Int64 accountId)
+    {
+        try
+        {
+            _accountRepository.DeleteAccountAsync(accountId);
+
+            return ErrorCode.None;
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+                $"[AccountService.DeleteAccountAsync] ErrorCode: {ErrorCode.DeleteAccountException}");
+            return ErrorCode.DeleteAccountException;
+        }
+
     }
 }

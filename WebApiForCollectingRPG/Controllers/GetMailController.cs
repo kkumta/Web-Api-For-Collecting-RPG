@@ -42,7 +42,7 @@ public class GetMail : ControllerBase
         }
         foreach (var item in items)
         {
-            var itemInfo = new MailItemInfo
+            var itemInfo = new MailItemDTO
             {
                 ItemId = item.ItemId,
                 ItemCount = item.ItemCount,

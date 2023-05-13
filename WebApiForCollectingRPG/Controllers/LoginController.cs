@@ -77,7 +77,7 @@ namespace WebApiForCollectingRPG.Controllers
             }
             foreach (var item in itemInfoList)
             {
-                var itemInfo = new PlayerItemInfo
+                var itemInfo = new PlayerItemDTO
                 {
                     PlayerItemId = item.PlayerItemId,
                     ItemId = item.ItemId,

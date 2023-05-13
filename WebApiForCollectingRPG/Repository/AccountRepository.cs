@@ -84,6 +84,11 @@ public class AccountRepository : IAccountRepository
                     .Select("account_id AS AccountId")
                     .FirstOrDefaultAsync<Int64>();
     }
+
+    public async void DeleteAccountAsync(Int64 accountId)
+    {
+        await _queryFactory.Query("account").Where("account_id", accountId).DeleteAsync();
+    }
 }
 
 public class DbConfig

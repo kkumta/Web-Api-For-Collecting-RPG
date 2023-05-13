@@ -31,6 +31,7 @@ public enum ErrorCode : UInt16
     GetAccountDbConnectionFail = 2018,
     FindAccountIdByEmailFailNotExist = 2019,
     FindAccountIdByEmailFailException = 2020,
+    DeleteAccountException = 2021,
 
     // GameDb
     GetGameDbConnectionFail = 4001,
@@ -50,10 +51,13 @@ public enum ErrorCode : UInt16
     ReceiveMailItemsFailNotExist = 4206,
     ReceiveMailItemsFailMailNotExist = 4207,
     ReceiveMailItemsException = 4208,
-    
+    ReceiveMailItemActionsException = 4209,
+    ReceiveMailItemActionsRollbackException = 4210,
+    SendRewardToMailboxError = 4211,
+
     // CheckAttendance
     AttendanceInfoNotExist = 4301,
-    AttendanceInfoException = 4302,
+    CheckAttendanceException = 4302,
     DuplicateAttendance = 4303,
 
     // InAppProduct
@@ -70,6 +74,7 @@ public enum ErrorCode : UInt16
     CreatePlayerFailException = 4601,
     FindPlayerIdByAccountIdException = 4602,
     PlayerIdNotExist = 4603,
+    DeletePlayerAsyncException = 4604,
 
     // MasterDb
     LoadItemListFail = 5001,

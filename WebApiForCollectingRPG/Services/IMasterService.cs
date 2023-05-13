@@ -12,7 +12,7 @@ public interface IMasterService
     public void LoadAttendanceCompensation();
     public void LoadInAppProductListAsync();
     public AttendanceCompensation GetAttendanceCompensationByCompensationId(Int16 compensationId);
-    public List<InAppItem> GetInAppItemsByProductId(Int16 productId);
+    public List<InAppItemDTO> GetInAppItemsByProductId(Int16 productId);
     public bool IsMoney(Int64 itemId);
     public bool IsStackableItem(Int64 itemId);
     public Item GetItemByItemId(Int64 itemId);

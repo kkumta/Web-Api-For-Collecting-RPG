@@ -28,7 +28,7 @@ public class ReceiveMailItems : ControllerBase
      * parameter: mailId
      */
     [HttpPost]
-    [Route("ReceiveMailItems")]
+    [Route("receiveMailItems")]
     public async Task<ReceiveMailItemsRes> Post(ReceiveMailItemsReq request)
     {
         var response = new ReceiveMailItemsRes();

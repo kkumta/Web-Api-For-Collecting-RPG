@@ -170,7 +170,7 @@ public class MasterService : IMasterService
         }
     }
 
-    public List<InAppItem> GetInAppItemsByProductId(Int16 productId)
+    public List<InAppItemDTO> GetInAppItemsByProductId(Int16 productId)
     {
         try
         {
@@ -178,7 +178,7 @@ public class MasterService : IMasterService
             var seletedItemList = itemList.FindAll(x => x.ProductId == productId);
             return seletedItemList.ConvertAll(product =>
             {
-                return new InAppItem()
+                return new InAppItemDTO()
                 {
                     ItemId = product.ItemId,
                     ItemName = product.ItemName,
@@ -190,7 +190,7 @@ public class MasterService : IMasterService
         {
             _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
                 $"[MasterService.GetInAppItemsByProductId] ErrorCode: {ErrorCode.GetInAppItemsByProductIdExeption}, ProductId: {productId}");
-            return new List<InAppItem>();
+            return new List<InAppItemDTO>();
         }
     }
 
