@@ -76,11 +76,14 @@ public enum ErrorCode : UInt16
     PlayerIdNotExist = 4603,
     DeletePlayerAsyncException = 4604,
 
-    // Dunjeon
+    // GameService - Dunjeon
     GetHighestClearedStageException = 4701,
     GetAllStagesAsyncException = 4702,
     InaccessibleStage = 4703,
     EnterStageAsyncException = 4704,
+
+    // MemoryService - Dunjeon
+    ItemFarmingException = 4801,
 
     // MasterDb
     LoadItemListFail = 5001,

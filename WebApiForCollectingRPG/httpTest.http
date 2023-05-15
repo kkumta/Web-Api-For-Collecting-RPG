@@ -124,3 +124,16 @@ Content-Type: application/json
   "MasterDataVersion": "1.0.0",
   "StageId": 2
 }
+
+###
+POST http://localhost:11500/api/itemFarming
+Content-Type: application/json
+
+{
+  "Email": "uiyhwe@gmail.com",
+  "AuthToken": "g9lw8xo51b054q3iggowvjevb",
+  "ClientVersion": "1.0.0",
+  "MasterDataVersion": "1.0.0",
+  "StageId": 2,
+  "ItemId": 1
+}

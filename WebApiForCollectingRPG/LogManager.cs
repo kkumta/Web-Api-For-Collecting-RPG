@@ -18,11 +18,13 @@ public class LogManager
         EnhanceItem = 701,
         GetAllStages = 801,
         EnterStage = 802,
+        ItemFarming = 803,
         AccountService = 1001,
         GameService = 1002,
         MasterService = 1003,
         RedisService = 1004,
-        AccountRepository = 1005,
+        HttpContextService = 1005,
+        AccountRepository = 2001,
     }
 
     private static ILoggerFactory s_loggerFactory;
@@ -41,10 +43,12 @@ public class LogManager
         {EventType.EnhanceItem, new EventId((int)EventType.EnhanceItem, "EnhanceItem") },
         {EventType.GetAllStages, new EventId((int)EventType.GetAllStages, "GetAllStages") },
         {EventType.EnterStage, new EventId((int)EventType.EnterStage, "EnterStage") },
+        {EventType.ItemFarming, new EventId((int)EventType.ItemFarming, "ItemFarming") },
         {EventType.AccountService, new EventId((int)EventType.AccountService, "AccountService") },
         {EventType.GameService, new EventId((int)EventType.GameService, "GameService") },
         {EventType.MasterService, new EventId((int)EventType.MasterService, "MasterService") },
         {EventType.RedisService, new EventId((int)EventType.RedisService, "RedisService") },
+        {EventType.HttpContextService, new EventId((int)EventType.HttpContextService, "HttpContextService") },
         {EventType.AccountRepository, new EventId((int)EventType.AccountRepository, "AccountRepository") }
     };
 

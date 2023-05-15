@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ZLogger;
 using static LogManager;
 using WebApiForCollectingRPG.Util;
+using Microsoft.AspNetCore.Http;
 
 namespace WebApiForCollectingRPG.Services;
 
@@ -14,6 +15,12 @@ public class RedisService : IMemoryService
 {
     public RedisConnection _redisConn;
     private static readonly ILogger<RedisService> s_logger = GetLogger<RedisService>();
+    readonly IHttpContextAccessor _httpContextAccessor;
+
+    public RedisService(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
 
     public void Init(String address)
     {
@@ -184,9 +191,45 @@ public class RedisService : IMemoryService
         {
             s_logger.ZLogError(EventIdDic[EventType.ReceiveNotice], ex,
                 $"RedisDb.GetNoticeAsync: key = {key}, ErrorMessage = Applicable Notice Not Exist, ErrorCode: {ErrorCode.GetNoticeException}");
-
             return (ErrorCode.GetNoticeException, null);
         }
+    }
+
+    public async Task<ErrorCode> ItemFarming(Int32 stageId, Int64 itemId)
+    {
+        try
+        {
+            var (errorCode, playerId) = GetPlayerIdFromHttpContext();
+            if (errorCode != ErrorCode.None)
+            {
+                return errorCode;
+            }
+
+            var key = MemoryDbKeyMaker.MakePlayerStageFarmingKey(playerId, stageId);
+            var redis = new RedisList<Int64>(_redisConn, key, StageKeyTimeSpan());
+            await redis.RightPushAsync(itemId);
+
+            return ErrorCode.None;
+        }
+        catch (Exception ex) {
+            s_logger.ZLogError(EventIdDic[EventType.ItemFarming], ex,
+                $"RedisDb.ItemFarming: stageId = {stageId}, itemId = {itemId}, ErrorMessage = ItemFarming Exception, ErrorCode: {ErrorCode.ItemFarmingException}");
+            return ErrorCode.ItemFarmingException;
+        }
+    }
+
+    private (ErrorCode, Int64?) GetPlayerIdFromHttpContext()
+    {
+        var playerId = (_httpContextAccessor.HttpContext.Items[nameof(AuthUser)] as AuthUser)?.PlayerId;
+
+        if (playerId == null)
+        {
+            s_logger.ZLogError(EventIdDic[EventType.GameService],
+                $"[GameService.GetPlayerIdFromHttpContext] ErrorCode: {ErrorCode.PlayerIdNotExist}");
+            return new(ErrorCode.PlayerIdNotExist, playerId);
+        }
+
+        return (ErrorCode.None, playerId);
     }
 
     public TimeSpan LoginTimeSpan()
@@ -202,5 +245,10 @@ public class RedisService : IMemoryService
     public TimeSpan NxKeyTimeSpan()
     {
         return TimeSpan.FromSeconds(RediskeyExpireTime.NxKeyExpireSecond);
+    }
+
+    public TimeSpan StageKeyTimeSpan()
+    {
+        return TimeSpan.FromSeconds(RediskeyExpireTime.StageExpireSecond);
     }
 }
