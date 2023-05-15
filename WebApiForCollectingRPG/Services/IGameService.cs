@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using WebApiForCollectingRPG.DTO.Mail;
 using WebApiForCollectingRPG.DTO.Player;
 using WebApiForCollectingRPG.DTO.Dungeon;
+using WebApiForCollectingRPG.DTO.Attendance;
 
 namespace WebApiForCollectingRPG.Services;
 
@@ -17,6 +18,7 @@ public interface IGameService : IDisposable
     public Task<Tuple<ErrorCode, IEnumerable<PlayerItemDTO>>> GetPlayerItemInfoListAsync(Int64 playerId);
     public Task<Tuple<ErrorCode, IEnumerable<MailListInfo>>> GetMailsByPage(Int32 page);
     public Task<Tuple<ErrorCode, MailDetail, IEnumerable<ItemDTO>>> GetMailByMailId(Int64 mailId);
+    public Task<Tuple<ErrorCode, IEnumerable<AttendanceDetail>>> GetAttendanceAsync();
     public Task<ErrorCode> CheckAttendance();
     public Task<ErrorCode> SendInAppProduct(Int64 receiptId, Int16 productId);
     public Task<ErrorCode> ReceiveMailItems(Int64 mailId);

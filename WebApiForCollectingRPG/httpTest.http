@@ -53,12 +53,23 @@ Content-Type: application/json
 }
 
 ###
+POST http://localhost:11500/api/getAttendance
+Content-Type: application/json
+
+{
+  "Email": "bye0011@gmail.com",
+  "AuthToken": "znybclqwjihcf1qgnjfpa6nuw",
+  "ClientVersion": "1.0.0",
+  "MasterDataVersion": "1.0.0"
+}
+
+###
 POST http://localhost:11500/api/checkAttendance
 Content-Type: application/json
 
 {
   "Email": "bye0011@gmail.com",
-  "AuthToken": "qsoi8dx4cz6wd7h4q6jmq7l1s",
+  "AuthToken": "5k7od9g7cj0by1nca7en664qu",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0"
 }

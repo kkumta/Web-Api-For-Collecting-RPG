@@ -293,6 +293,47 @@ public class GameService : IGameService
         }
     }
 
+    public async Task<Tuple<ErrorCode, IEnumerable<AttendanceDetail>>> GetAttendanceAsync()
+    {
+        try
+        {
+            var (errorCode, playerId) = GetPlayerIdFromHttpContext();
+            if (errorCode != ErrorCode.None)
+            {
+                return new Tuple<ErrorCode, IEnumerable<AttendanceDetail>>(errorCode, null);
+            }
+
+            var lastCompensationId = await _queryFactory.Query("attendance")
+                .Where("player_id", playerId)
+                .Select("last_compensation_id AS LastCompensationId")
+                .FirstOrDefaultAsync<Int16>();
+
+            List<AttendanceDetail> attendance = new List<AttendanceDetail>();
+            (errorCode, var attendanceSize) = _memoryCacheService.GetAttendanceSize();
+            if (errorCode != ErrorCode.None)
+            {
+                return new Tuple<ErrorCode, IEnumerable<AttendanceDetail>>(errorCode, null);
+            }
+
+            for (Int16 i = 1; i <= lastCompensationId; i++)
+            {
+                attendance.Add(new AttendanceDetail(i, true));
+            }
+            for (Int16 i = ++lastCompensationId; i <= attendanceSize; i++)
+            {
+                attendance.Add(new AttendanceDetail(i, false));
+            }
+
+            return new Tuple<ErrorCode, IEnumerable<AttendanceDetail>>(ErrorCode.None, attendance);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
+                $"[GameService.GetAttendanceAsync] ErrorCode: {ErrorCode.GetAttendanceAsyncException}");
+            return new Tuple<ErrorCode, IEnumerable<AttendanceDetail>>(ErrorCode.GetAttendanceAsyncException, null);
+        }
+    }
+
     public async Task<ErrorCode> CheckAttendance()
     {
         Int16 todayCompensationId = 1;

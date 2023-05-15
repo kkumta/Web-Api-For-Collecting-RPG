@@ -34,6 +34,7 @@ public class GetAllStages : ControllerBase
             response.Result = errorCode;
             return response;
         }
+
         foreach (var stageDetail in stages)
         {
             response.Stages.Add(stageDetail);

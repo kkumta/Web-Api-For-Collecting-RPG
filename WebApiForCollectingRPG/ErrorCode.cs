@@ -59,9 +59,10 @@ public enum ErrorCode : UInt16
     SendRewardToMailboxError = 4211,
 
     // CheckAttendance
-    AttendanceInfoNotExist = 4301,
-    CheckAttendanceException = 4302,
-    DuplicateAttendance = 4303,
+    GetAttendanceAsyncException = 4301,
+    AttendanceInfoNotExist = 4302,
+    CheckAttendanceException = 4303,
+    DuplicateAttendance = 4304,
 
     // InAppProduct
     ReceiptAlreadyUsed = 4401,
@@ -109,6 +110,7 @@ public enum ErrorCode : UInt16
     GetStageItemsByStageIdException = 5014,
     GetAttackNpcsByStageIdException = 5015,
     GetAttackNpcExpByNpcIdException = 5016,
+    GetAttendanceSizeException = 5017,
 
     // Version
     ClientVersionFailNotMatch = 6001,

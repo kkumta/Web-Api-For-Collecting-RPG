@@ -184,4 +184,19 @@ public class MemoryCacheService : IMemoryCacheService
             return new Tuple<ErrorCode, Int64>(ErrorCode.GetAttackNpcExpByNpcIdException, 0);
         }
     }
+
+    public Tuple<ErrorCode, Int16> GetAttendanceSize()
+    {
+        try
+        {
+            List<AttendanceCompensation> attendanceCompensations = _cache.Get("attendance_compensation") as List<AttendanceCompensation>;
+            return new Tuple<ErrorCode, Int16>(ErrorCode.None, (short)attendanceCompensations.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MemoryCacheService], ex,
+                $"[MemoryCacheService.GetAttendanceSize] ErrorCode: {ErrorCode.GetAttendanceSizeException}");
+            return new Tuple<ErrorCode, Int16>(ErrorCode.GetAttendanceSizeException, 0);
+        }
+    }
 }

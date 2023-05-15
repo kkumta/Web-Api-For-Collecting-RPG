@@ -21,10 +21,6 @@ public class CheckAttendance : ControllerBase
         _gameService = gameService;
     }
 
-    /**
-    * parameter: mailId
-    * return: mail
-    */
     [HttpPost]
     [Route("checkAttendance")]
     public async Task<CheckAttendanceRes> Post(CheckAttendanceReq request)
