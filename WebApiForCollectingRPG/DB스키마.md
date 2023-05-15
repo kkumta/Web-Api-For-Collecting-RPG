@@ -244,6 +244,7 @@ CREATE TABLE IF NOT EXISTS game_db.`player_item`
     defence BIGINT  COMMENT '방어력',
     magic BIGINT COMMENT '마력'
 ) COMMENT '유저별 아이템 데이터';
+CREATE INDEX player_id_idx ON game_db.player_item (player_id);
 ```
 
 ## mail Table
@@ -266,6 +267,7 @@ CREATE TABLE IF NOT EXISTS game_db.`mail`
     is_read BOOL NOT NULL COMMENT '읽음 여부',
     has_item BOOL NOT NULL COMMENT '아이템 포함 여부'
 ) COMMENT '우편';
+CREATE INDEX player_id_idx ON game_db.mail (player_id);
 ```
 
 ## v Table
@@ -281,6 +283,7 @@ CREATE TABLE IF NOT EXISTS game_db.`mail_item`
     item_id BIGINT NOT NULL COMMENT '아이템 번호',
     item_count INT NOT NULL COMMENT '아이템 개수'
 ) COMMENT '우편';
+CREATE INDEX mail_id_idx ON game_db.mail_item (mail_id);
 ```
 
 ## attendance Table
