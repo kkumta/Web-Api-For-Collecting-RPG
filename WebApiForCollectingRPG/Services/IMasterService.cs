@@ -7,10 +7,12 @@ namespace WebApiForCollectingRPG.Services;
 
 public interface IMasterService
 {
-    public void LoadItemList();
-    public void LoadItemAttributeList();
-    public void LoadAttendanceCompensation();
+    public void LoadItemListAsync();
+    public void LoadItemAttributeListAsync();
+    public void LoadAttendanceCompensationAsync();
     public void LoadInAppProductListAsync();
+    public void LoadStageItemListAsync();
+    public void LoadStageAttackNpcListAsync();
     public AttendanceCompensation GetAttendanceCompensationByCompensationId(Int16 compensationId);
     public List<InAppItemDTO> GetInAppItemsByProductId(Int16 productId);
     public bool IsMoney(Int64 itemId);

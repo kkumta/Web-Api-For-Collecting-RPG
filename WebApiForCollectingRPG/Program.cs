@@ -21,8 +21,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddTransient<IAccountRepository, AccountRepository>();
 builder.Services.AddTransient<IAccountService, AccountService>();
 builder.Services.AddTransient<IMasterService, MasterService>();
-builder.Services.AddTransient<IGameDb, GameDb>();
-builder.Services.AddSingleton<IMemoryDb, RedisDb>();
+builder.Services.AddTransient<IGameService, GameService>();
+builder.Services.AddSingleton<IMemoryService, RedisService>();
 builder.Services.AddControllers();
 
 SettingLogger();
@@ -45,7 +45,7 @@ app.UseRouting();
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 #pragma warning restore ASP0014
 
-var redisDB = app.Services.GetRequiredService<IMemoryDb>();
+var redisDB = app.Services.GetRequiredService<IMemoryService>();
 redisDB.Init(configuration.GetSection("DbConfig")["Redis"]);
 
 app.Run(configuration["ServerAddress"]);
@@ -53,10 +53,12 @@ app.Run(configuration["ServerAddress"]);
 void loadMasterData()
 {
     var service = app.Services.GetService<IMasterService>();
-    service.LoadItemList();
-    service.LoadItemAttributeList();
-    service.LoadAttendanceCompensation();
+    service.LoadItemListAsync();
+    service.LoadItemAttributeListAsync();
+    service.LoadAttendanceCompensationAsync();
     service.LoadInAppProductListAsync();
+    service.LoadStageItemListAsync();
+    service.LoadStageAttackNpcListAsync();
 }
 
 void SettingLogger()

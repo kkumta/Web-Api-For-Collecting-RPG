@@ -1,6 +1,6 @@
-# AccountDB
+# account_db
   
-## Account Table
+## account Table
 홈페이지 계정 정보를 가지고 있는 테이블    
   
 ```sql
@@ -21,15 +21,13 @@ CREATE TABLE IF NOT EXISTS account_db.`account`
 ```
    
 <br>  
-<br>  
-
-# MasterDB
+# master_db
 
 ```sql
 CREATE DATABASE IF NOT EXISTS master_db;
 ```
   
-## Item Table
+## item Table
 아이템 정보
 
 ```sql
@@ -60,7 +58,7 @@ insert into Item (item_id, name, attribute_id, sell_price, buy_price, use_lv, at
 (6, "포션", 4, 3, 6, 1, 0, 0, 0, 0, true);
 ```
 
-## ItemAttribute Table
+## item_attribute Table
 아이템 특성 정보
 
 ```sql
@@ -80,7 +78,7 @@ insert into item_attribute (attribute_id, name) values
 (5, "돈");
 ```
 
-## AttendanceCompensation Table
+## attendance_compensation Table
 출석부 보상
 
 ```sql
@@ -126,7 +124,7 @@ insert into attendance_compensation (compensation_id, item_id, item_count) value
 (30, 3, 1);
 ```
 
-## InAppProduct Table
+## in_app_product Table
 인앱 상품
 
 ```sql
@@ -154,14 +152,56 @@ insert into in_app_product (product_id, item_id, item_name, item_count) values
 ```
 
 
-# GameDB
+## stage_item Table
+
+```sql
+USE master_db;
+DROP TABLE IF EXISTS master_db.`stage_item`;
+CREATE TABLE IF NOT EXISTS master_db.`stage_item`
+(
+    stage_item_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '스테이지-아이템 번호',
+    stage_id INT NOT NULL COMMENT '스테이지 번호',
+    item_id BIGINT NOT NULL COMMENT '아이템 번호'
+) COMMENT '스테이지별 아이템 정보';
+
+insert into stage_item (stage_id, item_id) values
+(1, 1),
+(1, 2),
+(2, 3),
+(2, 3);
+```
+
+## stage_attack_npc Table
+
+```sql
+USE master_db;
+DROP TABLE IF EXISTS master_db.`stage_attack_npc`;
+CREATE TABLE IF NOT EXISTS master_db.`stage_attack_npc`
+(
+    stage_attack_npc_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '스테이지-공격 NPC 번호',
+    stage_id INT NOT NULL COMMENT '스테이지 번호',
+    npc_id INT NOT NULL COMMENT '공격 NPC 번호',
+    npc_count INT NOT NULL COMMENT '개수',
+    exp BIGINT NOT NULL COMMENT '1마리당 보상 경험치'
+) COMMENT '스테이지 공격 NPC 정보';
+
+insert into stage_attack_npc (stage_id, npc_id, npc_count, exp) values
+(1, 101, 10, 10),
+(1, 110, 12, 15),
+(2, 201, 40, 20),
+(2, 211, 20, 35),
+(2, 221, 1, 50);
+```
+
+<br>
+# game_db
 
 ```sql
 DROP DATABASE IF EXISTS game_db;
 CREATE DATABASE IF NOT EXISTS game_db;
 ```
 
-## Account-Player Table
+## account_player Table
 홈페이지 계정에 따른 플레이어 계정 데이터
 ```sql
 USE game_db;
@@ -173,7 +213,7 @@ CREATE TABLE IF NOT EXISTS game_db.`account_player`
 ) COMMENT '계정-플레이어 데이터';
 ```
   
-## AccountGame Table
+## player_game Table
 각 플레이어별 게임 데이터
 
 ```sql
@@ -187,7 +227,7 @@ CREATE TABLE IF NOT EXISTS game_db.`player_game`
 ) COMMENT '플레이어별 게임 데이터';
 ```
   
-## AccountItem Table
+## player_item Table
 각 플레이어별 아이템 데이터
 
 ```sql
@@ -206,7 +246,7 @@ CREATE TABLE IF NOT EXISTS game_db.`player_item`
 ) COMMENT '유저별 아이템 데이터';
 ```
 
-## Mail Table
+## mail Table
 우편
 
 ```sql
@@ -228,7 +268,7 @@ CREATE TABLE IF NOT EXISTS game_db.`mail`
 ) COMMENT '우편';
 ```
 
-## MailItem Table
+## v Table
 우편 아이템
 
 ```sql
@@ -243,7 +283,7 @@ CREATE TABLE IF NOT EXISTS game_db.`mail_item`
 ) COMMENT '우편';
 ```
 
-## Attendance Table
+## attendance Table
 출석
 
 ```sql
@@ -257,7 +297,7 @@ CREATE TABLE IF NOT EXISTS game_db.`attendance`
 ) COMMENT '출석부';
 ```
 
-## Receipt Table
+## receipt Table
 영수증
 
 ```sql
@@ -269,4 +309,17 @@ CREATE TABLE IF NOT EXISTS game_db.`receipt`
     player_id BIGINT NOT NULL COMMENT '플레이어 번호',
     product_id SMALLINT NOT NULL COMMENT '상품 번호'
 ) COMMENT '인앱 결제 영수증';
+```
+
+## highest_cleared_stage Table
+클리어한 가장 높은 스테이지 정보
+
+```sql
+USE game_db;
+DROP TABLE IF EXISTS game_db.`highest_cleared_stage`;
+CREATE TABLE IF NOT EXISTS game_db.`highest_cleared_stage`
+(
+    player_id BIGINT NOT NULL PRIMARY KEY COMMENT '플레이어 번호',
+    stage_id INT NOT NULL COMMENT '클리어한 가장 높은 스테이지 번호'
+) COMMENT '클리어한 가장 높은 스테이지 정보';
 ```

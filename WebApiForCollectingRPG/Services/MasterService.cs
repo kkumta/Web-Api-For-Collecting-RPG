@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using WebApiForCollectingRPG.DAO.Master;
+using WebApiForCollectingRPG.DTO.Dungeon;
 using WebApiForCollectingRPG.DTO.InAppProduct;
 using WebApiForCollectingRPG.Repository;
 using ZLogger;
@@ -58,11 +59,11 @@ public class MasterService : IMasterService
         _dbConn.Close();
     }
 
-    public async void LoadItemList()
+    public async void LoadItemListAsync()
     {
         try
         {
-            string key = "item_list";
+            String key = "item_list";
 
             var itemList = await _queryFactory.Query("item")
                 .Select("item_id AS ItemId",
@@ -90,11 +91,11 @@ public class MasterService : IMasterService
         }
     }
 
-    public async void LoadItemAttributeList()
+    public async void LoadItemAttributeListAsync()
     {
         try
         {
-            string key = "item_attribute_list";
+            String key = "item_attribute_list";
 
             var itemAttributeList = await _queryFactory.Query("item_attribute")
                 .Select("attribute_id AS AttributeId",
@@ -103,7 +104,7 @@ public class MasterService : IMasterService
 
             _cache.Set(key, itemAttributeList, cacheOptions);
             _logger.ZLogDebug(EventIdDic[EventType.MasterService],
-                $"[MasterService.LoadItemAttributeList] item_attribute_list: {_cache.Get("item_attribute_list")}");
+                $"[MasterService.LoadItemAttributeList] item_attribute_list: {_cache.Get(key)}");
 
         }
         catch (Exception ex)
@@ -113,11 +114,11 @@ public class MasterService : IMasterService
         }
     }
 
-    public async void LoadAttendanceCompensation()
+    public async void LoadAttendanceCompensationAsync()
     {
         try
         {
-            string key = "attendance_compensation";
+            String key = "attendance_compensation";
 
             var attendanceCompensation = await _queryFactory.Query("attendance_compensation")
                 .Select("compensation_id AS CompensationId", "item_id AS ItemId", "item_count AS ItemCount")
@@ -125,7 +126,7 @@ public class MasterService : IMasterService
 
             _cache.Set(key, attendanceCompensation, cacheOptions);
             _logger.ZLogDebug(EventIdDic[EventType.MasterService],
-                $"[MasterService.LoadAttendanceCompensation] attendance_compensation: {_cache.Get("attendance_compensation")}");
+                $"[MasterService.LoadAttendanceCompensation] attendance_compensation: {_cache.Get(key)}");
         }
         catch (Exception ex)
         {
@@ -138,7 +139,7 @@ public class MasterService : IMasterService
     {
         try
         {
-            string key = "in_app_product_list";
+            String key = "in_app_product_list";
 
             var inAppProductList = await _queryFactory.Query("in_app_product")
                 .Select("product_id AS ProductId", "item_id AS ItemId", "item_name AS ItemName", "item_count AS ItemCount")
@@ -146,12 +147,54 @@ public class MasterService : IMasterService
 
             _cache.Set(key, inAppProductList, cacheOptions);
             _logger.ZLogDebug(EventIdDic[EventType.MasterService],
-                $"[MasterService.LoadInAppProductListAsync] in_app_product_list: {_cache.Get("in_app_product_list")}");
+                $"[MasterService.LoadInAppProductListAsync] in_app_product_list: {_cache.Get(key)}");
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
                 $"[MasterService.LoadInAppProductListAsync] ErrorCode : {ErrorCode.LoadInAppProductListFail}");
+        }
+    }
+
+    public async void LoadStageItemListAsync()
+    {
+        try
+        {
+            String key = "stage_item_list";
+
+            var stageItemList = await _queryFactory.Query("stage_item")
+                .Select("stage_id AS StageId", "item_id AS ItemId")
+                .GetAsync<StageItemDTO>();
+
+            _cache.Set(key, stageItemList, cacheOptions);
+            _logger.ZLogDebug(EventIdDic[EventType.MasterService],
+                $"[MasterService.LoadStageItemListAsync] in_app_product_list: {_cache.Get(key)}");
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.LoadStageItemListAsync] ErrorCode : {ErrorCode.LoadStageItemListAsyncException}");
+        }
+    }
+
+    public async void LoadStageAttackNpcListAsync()
+    {
+        try
+        {
+            String key = "stage_attack_npc_list";
+
+            var stageAttackNpcList = await _queryFactory.Query("stage_attack_npc")
+                .Select("stage_id AS StageId", "npc_id AS NpcId", "npc_count AS NpcCount", "exp AS Exp")
+                .GetAsync<StageAttackNpcDTO>();
+
+            _cache.Set(key, stageAttackNpcList, cacheOptions);
+            _logger.ZLogDebug(EventIdDic[EventType.MasterService],
+                $"[MasterService.LoadStageAttackNpcListAsync] in_app_product_list: {_cache.Get(key)}");
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.LoadStageAttackNpcListAsync] ErrorCode : {ErrorCode.LoadStageAttackNpcListAsyncException}");
         }
     }
 
