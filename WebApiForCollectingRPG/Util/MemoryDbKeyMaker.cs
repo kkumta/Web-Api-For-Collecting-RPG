@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebApiForCollectingRPG.Services;
+namespace WebApiForCollectingRPG.Util;
 
 public class MemoryDbKeyMaker
 {

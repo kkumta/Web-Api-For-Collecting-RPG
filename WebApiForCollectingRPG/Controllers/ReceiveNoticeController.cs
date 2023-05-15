@@ -12,10 +12,10 @@ namespace WebApiForCollectingRPG.Controllers;
 [Route("api")]
 public class ReceiveNotice : ControllerBase
 {
-    readonly IMemoryDb _memoryDb;
+    readonly IMemoryService _memoryDb;
     readonly ILogger<ReceiveNotice> _logger;
 
-    public ReceiveNotice(ILogger<ReceiveNotice> logger, IMemoryDb memoryDb)
+    public ReceiveNotice(ILogger<ReceiveNotice> logger, IMemoryService memoryDb)
     {
         _logger = logger;
         _memoryDb = memoryDb;

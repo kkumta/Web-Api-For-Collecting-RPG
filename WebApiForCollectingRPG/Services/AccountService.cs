@@ -110,7 +110,7 @@ public class AccountService : IAccountService
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[AccountService.DeleteAccountAsync] ErrorCode: {ErrorCode.DeleteAccountException}");
             return ErrorCode.DeleteAccountException;
         }

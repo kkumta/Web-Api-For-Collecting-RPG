@@ -17,9 +17,9 @@ public class LogManager
         ReceiveInAppProduct = 601,
         EnhanceItem = 602,
         AccountService = 1001,
-        GameDb = 1002,
+        GameService = 1002,
         MasterService = 1003,
-        RedisDb = 1004,
+        RedisService = 1004,
         AccountRepository = 1005,
     }
 
@@ -38,9 +38,9 @@ public class LogManager
         {EventType.ReceiveInAppProduct, new EventId((int)EventType.ReceiveInAppProduct, "ReceiveInAppProduct") },
         {EventType.EnhanceItem, new EventId((int)EventType.EnhanceItem, "EnhanceItem") },
         {EventType.AccountService, new EventId((int)EventType.AccountService, "AccountService") },
-        {EventType.GameDb, new EventId((int)EventType.GameDb, "GameDb") },
+        {EventType.GameService, new EventId((int)EventType.GameService, "GameService") },
         {EventType.MasterService, new EventId((int)EventType.MasterService, "MasterService") },
-        {EventType.RedisDb, new EventId((int)EventType.RedisDb, "RedisDb") },
+        {EventType.RedisService, new EventId((int)EventType.RedisService, "RedisService") },
         {EventType.AccountRepository, new EventId((int)EventType.AccountRepository, "AccountRepository") }
     };
 

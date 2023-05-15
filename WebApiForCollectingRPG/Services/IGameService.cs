@@ -6,7 +6,7 @@ using WebApiForCollectingRPG.DTO.Game;
 
 namespace WebApiForCollectingRPG.Services;
 
-public interface IGameDb : IDisposable
+public interface IGameService : IDisposable
 {
     public Task<Tuple<ErrorCode, Int64>> CreatePlayerAsync(Int64 accountId);
     public Task<Tuple<ErrorCode, Int64>> FindPlayerIdByAccountId(Int64 accountId);

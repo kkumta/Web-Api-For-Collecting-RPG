@@ -86,6 +86,8 @@ public enum ErrorCode : UInt16
     IsMoneyException = 5007,
     IsStackableItemException = 5008,
     GetItemByItemIdException = 5009,
+    LoadStageItemListAsyncException = 5010,
+    LoadStageAttackNpcListAsyncException = 5011,
 
     // Version
     ClientVersionFailNotMatch = 6001,

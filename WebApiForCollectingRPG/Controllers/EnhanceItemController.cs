@@ -13,11 +13,11 @@ namespace WebApiForCollectingRPG.Controllers;
 [ApiController]
 public class EnhanceItem : ControllerBase
 {
-    readonly IGameDb _gameDb;
+    readonly IGameService _gameDb;
     readonly IAccountService _accountService;
     readonly ILogger<EnhanceItem> _logger;
 
-    public EnhanceItem(ILogger<EnhanceItem> logger, IGameDb gameDb, IAccountService accountService)
+    public EnhanceItem(ILogger<EnhanceItem> logger, IGameService gameDb, IAccountService accountService)
     {
         _logger = logger;
         _gameDb = gameDb;

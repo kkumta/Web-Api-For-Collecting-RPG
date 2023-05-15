@@ -5,15 +5,16 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using WebApiForCollectingRPG.DAO;
 using Microsoft.AspNetCore.Http;
+using WebApiForCollectingRPG.Util;
 
 namespace WebApiForCollectingRPG.Middleware;
 
 public class AuthCheck
 {
-    private readonly Services.IMemoryDb _memoryDb;
+    private readonly Services.IMemoryService _memoryDb;
     private readonly RequestDelegate _next;
 
-    public AuthCheck(RequestDelegate next, Services.IMemoryDb memoryDb)
+    public AuthCheck(RequestDelegate next, Services.IMemoryService memoryDb)
     {
         _memoryDb = memoryDb;
         _next = next;
@@ -68,7 +69,7 @@ public class AuthCheck
                 return;
             }
 
-            userLockKey = Services.MemoryDbKeyMaker.MakeUserLockKey(userInfo.Email);
+            userLockKey = MemoryDbKeyMaker.MakeUserLockKey(userInfo.Email);
             if (await SetLockAndIsFailThenSendError(context, userLockKey))
             {
                 return;

@@ -17,15 +17,14 @@ using WebApiForCollectingRPG.DTO.InAppProduct;
 using WebApiForCollectingRPG.Repository;
 using Microsoft.AspNetCore.Http;
 using WebApiForCollectingRPG.DTO.Enhance;
-using WebApiForCollectingRPG.DAO.Master;
 
 namespace WebApiForCollectingRPG.Services;
 
-public class GameDb : IGameDb
+public class GameService : IGameService
 {
     private const Int32 PerPage = 20;
     readonly IOptions<DbConfig> _dbConfig;
-    readonly ILogger<GameDb> _logger;
+    readonly ILogger<GameService> _logger;
     readonly IMasterService _masterService;
     readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -33,7 +32,7 @@ public class GameDb : IGameDb
     MySqlCompiler _compiler;
     QueryFactory _queryFactory;
 
-    public GameDb(ILogger<GameDb> logger, IOptions<DbConfig> dbConfig, IMasterService masterService, IHttpContextAccessor httpContextAccessor)
+    public GameService(ILogger<GameService> logger, IOptions<DbConfig> dbConfig, IMasterService masterService, IHttpContextAccessor httpContextAccessor)
     {
         _dbConfig = dbConfig;
         _masterService = masterService;
@@ -60,7 +59,7 @@ public class GameDb : IGameDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[Open GameDb Fail] ErrorCode: {ErrorCode.GetGameDbConnectionFail}");
         }
     }
@@ -79,14 +78,14 @@ public class GameDb : IGameDb
                 account_id = accountId
             });
 
-            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
+            _logger.ZLogDebug(EventIdDic[EventType.GameService],
                 $"[CreatePlayer] AccountId: {accountId}, PlayerId:{playerId}");
             return new Tuple<ErrorCode, Int64>(ErrorCode.None, playerId);
 
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[CreatePlayer] ErrorCode: {ErrorCode.CreatePlayerFailException}, AccountId: {accountId}");
             return new Tuple<ErrorCode, Int64>(ErrorCode.CreatePlayerFailException, 0);
         }
@@ -101,13 +100,13 @@ public class GameDb : IGameDb
                 .Select("player_id AS PlayerId")
                 .FirstOrDefaultAsync<Int64>();
 
-            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
+            _logger.ZLogDebug(EventIdDic[EventType.GameService],
                 $"[FindPlayerIdByAccountId] AccountId: {accountId}, PlayerId:{playerId}");
             return new Tuple<ErrorCode, Int64>(ErrorCode.None, playerId);
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[FindPlayerIdByAccountId] ErrorCode: {ErrorCode.FindPlayerIdByAccountIdException}, AccountId: {accountId}");
             return new Tuple<ErrorCode, Int64>(ErrorCode.FindPlayerIdByAccountIdException, 0);
         }
@@ -125,14 +124,14 @@ public class GameDb : IGameDb
                 exp = 0
             });
 
-            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
+            _logger.ZLogDebug(EventIdDic[EventType.GameService],
                 $"[GameDb.CreatePlayerGameDataAsync] PlayerId: {playerId}");
 
             return ErrorCode.None;
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameDb.CreatePlayerGameDataAsync] ErrorCode: {ErrorCode.CreatePlayerGameFailException}");
         }
         return ErrorCode.CreatePlayerGameFailException;
@@ -150,7 +149,7 @@ public class GameDb : IGameDb
 
             if (accountGameInfo is null)
             {
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                _logger.ZLogError(EventIdDic[EventType.GameService],
                     $"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetPlayerGameInfoFailNotExist}, PlayerId: {playerId}");
                 return new Tuple<ErrorCode, PlayerGameDTO>(ErrorCode.GetPlayerGameInfoFailNotExist, null);
             }
@@ -159,7 +158,7 @@ public class GameDb : IGameDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameDb.GetAccountGameInfoAsync] ErrorCode: {ErrorCode.GetPlayerGameInfoFailException}");
             return new Tuple<ErrorCode, PlayerGameDTO>(ErrorCode.GetPlayerGameInfoFailException, null);
         }
@@ -184,7 +183,7 @@ public class GameDb : IGameDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameDb.GetAccountItemListAsync] ErrorCode: {ErrorCode.GetPlayerItemListFailException}");
             return new Tuple<ErrorCode, IEnumerable<PlayerItemDTO>>(ErrorCode.GetPlayerItemListFailException, null);
         }
@@ -200,7 +199,7 @@ public class GameDb : IGameDb
 
         if (page <= 0)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb],
+            _logger.ZLogError(EventIdDic[EventType.GameService],
                 $"[GameDb.GetMailsByPage] ErrorCode: {ErrorCode.GetMailsFailNotExistPage}, PlayerId: {playerId}, Page: {page}");
             return new Tuple<ErrorCode, IEnumerable<MailListInfo>>(ErrorCode.GetMailsFailNotExistPage, null);
         }
@@ -225,7 +224,7 @@ public class GameDb : IGameDb
 
             if (page > mails.TotalPages)
             {
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                _logger.ZLogError(EventIdDic[EventType.GameService],
                     $"[GameDb.GetMailsByPage] ErrorCode: {ErrorCode.GetMailsFailNotExistPage}, PlayerId: {playerId}, Page: {page}");
                 return new Tuple<ErrorCode, IEnumerable<MailListInfo>>(ErrorCode.GetMailsFailNotExistPage, null);
             }
@@ -234,7 +233,7 @@ public class GameDb : IGameDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameDb.GetMailsByPage] ErrorCode: {ErrorCode.GetMailsFailException}, PlayerId: {playerId}, Page: {page}");
             return new Tuple<ErrorCode, IEnumerable<MailListInfo>>(ErrorCode.GetMailsFailException, null);
         }
@@ -269,7 +268,7 @@ public class GameDb : IGameDb
 
             if (mail == null || mailId == 0)
             {
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                _logger.ZLogError(EventIdDic[EventType.GameService],
                     $"[GameDb.GetMailByMailId] ErrorCode: {ErrorCode.GetMailFailNotExist}, PlayerId: {playerId}, MailId: {mailId}");
                 return new Tuple<ErrorCode, MailDetail, IEnumerable<MailItemDTO>>(ErrorCode.GetMailFailNotExist, null, null);
             }
@@ -288,7 +287,7 @@ public class GameDb : IGameDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameDb.GetMailByMailId] ErrorCode: {ErrorCode.GetMailFailException}, MailId: {mailId}");
             return new Tuple<ErrorCode, MailDetail, IEnumerable<MailItemDTO>>(ErrorCode.GetMailFailException, null, null);
         }
@@ -332,7 +331,7 @@ public class GameDb : IGameDb
                 // 출석 요청일이 마지막 출석일과 일치할 경우
                 if (DateTime.Compare(requestDate, lastAttendanceDate) == 0)
                 {
-                    _logger.ZLogError(EventIdDic[EventType.GameDb],
+                    _logger.ZLogError(EventIdDic[EventType.GameService],
                         $"[GameDb.CheckAttendance] ErrorCode: {ErrorCode.DuplicateAttendance}, AccountId: {playerId}");
                     return ErrorCode.DuplicateAttendance;
                 }
@@ -393,7 +392,7 @@ public class GameDb : IGameDb
                         last_attendance_date = attendance.LastAttendanceDate
                     });
                 }
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                _logger.ZLogError(EventIdDic[EventType.GameService],
                     $"[GameDb.CheckAttendance] ErrorCode: {ErrorCode.SendRewardToMailboxError}, " +
                     $"Message: An error occurred while check attendance, so has been rolled back.");
                 return ErrorCode.SendRewardToMailboxError;
@@ -419,7 +418,7 @@ public class GameDb : IGameDb
                 }
             }
 
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameDb.CheckAttendance] ErrorCode: {ErrorCode.CheckAttendanceException}, " +
                 $"Message: An error occurred while check attendance, so has been rolled back.");
             return ErrorCode.CheckAttendanceException;
@@ -451,13 +450,13 @@ public class GameDb : IGameDb
 
             if (mail == null || mail.MailId == 0)
             {
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                _logger.ZLogError(EventIdDic[EventType.GameService],
                     $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsFailMailNotExist}, PlayerId: {playerId}, MailId: {mailId}");
                 return ErrorCode.ReceiveMailItemsFailMailNotExist;
             }
             else if (mail.IsReceived || !mail.HasItem)
             {
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                _logger.ZLogError(EventIdDic[EventType.GameService],
                     $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsFailNotExist}, PlayerId: {playerId}, MailId: {mailId}");
                 return ErrorCode.ReceiveMailItemsFailNotExist;
             }
@@ -469,7 +468,7 @@ public class GameDb : IGameDb
 
             if (mailItems == null)
             {
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                _logger.ZLogError(EventIdDic[EventType.GameService],
                     $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsFailNotExist}, PlayerId: {playerId}, MailId: {mailId}");
                 return ErrorCode.ReceiveMailItemsFailNotExist;
             }
@@ -492,14 +491,14 @@ public class GameDb : IGameDb
                     has_item = true
                 });
             }
-            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
+            _logger.ZLogDebug(EventIdDic[EventType.GameService],
                 $"[GameDb.ReceiveMailItems] PlayerId: {playerId}, MailId: {mailId}");
 
             return ErrorCode.None;
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameDb.ReceiveMailItems] ErrorCode: {ErrorCode.ReceiveMailItemsException}");
             return ErrorCode.ReceiveMailItemsException;
         }
@@ -614,12 +613,12 @@ public class GameDb : IGameDb
             }
             catch (Exception rollbackEx)
             {
-                _logger.ZLogError(EventIdDic[EventType.GameDb], rollbackEx,
+                _logger.ZLogError(EventIdDic[EventType.GameService], rollbackEx,
                     $"[GameDb.ReceiveMailItemActions] ErrorCode: {ErrorCode.ReceiveMailItemActionsRollbackException}, Message: Exception occurred during rollback.");
                 return ErrorCode.ReceiveMailItemActionsRollbackException;
             }
 
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameDb.ReceiveMailItemActions] ErrorCode: {ErrorCode.ReceiveMailItemsException}, Message: An error occurred while receiving items, so has been rolled back.");
             return ErrorCode.ReceiveMailItemActionsException;
         }
@@ -641,7 +640,7 @@ public class GameDb : IGameDb
 
             if (receipt != null)
             {
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                _logger.ZLogError(EventIdDic[EventType.GameService],
                     $"[GameDb.SendInAppProduct] ErrorCode: {ErrorCode.ReceiptAlreadyUsed}, ReceiptId: {receiptId}");
                 return ErrorCode.ReceiptAlreadyUsed;
             }
@@ -653,7 +652,7 @@ public class GameDb : IGameDb
                 product_id = productId,
             });
 
-            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
+            _logger.ZLogDebug(EventIdDic[EventType.GameService],
                 $"[GameDb.SendInAppProduct] Add Receipt Success! ReceiptId: {receiptId} PlayerId: {playerId}, ProductId: {productId}");
 
             SendMailDTO mail = new(playerId.Value,
@@ -679,7 +678,7 @@ public class GameDb : IGameDb
             {
                 // receipt 삽입 rollback
                 await _queryFactory.Query("receipt").Where("receipt_id", receiptId).DeleteAsync();
-                _logger.ZLogError(EventIdDic[EventType.GameDb],
+                _logger.ZLogError(EventIdDic[EventType.GameService],
                     $"[GameDb.SendInAppProduct] ErrorCode: {ErrorCode.SendRewardToMailboxError}, ReceiptId: {receiptId}," +
                     $"Message: An error occurred while send in app product, so has been rolled back.");
                 return ErrorCode.SendRewardToMailboxError;
@@ -695,7 +694,7 @@ public class GameDb : IGameDb
                 await _queryFactory.Query("receipt").Where("receipt_id", receiptId).DeleteAsync();
             }
 
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameDb.SendInAppProduct] ErrorCode: {ErrorCode.SendInAppProductException}, ReceiptId: {receiptId}," +
                 $"Message: An error occurred while send in app product, so has been rolled back.");
             return ErrorCode.SendInAppProductException;
@@ -736,7 +735,7 @@ public class GameDb : IGameDb
                 });
             }
 
-            _logger.ZLogDebug(EventIdDic[EventType.GameDb],
+            _logger.ZLogDebug(EventIdDic[EventType.GameService],
                 $"[GameDb.SendRewardToMailbox] PlayerId: {playerId}, MailId: {mailId}, MailItemCount: {mailItems.Count}");
 
             return ErrorCode.None;
@@ -756,7 +755,7 @@ public class GameDb : IGameDb
                 }
             }
 
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameDb.SendRewardToMailbox] ErrorCode: {ErrorCode.SendRewardToMailboxException}, MailTitle: {mail.Title}, MailItemCount: {mailItems.Count}, " +
                 $"Message: An error occurred while send reward to mailbox, so has been rolled back.");
             return ErrorCode.SendRewardToMailboxException;
@@ -833,7 +832,7 @@ public class GameDb : IGameDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.EnhanceItemException}");
             return new Tuple<ErrorCode, bool>(ErrorCode.EnhanceItemException, false);
         }
@@ -876,7 +875,7 @@ public class GameDb : IGameDb
         // 강화 가능한 아이템인지 확인
         if (enhanceMaxCount == 0)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb],
+            _logger.ZLogError(EventIdDic[EventType.GameService],
                 $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.NotEnchantableItem}");
             return ErrorCode.NotEnchantableItem;
         }
@@ -884,7 +883,7 @@ public class GameDb : IGameDb
         // 강화 횟수가 남아있는지 확인
         if (enhanceMaxCount <= enhanceCount)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb],
+            _logger.ZLogError(EventIdDic[EventType.GameService],
                 $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.OverMaxEnhanceCount}");
             return ErrorCode.OverMaxEnhanceCount;
         }
@@ -910,7 +909,7 @@ public class GameDb : IGameDb
 
         if (playerItem == null)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb],
+            _logger.ZLogError(EventIdDic[EventType.GameService],
                 $"[GameDb.EnhanceItem] ErrorCode: {ErrorCode.PlayerItemNotExist}, PlayerId: {playerId}, PlayerItemId: {playerItemId}");
             return new Tuple<ErrorCode, PlayerItemEnhanceDTO>(ErrorCode.PlayerItemNotExist, null);
         }
@@ -923,7 +922,7 @@ public class GameDb : IGameDb
 
         if (playerId == null)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb],
+            _logger.ZLogError(EventIdDic[EventType.GameService],
                 $"[GameDb.GetPlayerIdFromHttpContext] ErrorCode: {ErrorCode.PlayerIdNotExist}");
             return new(ErrorCode.PlayerIdNotExist, playerId);
         }
@@ -939,7 +938,7 @@ public class GameDb : IGameDb
         }
         catch (Exception ex)
         {
-            _logger.ZLogError(EventIdDic[EventType.GameDb], ex,
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameDb.GetPlayerIdFromHttpContext] ErrorCode: {ErrorCode.PlayerIdNotExist}");
             return ErrorCode.DeletePlayerAsyncException;
         }

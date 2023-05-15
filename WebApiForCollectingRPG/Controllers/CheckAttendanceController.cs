@@ -12,11 +12,11 @@ namespace WebApiForCollectingRPG.Controllers;
 [Route("api")]
 public class CheckAttendance : ControllerBase
 {
-    readonly IGameDb _gameDb;
+    readonly IGameService _gameDb;
     readonly IAccountService _accountService;
     readonly ILogger<CheckAttendance> _logger;
 
-    public CheckAttendance(ILogger<CheckAttendance> logger, IGameDb gameDb, IAccountService accountService)
+    public CheckAttendance(ILogger<CheckAttendance> logger, IGameService gameDb, IAccountService accountService)
     {
         _logger = logger;
         _gameDb = gameDb;

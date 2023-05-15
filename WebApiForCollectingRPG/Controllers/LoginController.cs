@@ -15,10 +15,10 @@ namespace WebApiForCollectingRPG.Controllers
     public class Login : ControllerBase
     {
         readonly IAccountService _accountService;
-        readonly IMemoryDb _memoryDb;
-        readonly IGameDb _gameDb;
+        readonly IMemoryService _memoryDb;
+        readonly IGameService _gameDb;
         readonly ILogger<Login> _logger;
-        public Login(ILogger<Login> logger, IAccountService accountService, IMemoryDb memoryDb, IGameDb gameDb)
+        public Login(ILogger<Login> logger, IAccountService accountService, IMemoryService memoryDb, IGameService gameDb)
         {
             _logger = logger;
             _accountService = accountService;

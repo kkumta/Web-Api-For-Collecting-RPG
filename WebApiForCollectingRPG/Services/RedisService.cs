@@ -6,15 +6,16 @@ using System;
 using System.Threading.Tasks;
 using ZLogger;
 using static LogManager;
+using WebApiForCollectingRPG.Util;
 
 namespace WebApiForCollectingRPG.Services;
 
-public class RedisDb : IMemoryDb
+public class RedisService : IMemoryService
 {
     public RedisConnection _redisConn;
-    private static readonly ILogger<RedisDb> s_logger = GetLogger<RedisDb>();
+    private static readonly ILogger<RedisService> s_logger = GetLogger<RedisService>();
 
-    public void Init(string address)
+    public void Init(String address)
     {
         var config = new RedisConfig("default", address);
         _redisConn = new RedisConnection(config);
@@ -93,7 +94,7 @@ public class RedisDb : IMemoryDb
         return result;
     }
 
-    public async Task<(bool, AuthUser)> GetUserAsync(string id)
+    public async Task<(bool, AuthUser)> GetUserAsync(String id)
     {
         var uid = MemoryDbKeyMaker.MakeUIDKey(id);
 
@@ -117,7 +118,7 @@ public class RedisDb : IMemoryDb
         }
     }
 
-    public async Task<bool> SetUserReqLockAsync(string key)
+    public async Task<bool> SetUserReqLockAsync(String key)
     {
         try
         {
@@ -138,9 +139,9 @@ public class RedisDb : IMemoryDb
         return true;
     }
 
-    public async Task<bool> DelUserReqLockAsync(string key)
+    public async Task<bool> DelUserReqLockAsync(String key)
     {
-        if (string.IsNullOrEmpty(key))
+        if (String.IsNullOrEmpty(key))
         {
             return false;
         }

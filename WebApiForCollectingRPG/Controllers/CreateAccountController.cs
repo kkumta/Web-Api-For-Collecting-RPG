@@ -14,10 +14,10 @@ namespace WebApiForCollectingRPG.Controllers;
 public class CreateAccount : ControllerBase
 {
     private readonly IAccountService _accountService;
-    private readonly IGameDb _gameDb;
+    private readonly IGameService _gameDb;
     private readonly ILogger<CreateAccount> _logger;
 
-    public CreateAccount(ILogger<CreateAccount> logger, IAccountService accountService, IGameDb gameDb)
+    public CreateAccount(ILogger<CreateAccount> logger, IAccountService accountService, IGameService gameDb)
     {
         _logger = logger;
         _accountService = accountService;

@@ -4,7 +4,7 @@ using WebApiForCollectingRPG.DAO;
 
 namespace WebApiForCollectingRPG.Services
 {
-    public interface IMemoryDb
+    public interface IMemoryService
     {
         public void Init(String address);
 

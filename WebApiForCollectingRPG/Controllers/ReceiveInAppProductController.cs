@@ -12,11 +12,11 @@ namespace WebApiForCollectingRPG.Controllers;
 [Route("api")]
 public class ReceiveInAppProduct : ControllerBase
 {
-    readonly IGameDb _gameDb;
+    readonly IGameService _gameDb;
     readonly IAccountService _accountService;
     readonly ILogger<ReceiveInAppProduct> _logger;
 
-    public ReceiveInAppProduct(ILogger<ReceiveInAppProduct> logger, IGameDb gameDb, IAccountService accountService)
+    public ReceiveInAppProduct(ILogger<ReceiveInAppProduct> logger, IGameService gameDb, IAccountService accountService)
     {
         _logger = logger;
         _gameDb = gameDb;
