@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using SqlKata;
 using SqlKata.Execution;
 using System;
 using System.Collections.Generic;
@@ -168,7 +169,7 @@ public class MasterService : IMasterService
 
             _cache.Set(key, stageItemList, cacheOptions);
             _logger.ZLogDebug(EventIdDic[EventType.MasterService],
-                $"[MasterService.LoadStageItemListAsync] in_app_product_list: {_cache.Get(key)}");
+                $"[MasterService.LoadStageItemListAsync] stage_item_list: {_cache.Get(key)}");
         }
         catch (Exception ex)
         {
@@ -189,12 +190,33 @@ public class MasterService : IMasterService
 
             _cache.Set(key, stageAttackNpcList, cacheOptions);
             _logger.ZLogDebug(EventIdDic[EventType.MasterService],
-                $"[MasterService.LoadStageAttackNpcListAsync] in_app_product_list: {_cache.Get(key)}");
+                $"[MasterService.LoadStageAttackNpcListAsync] stage_attack_npc_list: {_cache.Get(key)}");
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
                 $"[MasterService.LoadStageAttackNpcListAsync] ErrorCode : {ErrorCode.LoadStageAttackNpcListAsyncException}");
+        }
+    }
+
+    public async void LoadTotalStageCountAsync()
+    {
+        try
+        {
+            String key = "total_stage_count";
+
+            var stageCount = await _queryFactory.Query("stage_item")
+                .SelectRaw("COUNT(DISTINCT stage_id)")
+                .FirstOrDefaultAsync<Int32>();
+
+            _cache.Set(key, stageCount, cacheOptions);
+            _logger.ZLogDebug(EventIdDic[EventType.MasterService],
+                $"[MasterService.LoadTotalStageCountAsync] total_stage_count: {_cache.Get(key)}");
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.LoadTotalStageCountAsync] ErrorCode : {ErrorCode.LoadTotalStageCountAsyncException}");
         }
     }
 
@@ -279,6 +301,21 @@ public class MasterService : IMasterService
             _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
                 $"[MasterService.GetItemByItemId] ErrorCode: {ErrorCode.GetItemByItemIdException}, ItemId: {itemId}");
             return new Item();
+        }
+    }
+
+    public Int32 GetTotalStageCount()
+    {
+        try
+        {
+            String key = "total_stage_count";
+            return (Int32)_cache.Get(key);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.GetTotalStageCount] ErrorCode: {ErrorCode.GetTotalStageCountException}");
+            return 0;
         }
     }
 }

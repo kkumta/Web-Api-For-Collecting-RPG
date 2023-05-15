@@ -13,15 +13,13 @@ namespace WebApiForCollectingRPG.Controllers;
 [Route("api")]
 public class GetMails : ControllerBase
 {
-    readonly IGameService _gameDb;
-    readonly IAccountService _accountService;
+    readonly IGameService _gameService;
     readonly ILogger<GetMails> _logger;
 
-    public GetMails(ILogger<GetMails> logger, IGameService gameDb, IAccountService accountService)
+    public GetMails(ILogger<GetMails> logger, IGameService gameService)
     {
         _logger = logger;
-        _gameDb = gameDb;
-        _accountService = accountService;
+        _gameService = gameService;
     }
 
     /**
@@ -35,7 +33,7 @@ public class GetMails : ControllerBase
         var response = new GetMailsRes();
 
         // 특정 페이지의 우편 목록을 가져온다.
-        (var errorCode, var mails) = await _gameDb.GetMailsByPage(request.Page);
+        (var errorCode, var mails) = await _gameService.GetMailsByPage(request.Page);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

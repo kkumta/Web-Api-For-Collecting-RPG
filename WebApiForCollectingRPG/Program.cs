@@ -59,6 +59,7 @@ void loadMasterData()
     service.LoadInAppProductListAsync();
     service.LoadStageItemListAsync();
     service.LoadStageAttackNpcListAsync();
+    service.LoadTotalStageCountAsync();
 }
 
 void SettingLogger()

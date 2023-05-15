@@ -3,8 +3,8 @@ using static LogManager;
 using Microsoft.Extensions.Logging;
 using ZLogger;
 using WebApiForCollectingRPG.Services;
-using WebApiForCollectingRPG.Dtos;
 using System.Threading.Tasks;
+using WebApiForCollectingRPG.DTO;
 
 namespace WebApiForCollectingRPG.Controllers;
 
@@ -12,13 +12,13 @@ namespace WebApiForCollectingRPG.Controllers;
 [Route("api")]
 public class ReceiveNotice : ControllerBase
 {
-    readonly IMemoryService _memoryDb;
+    readonly IMemoryService _memoryService;
     readonly ILogger<ReceiveNotice> _logger;
 
-    public ReceiveNotice(ILogger<ReceiveNotice> logger, IMemoryService memoryDb)
+    public ReceiveNotice(ILogger<ReceiveNotice> logger, IMemoryService memoryService)
     {
         _logger = logger;
-        _memoryDb = memoryDb;
+        _memoryService = memoryService;
     }
 
     /**
@@ -31,7 +31,7 @@ public class ReceiveNotice : ControllerBase
         var response = new ReceiveNoticeRes();
 
         // Memory DB로부터 공지를 받아온다.
-        (response.Result, response.Notice) = await _memoryDb.GetNoticeAsync();
+        (response.Result, response.Notice) = await _memoryService.GetNoticeAsync();
         if (response.Result != ErrorCode.None)
         {
             return response;

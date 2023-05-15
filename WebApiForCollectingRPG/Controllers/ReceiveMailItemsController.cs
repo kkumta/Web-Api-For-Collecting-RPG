@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using WebApiForCollectingRPG.DTO.Mail;
@@ -13,15 +12,13 @@ namespace WebApiForCollectingRPG.Controllers;
 [Route("api")]
 public class ReceiveMailItems : ControllerBase
 {
-    readonly IGameService _gameDb;
-    readonly IAccountService _accountService;
+    readonly IGameService _gameService;
     readonly ILogger<ReceiveMailItems> _logger;
 
-    public ReceiveMailItems(ILogger<ReceiveMailItems> logger, IGameService gameDb, IAccountService accountService)
+    public ReceiveMailItems(ILogger<ReceiveMailItems> logger, IGameService gameService)
     {
         _logger = logger;
-        _gameDb = gameDb;
-        _accountService = accountService;
+        _gameService = gameService;
     }
 
     /**
@@ -34,7 +31,7 @@ public class ReceiveMailItems : ControllerBase
         var response = new ReceiveMailItemsRes();
 
         // 해당되는 아이템들을 수령한다. 
-        var errorCode = await _gameDb.ReceiveMailItems(request.MailId);
+        var errorCode = await _gameService.ReceiveMailItems(request.MailId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

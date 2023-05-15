@@ -13,15 +13,13 @@ namespace WebApiForCollectingRPG.Controllers;
 [ApiController]
 public class EnhanceItem : ControllerBase
 {
-    readonly IGameService _gameDb;
-    readonly IAccountService _accountService;
+    readonly IGameService _gameService;
     readonly ILogger<EnhanceItem> _logger;
 
-    public EnhanceItem(ILogger<EnhanceItem> logger, IGameService gameDb, IAccountService accountService)
+    public EnhanceItem(ILogger<EnhanceItem> logger, IGameService gameService)
     {
         _logger = logger;
-        _gameDb = gameDb;
-        _accountService = accountService;
+        _gameService = gameService;
     }
 
     /**
@@ -35,7 +33,7 @@ public class EnhanceItem : ControllerBase
         var response = new EnhanceItemRes();
 
         // 해당하는 아이템을 강화한다.
-        (var errorCode, response.IsSuccess) = await _gameDb.EnhanceItem(request.PlayerItemId);
+        (var errorCode, response.IsSuccess) = await _gameService.EnhanceItem(request.PlayerItemId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

@@ -12,15 +12,13 @@ namespace WebApiForCollectingRPG.Controllers;
 [Route("api")]
 public class CheckAttendance : ControllerBase
 {
-    readonly IGameService _gameDb;
-    readonly IAccountService _accountService;
+    readonly IGameService _gameService;
     readonly ILogger<CheckAttendance> _logger;
 
-    public CheckAttendance(ILogger<CheckAttendance> logger, IGameService gameDb, IAccountService accountService)
+    public CheckAttendance(ILogger<CheckAttendance> logger, IGameService gameService)
     {
         _logger = logger;
-        _gameDb = gameDb;
-        _accountService = accountService;
+        _gameService = gameService;
     }
 
     /**
@@ -33,8 +31,7 @@ public class CheckAttendance : ControllerBase
     {
         var response = new CheckAttendanceRes();
 
-        // accountId를 가지고 출석 체크를 시도한다.
-        var errorCode = await _gameDb.CheckAttendance();
+        var errorCode = await _gameService.CheckAttendance();
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

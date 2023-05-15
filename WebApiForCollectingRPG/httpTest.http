@@ -2,7 +2,7 @@
 Content-Type: application/json
 
 {
-  "Email": "mysql0716@naver.com",
+  "Email": "uiyhwe@gmail.com",
   "Password": "dsd"
 }
 
@@ -11,7 +11,7 @@ POST http://localhost:11500/api/login
 Content-Type: application/json
 
 {
-  "Email": "mysql0716@naver.com",
+  "Email": "uiyhwe@gmail.com",
   "Password": "dsd",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0"
@@ -22,8 +22,8 @@ POST http://localhost:11500/api/receiveNotice
 Content-Type: application/json
 
 {
-  "Email": "mysql0716@naver.com",
-  "AuthToken": "3h8n4n0hvoudb7vl9wgccxmf2",
+  "Email": "uiyhwe@gmail.com",
+  "AuthToken": "e4mennnlvxa75y4kvx4yfva8c",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0"
 }
@@ -33,8 +33,8 @@ POST http://localhost:11500/api/getMails
 Content-Type: application/json
 
 {
-  "Email": "mysql0716@naver.com",
-  "AuthToken": "zla1lwr904t0e5grchuf7ffz8",
+  "Email": "uiyhwe@gmail.com",
+  "AuthToken": "olt5qkkuubwbfs5dxjjjbn0yi",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
   "Page": 1
@@ -45,11 +45,11 @@ POST http://localhost:11500/api/getMail
 Content-Type: application/json
 
 {
-  "Email": "mysql0716@naver.com",
-  "AuthToken": "zla1lwr904t0e5grchuf7ffz8",
+  "Email": "uiyhwe@gmail.com",
+  "AuthToken": "qebsd4f4no43ok5v9ntg6hdwg",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
-  "MailId": 3
+  "MailId": 7
 }
 
 ###
@@ -57,22 +57,22 @@ POST http://localhost:11500/api/checkAttendance
 Content-Type: application/json
 
 {
-  "Email": "mysql0716@naver.com",
-  "AuthToken": "zla1lwr904t0e5grchuf7ffz8",
+  "Email": "uiyhwe@gmail.com",
+  "AuthToken": "olt5qkkuubwbfs5dxjjjbn0yi",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0"
 }
 
 ###
-POST http://localhost:11500/api/ReceiveMailItems
+POST http://localhost:11500/api/receiveMailItems
 Content-Type: application/json
 
 {
-  "Email": "mysql0716@naver.com",
-  "AuthToken": "zla1lwr904t0e5grchuf7ffz8",
+  "Email": "uiyhwe@gmail.com",
+  "AuthToken": "olt5qkkuubwbfs5dxjjjbn0yi",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
-  "MailId": 2
+  "MailId": 6
 }
 
 ###
@@ -80,12 +80,12 @@ POST http://localhost:11500/api/receiveInAppProduct
 Content-Type: application/json
 
 {
-  "Email":"mysql0716@naver.com",
-  "AuthToken": "zla1lwr904t0e5grchuf7ffz8",
+  "Email": "uiyhwe@gmail.com",
+  "AuthToken": "olt5qkkuubwbfs5dxjjjbn0yi",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
   "ReceiptInfo": {
-    "ReceiptId": 12,
+    "ReceiptId": 14,
     "ProductId": 3
   }
 }
@@ -95,9 +95,20 @@ POST http://localhost:11500/api/enhanceItem
 Content-Type: application/json
 
 {
-  "Email": "mysql0716@naver.com",
-  "AuthToken": "u9s09u1a4mv9216affixlvkm4",
+  "Email": "uiyhwe@gmail.com",
+  "AuthToken": "qebsd4f4no43ok5v9ntg6hdwg",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
-  "PlayerItemId": 7
+  "PlayerItemId": 23
+}
+
+###
+POST http://localhost:11500/api/getAllStages
+Content-Type: application/json
+
+{
+  "Email": "uiyhwe@gmail.com",
+  "AuthToken": "wooq1kjwoudjssaqy483xarcj",
+  "ClientVersion": "1.0.0",
+  "MasterDataVersion": "1.0.0"
 }

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using WebApiForCollectingRPG.DAO;
 
-namespace WebApiForCollectingRPG.Dtos;
+namespace WebApiForCollectingRPG.DTO;
 
 public class ReceiveNoticeReq
 {

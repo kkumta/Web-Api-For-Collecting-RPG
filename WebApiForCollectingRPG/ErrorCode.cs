@@ -76,6 +76,9 @@ public enum ErrorCode : UInt16
     PlayerIdNotExist = 4603,
     DeletePlayerAsyncException = 4604,
 
+    // Dunjeon
+    GetAllStagesAsyncException = 4701,
+
     // MasterDb
     LoadItemListFail = 5001,
     LoadItemAttributeListFail = 5002,
@@ -88,6 +91,8 @@ public enum ErrorCode : UInt16
     GetItemByItemIdException = 5009,
     LoadStageItemListAsyncException = 5010,
     LoadStageAttackNpcListAsyncException = 5011,
+    LoadTotalStageCountAsyncException = 5012,
+    GetTotalStageCountException = 5013,
 
     // Version
     ClientVersionFailNotMatch = 6001,

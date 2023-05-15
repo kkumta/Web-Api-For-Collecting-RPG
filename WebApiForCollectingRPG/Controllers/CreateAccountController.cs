@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ZLogger;
 using static LogManager;
-using WebApiForCollectingRPG.Dtos;
+using WebApiForCollectingRPG.DTO.Account;
 
 namespace WebApiForCollectingRPG.Controllers;
 
@@ -14,14 +14,14 @@ namespace WebApiForCollectingRPG.Controllers;
 public class CreateAccount : ControllerBase
 {
     private readonly IAccountService _accountService;
-    private readonly IGameService _gameDb;
+    private readonly IGameService _gameService;
     private readonly ILogger<CreateAccount> _logger;
 
-    public CreateAccount(ILogger<CreateAccount> logger, IAccountService accountService, IGameService gameDb)
+    public CreateAccount(ILogger<CreateAccount> logger, IAccountService accountService, IGameService gameService)
     {
         _logger = logger;
         _accountService = accountService;
-        _gameDb = gameDb;
+        _gameService = gameService;
     }
 
     [HttpPost]
@@ -38,7 +38,7 @@ public class CreateAccount : ControllerBase
         }
         _logger.ZLogInformationWithPayload(EventIdDic[EventType.CreateAccount], new { Email = request.Email }, $"CreateAccount Success");
 
-        (errorCode, var playerId) = await _gameDb.CreatePlayerAsync(accountId);
+        (errorCode, var playerId) = await _gameService.CreatePlayerAsync(accountId);
         if (errorCode != ErrorCode.None)
         {
             await _accountService.DeleteAccountAsync(accountId);
@@ -47,11 +47,11 @@ public class CreateAccount : ControllerBase
         }
         _logger.ZLogInformationWithPayload(EventIdDic[EventType.CreateAccount], $"CreatePlayer Success");
 
-        errorCode = await _gameDb.CreatePlayerGameDataAsync(playerId);
+        errorCode = await _gameService.CreatePlayerGameDataAsync(playerId);
         if (errorCode != ErrorCode.None)
         {
             await _accountService.DeleteAccountAsync(accountId);
-            await _gameDb.DeletePlayerAsync(playerId);
+            await _gameService.DeletePlayerAsync(playerId);
             response.Result = errorCode;
             return response;
         }

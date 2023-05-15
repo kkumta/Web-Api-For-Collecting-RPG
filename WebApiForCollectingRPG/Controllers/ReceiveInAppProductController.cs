@@ -12,15 +12,13 @@ namespace WebApiForCollectingRPG.Controllers;
 [Route("api")]
 public class ReceiveInAppProduct : ControllerBase
 {
-    readonly IGameService _gameDb;
-    readonly IAccountService _accountService;
+    readonly IGameService _gameService;
     readonly ILogger<ReceiveInAppProduct> _logger;
 
-    public ReceiveInAppProduct(ILogger<ReceiveInAppProduct> logger, IGameService gameDb, IAccountService accountService)
+    public ReceiveInAppProduct(ILogger<ReceiveInAppProduct> logger, IGameService gameService)
     {
         _logger = logger;
-        _gameDb = gameDb;
-        _accountService = accountService;
+        _gameService = gameService;
     }
 
     [HttpPost]
@@ -29,7 +27,7 @@ public class ReceiveInAppProduct : ControllerBase
     {
         var response = new ReceiptRes();
 
-        var errorCode = await _gameDb.SendInAppProduct(request.ReceiptInfo.ReceiptId, request.ReceiptInfo.ProductId);
+        var errorCode = await _gameService.SendInAppProduct(request.ReceiptInfo.ReceiptId, request.ReceiptInfo.ProductId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

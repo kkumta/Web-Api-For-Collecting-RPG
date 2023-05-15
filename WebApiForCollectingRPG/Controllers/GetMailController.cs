@@ -13,15 +13,13 @@ namespace WebApiForCollectingRPG.Controllers;
 [Route("api")]
 public class GetMail : ControllerBase
 {
-    readonly IGameService _gameDb;
-    readonly IAccountService _accountService;
+    readonly IGameService _gameService;
     readonly ILogger<GetMail> _logger;
 
-    public GetMail(ILogger<GetMail> logger, IGameService gameDb, IAccountService accountService)
+    public GetMail(ILogger<GetMail> logger, IGameService gameService)
     {
         _logger = logger;
-        _gameDb = gameDb;
-        _accountService = accountService;
+        _gameService = gameService;
     }
 
     /**
@@ -34,7 +32,7 @@ public class GetMail : ControllerBase
     {
         var response = new GetMailRes();
 
-        (var errorCode, response.Mail, var items) = await _gameDb.GetMailByMailId(request.MailId);
+        (var errorCode, response.Mail, var items) = await _gameService.GetMailByMailId(request.MailId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;
