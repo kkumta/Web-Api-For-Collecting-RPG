@@ -22,4 +22,5 @@ public interface IGameService : IDisposable
     public Task<ErrorCode> ReceiveMailItems(Int64 mailId);
     public Task<Tuple<ErrorCode, bool>> EnhanceItem(Int64 playerItemId);
     public Task<Tuple<ErrorCode, IEnumerable<StageDetail>>> GetAllStagesAsync();
+    public Task<Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>> EnterStageAsync(Int32 requestedStageId);
 }

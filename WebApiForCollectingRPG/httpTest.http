@@ -108,7 +108,19 @@ Content-Type: application/json
 
 {
   "Email": "uiyhwe@gmail.com",
-  "AuthToken": "wooq1kjwoudjssaqy483xarcj",
+  "AuthToken": "r7ux96qsifdzj9z59izkg2r2g",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0"
+}
+
+###
+POST http://localhost:11500/api/enterStage
+Content-Type: application/json
+
+{
+  "Email": "uiyhwe@gmail.com",
+  "AuthToken": "g9lw8xo51b054q3iggowvjevb",
+  "ClientVersion": "1.0.0",
+  "MasterDataVersion": "1.0.0",
+  "StageId": 2
 }

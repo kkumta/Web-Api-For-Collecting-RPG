@@ -77,7 +77,10 @@ public enum ErrorCode : UInt16
     DeletePlayerAsyncException = 4604,
 
     // Dunjeon
-    GetAllStagesAsyncException = 4701,
+    GetHighestClearedStageException = 4701,
+    GetAllStagesAsyncException = 4702,
+    InaccessibleStage = 4703,
+    EnterStageAsyncException = 4704,
 
     // MasterDb
     LoadItemListFail = 5001,
@@ -93,6 +96,8 @@ public enum ErrorCode : UInt16
     LoadStageAttackNpcListAsyncException = 5011,
     LoadTotalStageCountAsyncException = 5012,
     GetTotalStageCountException = 5013,
+    GetStageItemsByStageIdException = 5014,
+    GetAttackNpcsByStageIdException = 5015,
 
     // Version
     ClientVersionFailNotMatch = 6001,

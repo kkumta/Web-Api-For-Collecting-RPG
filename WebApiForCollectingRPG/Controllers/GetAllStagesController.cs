@@ -14,13 +14,11 @@ namespace WebApiForCollectingRPG.Controllers;
 public class GetAllStages : ControllerBase
 {
     readonly IGameService _gameService;
-    readonly IMasterService _masterService;
     readonly ILogger<GetAllStages> _logger;
 
-    public GetAllStages (IGameService gameService, IMasterService masterService, ILogger<GetAllStages> logger)
+    public GetAllStages (IGameService gameService, ILogger<GetAllStages> logger)
     {
         _gameService = gameService;
-        _masterService = masterService;
         _logger = logger;
     }
 

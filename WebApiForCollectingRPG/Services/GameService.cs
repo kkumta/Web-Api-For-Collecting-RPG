@@ -943,10 +943,11 @@ public class GameService : IGameService
                 return new Tuple<ErrorCode, IEnumerable<StageDetail>>(errorCode, null);
             }
 
-            var highestClearedStage = await _queryFactory.Query("highest_cleared_stage")
-                .Where("player_id", playerId)
-                .Select("stage_id")
-                .FirstOrDefaultAsync<Int32>();
+            (errorCode, var highestClearedStage) = await GetHighestClearedStage(playerId);
+            if (errorCode != ErrorCode.None)
+            {
+                return new Tuple<ErrorCode, IEnumerable<StageDetail>>(errorCode, null);
+            }
 
             List<StageDetail> stages = new List<StageDetail>();
             for (int idx = 1; idx <= highestClearedStage; idx++)
@@ -964,6 +965,69 @@ public class GameService : IGameService
             _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameService.GetAllStagesAsync] ErrorCode: {ErrorCode.GetAllStagesAsyncException}");
             return new Tuple<ErrorCode, IEnumerable<StageDetail>>(ErrorCode.GetAllStagesAsyncException, null);
+        }
+    }
+
+    public async Task<Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>> EnterStageAsync(Int32 requestedStageId)
+    {
+        try
+        {
+            var (errorCode, playerId) = GetPlayerIdFromHttpContext();
+            if (errorCode != ErrorCode.None)
+            {
+                return new Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>(errorCode, null, null);
+            }
+
+            (errorCode, var highestClearedStage) = await GetHighestClearedStage(playerId);
+            if (errorCode != ErrorCode.None)
+            {
+                return new Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>(errorCode, null, null);
+            }
+
+            if (highestClearedStage + 1 < requestedStageId)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameService],
+                    $"[GameService.EnterStageAsync] ErrorCode: {ErrorCode.InaccessibleStage}");
+                return new Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>(ErrorCode.InaccessibleStage, null, null);
+            }
+
+            (errorCode, var items) = _masterService.GetStageItemsByStageId(requestedStageId);
+            if (errorCode != ErrorCode.None)
+            {
+                return new Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>(errorCode, null, null);
+            }
+
+            (errorCode, var npcs) = _masterService.GetAttackNpcsByStageId(requestedStageId);
+            if (errorCode != ErrorCode.None)
+            {
+                return new Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>(errorCode, null, null);
+            }
+
+            return new Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>(ErrorCode.None, items, npcs);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
+                $"[GameService.EnterStageAsync] ErrorCode: {ErrorCode.EnterStageAsyncException}");
+            return new Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>(ErrorCode.EnterStageAsyncException, null, null);
+        }
+    }
+
+    private async Task<Tuple<ErrorCode, Int32>> GetHighestClearedStage(long? playerId)
+    {
+        try
+        {
+            var highestClearedStage = await _queryFactory.Query("highest_cleared_stage")
+                .Where("player_id", playerId)
+                .Select("stage_id")
+                .FirstOrDefaultAsync<Int32>();
+
+            return new Tuple<ErrorCode, Int32>(ErrorCode.None, highestClearedStage);
+        } catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
+                $"[GameService.GetHighestClearedStage] ErrorCode: {ErrorCode.GetHighestClearedStageException}");
+            return new Tuple<ErrorCode, Int32>(ErrorCode.GetHighestClearedStageException, 0);
         }
     }
 

@@ -318,4 +318,50 @@ public class MasterService : IMasterService
             return 0;
         }
     }
+
+    public Tuple<ErrorCode, List<Int64>> GetStageItemsByStageId(Int32 stageId)
+    {
+        try
+        {
+            var key = "stage_item_list";
+
+            var items = _cache.Get(key) as List<StageItemDTO>;
+            var seletedItems = items.FindAll(x => x.StageId == stageId);
+
+            return new Tuple<ErrorCode, List<Int64>>(ErrorCode.None, seletedItems.ConvertAll(item => item.ItemId));
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.GetStageItemsByStageId] ErrorCode: {ErrorCode.GetStageItemsByStageIdException}, StageId: {stageId}");
+            return new Tuple<ErrorCode, List<Int64>>(ErrorCode.GetStageItemsByStageIdException, null);
+        }
+    }
+
+    public Tuple<ErrorCode, List<AttackNpcDTO>> GetAttackNpcsByStageId(Int32 stageId)
+    {
+        try
+        {
+            var key = "stage_attack_npc_list";
+            var npcs = _cache.Get(key) as List<StageAttackNpcDTO>;
+            var seletedNpcs = npcs.FindAll(x => x.StageId == stageId);
+
+            var convertedNpcs = seletedNpcs.ConvertAll(npc =>
+            {
+                return new AttackNpcDTO()
+                {
+                    NpcId = npc.NpcId,
+                    NpcCount = npc.NpcCount
+                };
+            });
+
+            return new Tuple<ErrorCode, List<AttackNpcDTO>>(ErrorCode.None, convertedNpcs);
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.MasterService], ex,
+                $"[MasterService.GetAttackNpcsByStageId] ErrorCode: {ErrorCode.GetAttackNpcsByStageIdException}, StageId: {stageId}");
+            return new Tuple<ErrorCode, List<AttackNpcDTO>>(ErrorCode.GetAttackNpcsByStageIdException, null);
+        }
+    }
 }
