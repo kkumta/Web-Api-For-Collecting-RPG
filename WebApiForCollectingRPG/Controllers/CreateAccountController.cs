@@ -41,7 +41,7 @@ public class CreateAccount : ControllerBase
         (errorCode, var playerId) = await _gameService.CreatePlayerAsync(accountId);
         if (errorCode != ErrorCode.None)
         {
-            await _accountService.DeleteAccountAsync(accountId);
+            _accountService.DeleteAccountAsync(accountId);
             response.Result = errorCode;
             return response;
         }
@@ -50,7 +50,7 @@ public class CreateAccount : ControllerBase
         errorCode = await _gameService.CreatePlayerGameDataAsync(playerId);
         if (errorCode != ErrorCode.None)
         {
-            await _accountService.DeleteAccountAsync(accountId);
+            _accountService.DeleteAccountAsync(accountId);
             await _gameService.DeletePlayerAsync(playerId);
             response.Result = errorCode;
             return response;

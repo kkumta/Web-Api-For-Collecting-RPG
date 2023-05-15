@@ -5,7 +5,6 @@ using WebApiForCollectingRPG.Services;
 using static LogManager;
 using ZLogger;
 using WebApiForCollectingRPG.DTO.Dungeon;
-using System;
 
 namespace WebApiForCollectingRPG.Controllers;
 
@@ -28,7 +27,7 @@ public class ItemFarming : ControllerBase
     {
         var response = new ItemFarmingRes();
 
-        var errorCode = await _memoryService.ItemFarming(request.StageId, request.ItemId);
+        var errorCode = await _memoryService.ItemFarmingAsync(request.StageId, request.ItemId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

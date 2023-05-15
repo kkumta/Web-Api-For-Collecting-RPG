@@ -17,5 +17,5 @@ public class CheckAttendanceReq
 
 public class CheckAttendanceRes
 {
-       public ErrorCode Result { get; set; } = ErrorCode.None;
+    public ErrorCode Result { get; set; } = ErrorCode.None;
 }

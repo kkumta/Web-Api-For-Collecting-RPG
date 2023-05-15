@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebApiForCollectingRPG.DAO;
 
@@ -13,5 +14,6 @@ public interface IMemoryService
     public Task<bool> SetUserReqLockAsync(String key);
     public Task<bool> DelUserReqLockAsync(String key);
     public Task<(ErrorCode, Notice)> GetNoticeAsync();
-    public Task<ErrorCode> ItemFarming(Int32 stageId, Int64 itemId);
+    public Task<ErrorCode> ItemFarmingAsync(Int32 stageId, Int64 itemId);
+    public Task<(ErrorCode, bool, List<Int64>)> KillNpcAsync(Int32 stageId, Int32 npcId);
 }

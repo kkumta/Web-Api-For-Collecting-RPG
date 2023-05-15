@@ -8,6 +8,7 @@ public class MemoryDbKeyMaker
     const String userLockKey = "ULock_";
     const String noticeKey = "Notice_";
     const String playerStageFarmingKey = "Farming_";
+    const String playerStageKillingNpcKey = "Killing_";
 
     public static String MakeUIDKey(String id)
     {
@@ -27,5 +28,10 @@ public class MemoryDbKeyMaker
     public static String MakePlayerStageFarmingKey(Int64? playerId, Int32 stageId)
     {
         return playerStageFarmingKey + playerId + "_" + stageId;
+    }
+
+    public static String MakePlayerStageKillingNpcKey(Int64? playerId, Int32 stageId)
+    {
+        return playerStageKillingNpcKey + playerId + "_" + stageId;
     }
 }

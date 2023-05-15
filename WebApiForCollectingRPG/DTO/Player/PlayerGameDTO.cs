@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebApiForCollectingRPG.DTO.Game;
+namespace WebApiForCollectingRPG.DTO.Player;
 
 public class PlayerGameDTO
 {

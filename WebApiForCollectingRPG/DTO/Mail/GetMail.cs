@@ -21,7 +21,7 @@ public class GetMailRes
 {
     [Required] public ErrorCode Result { get; set; } = ErrorCode.None;
     [Required] public MailDetail Mail { get; set; } = new();
-    [Required] public List<MailItemDTO> Items{ get; set; } = new();
+    [Required] public List<ItemDTO> Items{ get; set; } = new();
 }
 
 public class MailDetail

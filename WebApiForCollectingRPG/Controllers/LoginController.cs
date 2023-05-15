@@ -5,7 +5,7 @@ using WebApiForCollectingRPG.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using ZLogger;
-using WebApiForCollectingRPG.DTO.Game;
+using WebApiForCollectingRPG.DTO.Player;
 using WebApiForCollectingRPG.DTO.Account;
 
 namespace WebApiForCollectingRPG.Controllers;

@@ -37,10 +37,13 @@ public enum ErrorCode : UInt16
     GetGameDbConnectionFail = 4001,
     CreatePlayerGameFailException = 4002,
     CreatePlayerItemFailException = 4003,
+
+    // Player
     GetPlayerGameInfoFailNotExist = 4101,
     GetPlayerGameInfoFailException = 4102,
     GetPlayerItemListFailNotExist = 4103,
     GetPlayerItemListFailException = 4104,
+    AddPlayerExpAsyncException = 4105,
 
     // Mail
     GetMailsFailNotExistPage = 4201,
@@ -51,8 +54,8 @@ public enum ErrorCode : UInt16
     ReceiveMailItemsFailNotExist = 4206,
     ReceiveMailItemsFailMailNotExist = 4207,
     ReceiveMailItemsException = 4208,
-    ReceiveMailItemActionsException = 4209,
-    ReceiveMailItemActionsRollbackException = 4210,
+    ReceiveItemsActionsException = 4209,
+    ReceiveItemsActionsRollbackException = 4210,
     SendRewardToMailboxError = 4211,
 
     // CheckAttendance
@@ -81,11 +84,15 @@ public enum ErrorCode : UInt16
     GetAllStagesAsyncException = 4702,
     InaccessibleStage = 4703,
     EnterStageAsyncException = 4704,
+    SaveStageRewardToPlayerException = 4705,
+    UpdateHighestClearedStageAsyncException = 4606,
 
     // MemoryService - Dunjeon
     ItemFarmingException = 4801,
+    KillNpcException = 4802,
+    GetFarmedItemsException = 4803,
 
-    // MasterDb
+    // MasterService
     LoadItemListFail = 5001,
     LoadItemAttributeListFail = 5002,
     LoadAttendanceCompensationFail = 5003,
@@ -101,6 +108,7 @@ public enum ErrorCode : UInt16
     GetTotalStageCountException = 5013,
     GetStageItemsByStageIdException = 5014,
     GetAttackNpcsByStageIdException = 5015,
+    GetAttackNpcExpByNpcIdException = 5016,
 
     // Version
     ClientVersionFailNotMatch = 6001,

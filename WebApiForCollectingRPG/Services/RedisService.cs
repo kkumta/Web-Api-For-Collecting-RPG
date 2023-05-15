@@ -8,6 +8,8 @@ using ZLogger;
 using static LogManager;
 using WebApiForCollectingRPG.Util;
 using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace WebApiForCollectingRPG.Services;
 
@@ -16,10 +18,12 @@ public class RedisService : IMemoryService
     public RedisConnection _redisConn;
     private static readonly ILogger<RedisService> s_logger = GetLogger<RedisService>();
     readonly IHttpContextAccessor _httpContextAccessor;
+    readonly IMemoryCacheService _memoryCacheService;
 
-    public RedisService(IHttpContextAccessor httpContextAccessor)
+    public RedisService(IHttpContextAccessor httpContextAccessor, IMemoryCacheService memoryCacheService)
     {
         _httpContextAccessor = httpContextAccessor;
+        _memoryCacheService = memoryCacheService;
     }
 
     public void Init(String address)
@@ -183,19 +187,19 @@ public class RedisService : IMemoryService
                 return (ErrorCode.GetNoticeFailNotExist, null);
             }
             s_logger.ZLogDebug(EventIdDic[EventType.ReceiveNotice],
-                    $"RedisDb.GetNoticeAsync: key = {key}, value = {notice.Value}");
+                    $"RedisService.GetNoticeAsync: key = {key}, value = {notice.Value}");
 
             return (ErrorCode.None, notice.Value);
         }
         catch (Exception ex)
         {
             s_logger.ZLogError(EventIdDic[EventType.ReceiveNotice], ex,
-                $"RedisDb.GetNoticeAsync: key = {key}, ErrorMessage = Applicable Notice Not Exist, ErrorCode: {ErrorCode.GetNoticeException}");
+                $"RedisService.GetNoticeAsync: key = {key}, ErrorMessage = Applicable Notice Not Exist, ErrorCode: {ErrorCode.GetNoticeException}");
             return (ErrorCode.GetNoticeException, null);
         }
     }
 
-    public async Task<ErrorCode> ItemFarming(Int32 stageId, Int64 itemId)
+    public async Task<ErrorCode> ItemFarmingAsync(Int32 stageId, Int64 itemId)
     {
         try
         {
@@ -208,13 +212,88 @@ public class RedisService : IMemoryService
             var key = MemoryDbKeyMaker.MakePlayerStageFarmingKey(playerId, stageId);
             var redis = new RedisList<Int64>(_redisConn, key, StageKeyTimeSpan());
             await redis.RightPushAsync(itemId);
+            s_logger.ZLogDebug(EventIdDic[EventType.ItemFarming],
+                $"RedisService.ItemFarmingAsync: Key = {key}, Message = Success Farm Item Number {itemId}!");
 
             return ErrorCode.None;
         }
         catch (Exception ex) {
             s_logger.ZLogError(EventIdDic[EventType.ItemFarming], ex,
-                $"RedisDb.ItemFarming: stageId = {stageId}, itemId = {itemId}, ErrorMessage = ItemFarming Exception, ErrorCode: {ErrorCode.ItemFarmingException}");
+                $"RedisService.ItemFarmingAsync: stageId = {stageId}, itemId = {itemId}, ErrorMessage = ItemFarming Exception, ErrorCode: {ErrorCode.ItemFarmingException}");
             return ErrorCode.ItemFarmingException;
+        }
+    }
+
+    public async Task<(ErrorCode, bool, List<Int64>)> KillNpcAsync(Int32 stageId, Int32 npcId)
+    {
+        try
+        {
+            var (errorCode, playerId) = GetPlayerIdFromHttpContext();
+            if (errorCode != ErrorCode.None)
+            {
+                return (errorCode, false, null);
+            }
+
+            var key = MemoryDbKeyMaker.MakePlayerStageKillingNpcKey(playerId, stageId);
+            var redis = new RedisList<Int32>(_redisConn, key, StageKeyTimeSpan());
+            await redis.RightPushAsync(npcId);
+
+            s_logger.ZLogDebug(EventIdDic[EventType.KillNpc],
+                $"RedisService.KillNpcAsync: Key = {key}, Message = Success Kill Npc number {npcId}!");
+
+            Int32 totalNpcCount = 0;
+            (errorCode, var npcs) = _memoryCacheService.GetAttackNpcsByStageId(stageId);
+            if (errorCode != ErrorCode.None)
+            {
+                return (errorCode, false, null);
+            }
+            foreach ( var npc in npcs )
+            {
+                totalNpcCount += npc.NpcCount;
+            }
+
+            if (await redis.LengthAsync() >= totalNpcCount)
+            {
+                (errorCode, var items) = await GetFarmedItemsAndDeleteAsync(playerId, stageId);
+                if (errorCode != ErrorCode.None)
+                {
+                    return (errorCode, false, null);
+                }
+
+                await redis.DeleteAsync();
+
+                s_logger.ZLogDebug(EventIdDic[EventType.KillNpc],
+                    $"RedisService.KillNpcAsync: Key = {key}, Message = Success Clear Stage Number {stageId}!");
+
+                return (ErrorCode.None, true, items);
+            }
+
+            return (ErrorCode.None, false, null);
+        }
+        catch (Exception ex)
+        {
+            s_logger.ZLogError(EventIdDic[EventType.KillNpc], ex,
+                $"RedisDb.ItemFarming: stageId = {stageId}, npcId = {npcId}, ErrorMessage = KillNpc Exception, ErrorCode: {ErrorCode.KillNpcException}");
+            return (ErrorCode.KillNpcException, false, null);
+        }
+    }
+
+    private async Task<(ErrorCode, List<Int64>)> GetFarmedItemsAndDeleteAsync(Int64? playerId, Int32 stageId)
+    {
+        try {
+            var key = MemoryDbKeyMaker.MakePlayerStageFarmingKey(playerId, stageId);
+            var redis = new RedisList<Int64>(_redisConn, key, StageKeyTimeSpan());
+
+            var result = await redis.RangeAsync(0, -1);
+            await redis.DeleteAsync();
+
+            return (ErrorCode.None, result.ToList());
+        }
+        catch (Exception ex)
+        {
+            s_logger.ZLogError(EventIdDic[EventType.RedisService], ex,
+                $"MemoryService.GetFarmedItems: playerId = {playerId}, stageId = {stageId}, ErrorMessage = KillNpc Exception, ErrorCode: {ErrorCode.GetFarmedItemsException}");
+            return (ErrorCode.GetFarmedItemsException, null);
         }
     }
 

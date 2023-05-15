@@ -19,11 +19,12 @@ public class LogManager
         GetAllStages = 801,
         EnterStage = 802,
         ItemFarming = 803,
+        KillNpc = 804,
         AccountService = 1001,
         GameService = 1002,
         MasterService = 1003,
-        RedisService = 1004,
-        HttpContextService = 1005,
+        MemoryCacheService = 1004,
+        RedisService = 1005,
         AccountRepository = 2001,
     }
 
@@ -44,11 +45,12 @@ public class LogManager
         {EventType.GetAllStages, new EventId((int)EventType.GetAllStages, "GetAllStages") },
         {EventType.EnterStage, new EventId((int)EventType.EnterStage, "EnterStage") },
         {EventType.ItemFarming, new EventId((int)EventType.ItemFarming, "ItemFarming") },
+        {EventType.KillNpc, new EventId((int)EventType.KillNpc, "KillNpc") },
         {EventType.AccountService, new EventId((int)EventType.AccountService, "AccountService") },
         {EventType.GameService, new EventId((int)EventType.GameService, "GameService") },
         {EventType.MasterService, new EventId((int)EventType.MasterService, "MasterService") },
+        {EventType.MemoryCacheService, new EventId((int)EventType.MemoryCacheService, "MemoryCacheService") },
         {EventType.RedisService, new EventId((int)EventType.RedisService, "RedisService") },
-        {EventType.HttpContextService, new EventId((int)EventType.HttpContextService, "HttpContextService") },
         {EventType.AccountRepository, new EventId((int)EventType.AccountRepository, "AccountRepository") }
     };
 

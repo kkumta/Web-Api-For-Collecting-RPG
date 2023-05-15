@@ -270,7 +270,7 @@ CREATE TABLE IF NOT EXISTS game_db.`mail`
 CREATE INDEX player_id_idx ON game_db.mail (player_id);
 ```
 
-## v Table
+## mail_item Table
 우편 아이템
 
 ```sql

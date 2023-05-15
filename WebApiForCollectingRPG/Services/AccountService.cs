@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using SqlKata.Execution;
 using System;
 using System.Threading.Tasks;
 using WebApiForCollectingRPG.DAO;
@@ -100,7 +99,7 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<ErrorCode> DeleteAccountAsync(Int64 accountId)
+    public ErrorCode DeleteAccountAsync(Int64 accountId)
     {
         try
         {

@@ -2,7 +2,7 @@
 Content-Type: application/json
 
 {
-  "Email": "uiyhwe@gmail.com",
+  "Email": "bye0011@gmail.com",
   "Password": "dsd"
 }
 
@@ -11,7 +11,7 @@ POST http://localhost:11500/api/login
 Content-Type: application/json
 
 {
-  "Email": "uiyhwe@gmail.com",
+  "Email": "bye0011@gmail.com",
   "Password": "dsd",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0"
@@ -22,8 +22,8 @@ POST http://localhost:11500/api/receiveNotice
 Content-Type: application/json
 
 {
-  "Email": "uiyhwe@gmail.com",
-  "AuthToken": "e4mennnlvxa75y4kvx4yfva8c",
+  "Email": "bye0011@gmail.com",
+  "AuthToken": "qsoi8dx4cz6wd7h4q6jmq7l1s",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0"
 }
@@ -33,8 +33,8 @@ POST http://localhost:11500/api/getMails
 Content-Type: application/json
 
 {
-  "Email": "uiyhwe@gmail.com",
-  "AuthToken": "olt5qkkuubwbfs5dxjjjbn0yi",
+  "Email": "bye0011@gmail.com",
+  "AuthToken": "qsoi8dx4cz6wd7h4q6jmq7l1s",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
   "Page": 1
@@ -45,11 +45,11 @@ POST http://localhost:11500/api/getMail
 Content-Type: application/json
 
 {
-  "Email": "uiyhwe@gmail.com",
-  "AuthToken": "qebsd4f4no43ok5v9ntg6hdwg",
+  "Email": "bye0011@gmail.com",
+  "AuthToken": "qsoi8dx4cz6wd7h4q6jmq7l1s",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
-  "MailId": 7
+  "MailId": 6
 }
 
 ###
@@ -57,8 +57,8 @@ POST http://localhost:11500/api/checkAttendance
 Content-Type: application/json
 
 {
-  "Email": "uiyhwe@gmail.com",
-  "AuthToken": "olt5qkkuubwbfs5dxjjjbn0yi",
+  "Email": "bye0011@gmail.com",
+  "AuthToken": "qsoi8dx4cz6wd7h4q6jmq7l1s",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0"
 }
@@ -68,8 +68,8 @@ POST http://localhost:11500/api/receiveMailItems
 Content-Type: application/json
 
 {
-  "Email": "uiyhwe@gmail.com",
-  "AuthToken": "olt5qkkuubwbfs5dxjjjbn0yi",
+  "Email": "bye0011@gmail.com",
+  "AuthToken": "zuekdy7xwy6dkkhsp7zx5hm9l",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
   "MailId": 6
@@ -80,12 +80,12 @@ POST http://localhost:11500/api/receiveInAppProduct
 Content-Type: application/json
 
 {
-  "Email": "uiyhwe@gmail.com",
-  "AuthToken": "olt5qkkuubwbfs5dxjjjbn0yi",
+  "Email": "bye0011@gmail.com",
+  "AuthToken": "qsoi8dx4cz6wd7h4q6jmq7l1s",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
   "ReceiptInfo": {
-    "ReceiptId": 14,
+    "ReceiptId": 3,
     "ProductId": 3
   }
 }
@@ -95,11 +95,11 @@ POST http://localhost:11500/api/enhanceItem
 Content-Type: application/json
 
 {
-  "Email": "uiyhwe@gmail.com",
-  "AuthToken": "qebsd4f4no43ok5v9ntg6hdwg",
+  "Email": "bye0011@gmail.com",
+  "AuthToken": "durikqtpfyt11ta7mo05gq271",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
-  "PlayerItemId": 23
+  "PlayerItemId": 9
 }
 
 ###
@@ -107,8 +107,8 @@ POST http://localhost:11500/api/getAllStages
 Content-Type: application/json
 
 {
-  "Email": "uiyhwe@gmail.com",
-  "AuthToken": "r7ux96qsifdzj9z59izkg2r2g",
+  "Email": "bye0011@gmail.com",
+  "AuthToken": "durikqtpfyt11ta7mo05gq271",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0"
 }
@@ -118,8 +118,8 @@ POST http://localhost:11500/api/enterStage
 Content-Type: application/json
 
 {
-  "Email": "uiyhwe@gmail.com",
-  "AuthToken": "g9lw8xo51b054q3iggowvjevb",
+  "Email": "bye0011@gmail.com",
+  "AuthToken": "durikqtpfyt11ta7mo05gq271",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
   "StageId": 2
@@ -130,10 +130,23 @@ POST http://localhost:11500/api/itemFarming
 Content-Type: application/json
 
 {
-  "Email": "uiyhwe@gmail.com",
-  "AuthToken": "g9lw8xo51b054q3iggowvjevb",
+  "Email": "bye0011@gmail.com",
+  "AuthToken": "durikqtpfyt11ta7mo05gq271",
   "ClientVersion": "1.0.0",
   "MasterDataVersion": "1.0.0",
-  "StageId": 2,
+  "StageId": 1,
   "ItemId": 1
+}
+
+###
+POST http://localhost:11500/api/killNpc
+Content-Type: application/json
+
+{
+  "Email": "bye0011@gmail.com",
+  "AuthToken": "durikqtpfyt11ta7mo05gq271",
+  "ClientVersion": "1.0.0",
+  "MasterDataVersion": "1.0.0",
+  "StageId": 1,
+  "NpcId": 101
 }

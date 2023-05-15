@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebApiForCollectingRPG.DTO.InAppProduct;
+namespace WebApiForCollectingRPG.DAO;
 
 public class Receipt
 {

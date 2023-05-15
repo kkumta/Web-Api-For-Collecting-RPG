@@ -10,10 +10,9 @@ using System.Threading.Tasks;
 using WebApiForCollectingRPG.DAO;
 using WebApiForCollectingRPG.DTO.Attendance;
 using WebApiForCollectingRPG.DTO.Mail;
-using WebApiForCollectingRPG.DTO.Game;
+using WebApiForCollectingRPG.DTO.Player;
 using ZLogger;
 using static LogManager;
-using WebApiForCollectingRPG.DTO.InAppProduct;
 using WebApiForCollectingRPG.Repository;
 using Microsoft.AspNetCore.Http;
 using WebApiForCollectingRPG.DTO.Enhance;
@@ -26,17 +25,17 @@ public class GameService : IGameService
     private const Int32 PerPage = 20;
     readonly IOptions<DbConfig> _dbConfig;
     readonly ILogger<GameService> _logger;
-    readonly IMasterService _masterService;
+    readonly IMemoryCacheService _memoryCacheService;
     readonly IHttpContextAccessor _httpContextAccessor;
 
     IDbConnection _dbConn;
     MySqlCompiler _compiler;
     QueryFactory _queryFactory;
 
-    public GameService(ILogger<GameService> logger, IOptions<DbConfig> dbConfig, IMasterService masterService, IHttpContextAccessor httpContextAccessor)
+    public GameService(ILogger<GameService> logger, IOptions<DbConfig> dbConfig, IMemoryCacheService memoryCacheService, IHttpContextAccessor httpContextAccessor)
     {
         _dbConfig = dbConfig;
-        _masterService = masterService;
+        _memoryCacheService = memoryCacheService;
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
 
@@ -240,14 +239,14 @@ public class GameService : IGameService
         }
     }
 
-    public async Task<Tuple<ErrorCode, MailDetail, IEnumerable<MailItemDTO>>> GetMailByMailId(Int64 mailId)
+    public async Task<Tuple<ErrorCode, MailDetail, IEnumerable<ItemDTO>>> GetMailByMailId(Int64 mailId)
     {
         try
         {
             var (errorCode, playerId) = GetPlayerIdFromHttpContext();
             if (errorCode != ErrorCode.None)
             {
-                return new Tuple<ErrorCode, MailDetail, IEnumerable<MailItemDTO>>(errorCode, null, null);
+                return new Tuple<ErrorCode, MailDetail, IEnumerable<ItemDTO>>(errorCode, null, null);
             }
 
             var mail = await _queryFactory.Query("mail")
@@ -271,26 +270,26 @@ public class GameService : IGameService
             {
                 _logger.ZLogError(EventIdDic[EventType.GameService],
                     $"[GameService.GetMailByMailId] ErrorCode: {ErrorCode.GetMailFailNotExist}, PlayerId: {playerId}, MailId: {mailId}");
-                return new Tuple<ErrorCode, MailDetail, IEnumerable<MailItemDTO>>(ErrorCode.GetMailFailNotExist, null, null);
+                return new Tuple<ErrorCode, MailDetail, IEnumerable<ItemDTO>>(ErrorCode.GetMailFailNotExist, null, null);
             }
 
             var items = await _queryFactory.Query("mail_item")
                 .Where("mail_id", mailId)
                 .Select("item_id AS ItemId", "item_count AS ItemCount")
-                .GetAsync<MailItemDTO>();
+                .GetAsync<ItemDTO>();
 
             await _queryFactory.Query("mail").Where("mail_id", mailId).UpdateAsync(new
             {
                 is_read = true
             });
 
-            return new Tuple<ErrorCode, MailDetail, IEnumerable<MailItemDTO>>(ErrorCode.None, mail, items);
+            return new Tuple<ErrorCode, MailDetail, IEnumerable<ItemDTO>>(ErrorCode.None, mail, items);
         }
         catch (Exception ex)
         {
             _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameService.GetMailByMailId] ErrorCode: {ErrorCode.GetMailFailException}, MailId: {mailId}");
-            return new Tuple<ErrorCode, MailDetail, IEnumerable<MailItemDTO>>(ErrorCode.GetMailFailException, null, null);
+            return new Tuple<ErrorCode, MailDetail, IEnumerable<ItemDTO>>(ErrorCode.GetMailFailException, null, null);
         }
     }
 
@@ -365,9 +364,9 @@ public class GameService : IGameService
                 true,
                 DateTime.Now.AddDays(7));
 
-            List<MailItemDTO> mailItems = new();
-            var compensation = _masterService.GetAttendanceCompensationByCompensationId(todayCompensationId);
-            mailItems.Add(new MailItemDTO(compensation.ItemId, compensation.ItemCount));
+            List<ItemDTO> mailItems = new();
+            var compensation = _memoryCacheService.GetAttendanceCompensationByCompensationId(todayCompensationId);
+            mailItems.Add(new ItemDTO(compensation.ItemId, compensation.ItemCount));
 
             errorCode = await SendRewardToMailbox(mail, mailItems);
             if (errorCode != ErrorCode.None)
@@ -465,7 +464,7 @@ public class GameService : IGameService
             var mailItems = await _queryFactory.Query("mail_item")
                 .Where("mail_id", mailId)
                 .Select("item_id AS ItemId", "item_count AS ItemCount")
-                .GetAsync<MailItemDTO>();
+                .GetAsync<ItemDTO>();
 
             if (mailItems == null)
             {
@@ -481,7 +480,7 @@ public class GameService : IGameService
                 has_item = false
             });
 
-            errorCode = await ReceiveMailItemActions(playerId, mailItems);
+            errorCode = await ReceiveItemsActions(playerId, mailItems);
             if (errorCode != ErrorCode.None)
             {
                 // mail rollback
@@ -491,6 +490,8 @@ public class GameService : IGameService
                     is_received = false,
                     has_item = true
                 });
+
+                return errorCode;
             }
             _logger.ZLogDebug(EventIdDic[EventType.GameService],
                 $"[GameService.ReceiveMailItems] PlayerId: {playerId}, MailId: {mailId}");
@@ -505,17 +506,17 @@ public class GameService : IGameService
         }
     }
 
-    private async Task<ErrorCode> ReceiveMailItemActions(long? playerId, IEnumerable<MailItemDTO> mailItems)
+    private async Task<ErrorCode> ReceiveItemsActions(long? playerId, IEnumerable<ItemDTO> items)
     {
         // 롤백을 위해 동작 번호와 사용된 데이터(Money, PlayerItemId, ItemCount)를 가진다. 
         List<(Int16, Int64, Int64, Int32)> rollbacks = new();
         try
         {
-            foreach (MailItemDTO mailItemInfo in mailItems)
+            foreach (ItemDTO item in items)
             {
-                var itemInfo = _masterService.GetItemByItemId(mailItemInfo.ItemId);
+                var itemInfo = _memoryCacheService.GetItemByItemId(item.ItemId);
 
-                if (_masterService.IsMoney(mailItemInfo.ItemId))
+                if (_memoryCacheService.IsMoney(item.ItemId))
                 {
                     var money = await _queryFactory.Query("player_game")
                         .Where("player_id", playerId)
@@ -524,16 +525,16 @@ public class GameService : IGameService
 
                     await _queryFactory.Query("player_game").Where("player_id", playerId).UpdateAsync(new
                     {
-                        money = money + mailItemInfo.ItemCount
+                        money = money + item.ItemCount
                     });
                     rollbacks.Add((1, money, 0, 0)); // Money 갱신 동작, 기존 Money 데이터
                 }
-                else if (_masterService.IsStackableItem(mailItemInfo.ItemId))
+                else if (_memoryCacheService.IsStackableItem(item.ItemId))
                 {
                     var playerItem = await _queryFactory.Query("player_item")
                         .Where(new
                         {
-                            item_id = mailItemInfo.ItemId,
+                            item_id = item.ItemId,
                             player_id = playerId,
                         })
                         .Select("player_item_id AS PlayerItemId",
@@ -548,14 +549,14 @@ public class GameService : IGameService
                         var playerItemId = await _queryFactory.Query("player_item").InsertGetIdAsync<Int64>(new
                         {
                             player_id = playerId,
-                            item_id = mailItemInfo.ItemId,
-                            item_count = mailItemInfo.ItemCount,
+                            item_id = item.ItemId,
+                            item_count = item.ItemCount,
                             enhance_count = itemInfo.EnhanceMaxCount,
                             attack = itemInfo.Attack,
                             defence = itemInfo.Defence,
                             magic = itemInfo.Magic
                         });
-                        rollbacks.Add((2, 0, playerItemId, mailItemInfo.ItemCount)); // PlayerItem 생성 동작
+                        rollbacks.Add((2, 0, playerItemId, item.ItemCount)); // PlayerItem 생성 동작
                     }
                     else
                     {
@@ -563,7 +564,7 @@ public class GameService : IGameService
                             .Where("player_item_id", playerItem.PlayerItemId)
                             .UpdateAsync(new
                             {
-                                item_count = playerItem.ItemCount + mailItemInfo.ItemCount
+                                item_count = playerItem.ItemCount + item.ItemCount
                             });
                         rollbacks.Add((3, 0, playerItem.PlayerItemId, playerItem.ItemCount)); // PlayerItem 갱신 동작, 기존 ItemCount 데이터
                     }
@@ -573,14 +574,14 @@ public class GameService : IGameService
                     var playerItemId = await _queryFactory.Query("player_item").InsertGetIdAsync<Int64>(new
                     {
                         player_id = playerId,
-                        item_id = mailItemInfo.ItemId,
-                        item_count = mailItemInfo.ItemCount,
+                        item_id = item.ItemId,
+                        item_count = item.ItemCount,
                         enhance_count = 0,
                         attack = itemInfo.Attack,
                         defence = itemInfo.Defence,
                         magic = itemInfo.Magic
                     });
-                    rollbacks.Add((2, 0, playerItemId, mailItemInfo.ItemCount)); // PlayerItem 생성 동작
+                    rollbacks.Add((2, 0, playerItemId, item.ItemCount)); // PlayerItem 생성 동작
                 }
             }
             return ErrorCode.None;
@@ -615,13 +616,13 @@ public class GameService : IGameService
             catch (Exception rollbackEx)
             {
                 _logger.ZLogError(EventIdDic[EventType.GameService], rollbackEx,
-                    $"[GameService.ReceiveMailItemActions] ErrorCode: {ErrorCode.ReceiveMailItemActionsRollbackException}, Message: Exception occurred during rollback.");
-                return ErrorCode.ReceiveMailItemActionsRollbackException;
+                    $"[GameService.ReceiveMailItemActions] ErrorCode: {ErrorCode.ReceiveItemsActionsRollbackException}, Message: Exception occurred during rollback.");
+                return ErrorCode.ReceiveItemsActionsRollbackException;
             }
 
             _logger.ZLogError(EventIdDic[EventType.GameService], ex,
-                $"[GameService.ReceiveMailItemActions] ErrorCode: {ErrorCode.ReceiveMailItemsException}, Message: An error occurred while receiving items, so has been rolled back.");
-            return ErrorCode.ReceiveMailItemActionsException;
+                $"[GameService.ReceiveItemsActions] ErrorCode: {ErrorCode.ReceiveItemsActionsException}, Message: An error occurred while receiving items, so has been rolled back.");
+            return ErrorCode.ReceiveItemsActionsException;
         }
     }
 
@@ -664,10 +665,10 @@ public class GameService : IGameService
                 true,
                 Convert.ToDateTime(DateTime.MaxValue.ToString("yyyy-MM-dd HH:mm:ss")));
 
-            var inAppItems = _masterService.GetInAppItemsByProductId(productId);
+            var inAppItems = _memoryCacheService.GetInAppItemsByProductId(productId);
             var mailItems = inAppItems.ConvertAll(inAppItem =>
             {
-                return new MailItemDTO()
+                return new ItemDTO()
                 {
                     ItemId = inAppItem.ItemId,
                     ItemCount = inAppItem.ItemCount
@@ -702,7 +703,7 @@ public class GameService : IGameService
         }
     }
 
-    private async Task<ErrorCode> SendRewardToMailbox(SendMailDTO mail, List<MailItemDTO> mailItems)
+    private async Task<ErrorCode> SendRewardToMailbox(SendMailDTO mail, List<ItemDTO> items)
     {
         var mailId = 0L;
         try
@@ -726,7 +727,7 @@ public class GameService : IGameService
                 is_deleted = mail.IsDeleted
             });
 
-            foreach (MailItemDTO item in mailItems)
+            foreach (ItemDTO item in items)
             {
                 await _queryFactory.Query("mail_item").InsertAsync(new
                 {
@@ -737,7 +738,7 @@ public class GameService : IGameService
             }
 
             _logger.ZLogDebug(EventIdDic[EventType.GameService],
-                $"[GameService.SendRewardToMailbox] PlayerId: {playerId}, MailId: {mailId}, MailItemCount: {mailItems.Count}");
+                $"[GameService.SendRewardToMailbox] PlayerId: {playerId}, MailId: {mailId}, MailItemCount: {items.Count}");
 
             return ErrorCode.None;
         }
@@ -757,7 +758,7 @@ public class GameService : IGameService
             }
 
             _logger.ZLogError(EventIdDic[EventType.GameService], ex,
-                $"[GameService.SendRewardToMailbox] ErrorCode: {ErrorCode.SendRewardToMailboxException}, MailTitle: {mail.Title}, MailItemCount: {mailItems.Count}, " +
+                $"[GameService.SendRewardToMailbox] ErrorCode: {ErrorCode.SendRewardToMailboxException}, MailTitle: {mail.Title}, MailItemCount: {items.Count}, " +
                 $"Message: An error occurred while send reward to mailbox, so has been rolled back.");
             return ErrorCode.SendRewardToMailboxException;
         }
@@ -779,7 +780,7 @@ public class GameService : IGameService
                 return new Tuple<ErrorCode, bool>(errorCode, false);
             }
 
-            var item = _masterService.GetItemByItemId(playerItem.ItemId);
+            var item = _memoryCacheService.GetItemByItemId(playerItem.ItemId);
 
             errorCode = CanEnhance(item.EnhanceMaxCount, playerItem.EnhanceCount);
             if (errorCode != ErrorCode.None)
@@ -954,7 +955,7 @@ public class GameService : IGameService
             {
                 stages.Add(new StageDetail(idx, true));
             }
-            for (int idx = highestClearedStage + 1; idx <= _masterService.GetTotalStageCount(); idx++)
+            for (int idx = highestClearedStage + 1; idx <= _memoryCacheService.GetTotalStageCount(); idx++)
             {
                 stages.Add(new StageDetail(idx, false));
             }
@@ -991,13 +992,13 @@ public class GameService : IGameService
                 return new Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>(ErrorCode.InaccessibleStage, null, null);
             }
 
-            (errorCode, var items) = _masterService.GetStageItemsByStageId(requestedStageId);
+            (errorCode, var items) = _memoryCacheService.GetStageItemsByStageId(requestedStageId);
             if (errorCode != ErrorCode.None)
             {
                 return new Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>(errorCode, null, null);
             }
 
-            (errorCode, var npcs) = _masterService.GetAttackNpcsByStageId(requestedStageId);
+            (errorCode, var npcs) = _memoryCacheService.GetAttackNpcsByStageId(requestedStageId);
             if (errorCode != ErrorCode.None)
             {
                 return new Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>(errorCode, null, null);
@@ -1028,6 +1029,139 @@ public class GameService : IGameService
             _logger.ZLogError(EventIdDic[EventType.GameService], ex,
                 $"[GameService.GetHighestClearedStage] ErrorCode: {ErrorCode.GetHighestClearedStageException}");
             return new Tuple<ErrorCode, Int32>(ErrorCode.GetHighestClearedStageException, 0);
+        }
+    }
+
+    public async Task<ErrorCode> SaveStageRewardToPlayer(Int32 stageId, List<Int64> itemIds)
+    {
+        try
+        {
+            var (errorCode, playerId) = GetPlayerIdFromHttpContext();
+            if (errorCode != ErrorCode.None)
+            {
+                return errorCode;
+            }
+
+            var stackableItems = new Dictionary<Int64, Int32>();
+            var items = new List<ItemDTO>();
+
+            foreach ( var itemId in itemIds ) {
+                if (_memoryCacheService.IsStackableItem(itemId))
+                {
+                    if (stackableItems.ContainsKey(itemId))
+                    {
+                        stackableItems[itemId] = stackableItems[itemId] + 1;
+                    } else
+                    {
+                        stackableItems.Add(itemId, 1);
+                    }
+                } else
+                {
+                    items.Add(new ItemDTO(itemId, 1));
+                }
+            }
+
+            foreach (var item in stackableItems)
+            {
+                items.Add(new ItemDTO(item.Key, item.Value));
+            }
+
+            errorCode = await ReceiveItemsActions(playerId, items);
+            if (errorCode != ErrorCode.None)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameService],
+                    $"[GameService.SaveStageRewardToPlayer] ErrorCode: {errorCode}");
+                return errorCode;
+            }
+
+            Int64 totalExp = 0;
+            (errorCode, var attackNpcs) = _memoryCacheService.GetAttackNpcsByStageId(stageId);
+            foreach (var attackNpc in attackNpcs)
+            {
+                (errorCode, var exp) = _memoryCacheService.GetAttackNpcExpByNpcId(attackNpc.NpcId);
+                if (errorCode != ErrorCode.None)
+                {
+                    _logger.ZLogError(EventIdDic[EventType.GameService],
+                        $"[GameService.SaveStageRewardToPlayer] ErrorCode: {errorCode}");
+                    return errorCode;
+                }
+                totalExp += exp * attackNpc.NpcCount;
+            }
+
+            errorCode = await AddPlayerExpAsync(playerId, totalExp);
+            if (errorCode != ErrorCode.None)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameService],
+                    $"[GameService.SaveStageRewardToPlayer] ErrorCode: {errorCode}");
+                return errorCode;
+            }
+
+            errorCode = await UpdateHighestClearedStageAsync(playerId, stageId);
+            if (errorCode != ErrorCode.None)
+            {
+                _logger.ZLogError(EventIdDic[EventType.GameService],
+                    $"[GameService.SaveStageRewardToPlayer] ErrorCode: {errorCode}");
+                return errorCode;
+            }
+
+            return ErrorCode.None;
+        } catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
+                $"[GameService.SaveStageRewardToPlayer] ErrorCode: {ErrorCode.SaveStageRewardToPlayerException}");
+            return ErrorCode.SaveStageRewardToPlayerException;
+        }
+    }
+
+    private async Task<ErrorCode> UpdateHighestClearedStageAsync(Int64? playerId, Int32 stageId)
+    {
+        try
+        {
+            Int32? previousHighestClearedStage = await _queryFactory.Query("highest_cleared_stage").Where("player_id", playerId)
+                .Select("stage_id AS StageId")
+                .FirstOrDefaultAsync<Int32>();
+
+            if (previousHighestClearedStage == null || previousHighestClearedStage == 0)
+            {
+                await _queryFactory.Query("highest_cleared_stage").InsertAsync(new
+                {
+                    player_id = playerId,
+                    stage_id = stageId
+                });
+            }
+            else if (previousHighestClearedStage < stageId)
+            {
+                await _queryFactory.Query("highest_cleared_stage").Where("player_id", playerId).UpdateAsync(new
+                {
+                    stage_id = stageId
+                });
+            }
+
+            return ErrorCode.None;
+        }
+        catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
+                $"[GameService.UpdateHighestClearedStageAsync] ErrorCode: {ErrorCode.UpdateHighestClearedStageAsyncException}");
+            return ErrorCode.UpdateHighestClearedStageAsyncException;
+        }
+    }
+
+    private async Task<ErrorCode> AddPlayerExpAsync(Int64? playerId, Int64 addedExp)
+    {
+        try
+        {
+            await _queryFactory.Query("player_game").Where("player_id", playerId).UpdateAsync(new
+            {
+                exp = addedExp
+            });
+
+            return ErrorCode.None;
+        } catch (Exception ex)
+        {
+            _logger.ZLogError(EventIdDic[EventType.GameService], ex,
+                $"[GameService.AddPlayerExpAsync] ErrorCode: {ErrorCode.AddPlayerExpAsyncException}");
+            return ErrorCode.AddPlayerExpAsyncException;
         }
     }
 

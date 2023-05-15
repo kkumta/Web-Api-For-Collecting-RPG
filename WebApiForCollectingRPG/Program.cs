@@ -21,6 +21,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddTransient<IAccountRepository, AccountRepository>();
 builder.Services.AddTransient<IAccountService, AccountService>();
 builder.Services.AddTransient<IMasterService, MasterService>();
+builder.Services.AddTransient<IMemoryCacheService, MemoryCacheService>();
 builder.Services.AddTransient<IGameService, GameService>();
 builder.Services.AddSingleton<IMemoryService, RedisService>();
 builder.Services.AddControllers();

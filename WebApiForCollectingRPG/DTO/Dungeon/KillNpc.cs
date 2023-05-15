@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System;
 
 namespace WebApiForCollectingRPG.DTO.Dungeon;
 
-public class EnterStageReq
+public class KillNpcReq
 {
     [Required]
     [MinLength(1, ErrorMessage = "EMAIL CANNOT BE EMPTY")]
@@ -15,17 +14,11 @@ public class EnterStageReq
     [Required] public String ClientVersion { get; set; }
     [Required] public String MasterDataVersion { get; set; }
     [Required] public Int32 StageId { get; set; }
+    [Required] public Int32 NpcId { get; set; }
 }
 
-public class EnterStageRes
+public class KillNpcRes
 {
     [Required] public ErrorCode Result { get; set; } = ErrorCode.None;
-    [Required] public List<Int64> Items { get; set; } = new List<Int64>();
-    [Required] public List<AttackNpcDTO> AttackNpcs { get; set; } = new List<AttackNpcDTO>();
-}
-
-public class AttackNpcDTO
-{
-    public Int32 NpcId { get; set; }
-    public Int32 NpcCount { get; set; }
+    [Required] public bool AllNpcsKilled { get; set; } = false;
 }
