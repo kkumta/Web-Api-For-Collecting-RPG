@@ -27,7 +27,14 @@ public class ItemFarming : ControllerBase
     {
         var response = new ItemFarmingRes();
 
-        var errorCode = await _memoryService.ItemFarmingAsync(request.StageId, request.ItemId);
+        var errorCode = await _memoryService.IsPlaying(request.Email);
+        if (errorCode != ErrorCode.None)
+        {
+            response.Result = errorCode;
+            return response;
+        }
+
+        errorCode = await _memoryService.ItemFarmingAsync(request.Email, request.StageId, request.ItemId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;

@@ -14,11 +14,15 @@ namespace WebApiForCollectingRPG.Controllers;
 public class EnterStage : ControllerBase
 {
     readonly IGameService _gameService;
+    readonly IMemoryService _redisService;
+    readonly IMemoryCacheService _memoryCacheService;
     readonly ILogger<EnterStage> _logger;
 
-    public EnterStage (IGameService gameService, ILogger<EnterStage> logger)
+    public EnterStage (IGameService gameService, IMemoryService redisService, IMemoryCacheService memoryCacheService, ILogger<EnterStage> logger)
     {
         _gameService = gameService;
+        _redisService = redisService;
+        _memoryCacheService = memoryCacheService;
         _logger = logger;
     }
 
@@ -28,7 +32,14 @@ public class EnterStage : ControllerBase
     {
         var response = new EnterStageRes();
 
-        var (errorCode, items, attackNpcs) = await _gameService.EnterStageAsync(request.StageId);
+        var errorCode = _memoryCacheService.IsValidStageId(request.StageId);
+        if (errorCode != ErrorCode.None)
+        {
+            response.Result = errorCode;
+            return response;
+        }
+
+        (errorCode, var items, var attackNpcs) = await _gameService.EnterStageAsync(request.StageId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;
@@ -41,6 +52,13 @@ public class EnterStage : ControllerBase
         foreach (var npc in attackNpcs)
         {
             response.AttackNpcs.Add(npc);
+        }
+
+        errorCode = await _redisService.EnterStageAsync(request.Email, request.StageId);
+        if (errorCode != ErrorCode.None)
+        {
+            response.Result = errorCode;
+            return response;
         }
 
         _logger.ZLogInformationWithPayload(EventIdDic[EventType.EnterStage], $"EnterStage Success");

@@ -25,13 +25,13 @@ public class MemoryDbKeyMaker
         return noticeKey + id;
     }
 
-    public static String MakePlayerStageFarmingKey(Int64? playerId, Int32 stageId)
+    public static String MakePlayerStageFarmingKey(String email, Int32 stageId)
     {
-        return playerStageFarmingKey + playerId + "_" + stageId;
+        return playerStageFarmingKey + email + "_" + stageId;
     }
 
-    public static String MakePlayerStageKillingNpcKey(Int64? playerId, Int32 stageId)
+    public static String MakePlayerStageKillingNpcKey(String email, Int32 stageId)
     {
-        return playerStageKillingNpcKey + playerId + "_" + stageId;
+        return playerStageKillingNpcKey + email + "_" + stageId;
     }
 }

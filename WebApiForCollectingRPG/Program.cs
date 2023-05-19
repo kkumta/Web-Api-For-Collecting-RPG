@@ -54,13 +54,13 @@ app.Run(configuration["ServerAddress"]);
 void loadMasterData()
 {
     var service = app.Services.GetService<IMasterService>();
-    service.LoadItemListAsync();
-    service.LoadItemAttributeListAsync();
-    service.LoadAttendanceCompensationAsync();
-    service.LoadInAppProductListAsync();
-    service.LoadStageItemListAsync();
-    service.LoadStageAttackNpcListAsync();
-    service.LoadTotalStageCountAsync();
+    service.LoadItemList();
+    service.LoadItemAttributeList();
+    service.LoadAttendanceCompensation();
+    service.LoadInAppProductList();
+    service.LoadStageItemList();
+    service.LoadStageAttackNpcList();
+    service.LoadTotalStageCount();
 }
 
 void SettingLogger()

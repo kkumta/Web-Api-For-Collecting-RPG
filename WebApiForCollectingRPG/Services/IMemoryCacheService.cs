@@ -18,4 +18,5 @@ public interface IMemoryCacheService
     public Tuple<ErrorCode, List<AttackNpcDTO>> GetAttackNpcsByStageId(Int32 stageId);
     public Tuple<ErrorCode, Int64> GetAttackNpcExpByNpcId(Int32 npcId);
     public Tuple<ErrorCode, Int16> GetAttendanceSize();
+    public ErrorCode IsValidStageId(Int32 stageId);
 }

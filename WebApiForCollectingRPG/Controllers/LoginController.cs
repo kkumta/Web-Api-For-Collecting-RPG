@@ -61,6 +61,8 @@ public class Login : ControllerBase
         }
         response.AuthToken = authToken;
 
+
+
         (errorCode, var gameInfo) = await _gameService.GetPlayerGameInfoAsync(playerId);
         if (errorCode != ErrorCode.None)
         {

@@ -1073,7 +1073,7 @@ public class GameService : IGameService
         }
     }
 
-    public async Task<ErrorCode> SaveStageRewardToPlayer(Int32 stageId, List<Int64> itemIds)
+    public async Task<ErrorCode> SaveStageRewardToPlayer(Int32 stageId, List<RedisItemDTO> redisItems)
     {
         try
         {
@@ -1083,28 +1083,19 @@ public class GameService : IGameService
                 return errorCode;
             }
 
-            var stackableItems = new Dictionary<Int64, Int32>();
             var items = new List<ItemDTO>();
 
-            foreach ( var itemId in itemIds ) {
-                if (_memoryCacheService.IsStackableItem(itemId))
+            foreach ( var redisItem in redisItems ) {
+                if (_memoryCacheService.IsStackableItem(redisItem.ItemId))
                 {
-                    if (stackableItems.ContainsKey(itemId))
-                    {
-                        stackableItems[itemId] = stackableItems[itemId] + 1;
-                    } else
-                    {
-                        stackableItems.Add(itemId, 1);
-                    }
+                    items.Add(new ItemDTO(redisItem.ItemId, redisItem.CurCount));
                 } else
                 {
-                    items.Add(new ItemDTO(itemId, 1));
+                    for (int cnt = 0; cnt < redisItem.CurCount; cnt++)
+                    {
+                        items.Add(new ItemDTO(redisItem.ItemId, 1));
+                    }
                 }
-            }
-
-            foreach (var item in stackableItems)
-            {
-                items.Add(new ItemDTO(item.Key, item.Value));
             }
 
             errorCode = await ReceiveItemsActions(playerId, items);

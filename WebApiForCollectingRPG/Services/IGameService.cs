@@ -25,5 +25,5 @@ public interface IGameService : IDisposable
     public Task<Tuple<ErrorCode, bool>> EnhanceItem(Int64 playerItemId);
     public Task<Tuple<ErrorCode, IEnumerable<StageDetail>>> GetAllStagesAsync();
     public Task<Tuple<ErrorCode, IEnumerable<Int64>, IEnumerable<AttackNpcDTO>>> EnterStageAsync(Int32 requestedStageId);
-    public Task<ErrorCode> SaveStageRewardToPlayer(Int32 stageId, List<Int64> itemIds);
+    public Task<ErrorCode> SaveStageRewardToPlayer(Int32 stageId, List<RedisItemDTO> redisItems);
 }

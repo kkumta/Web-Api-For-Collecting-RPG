@@ -199,4 +199,21 @@ public class MemoryCacheService : IMemoryCacheService
             return new Tuple<ErrorCode, Int16>(ErrorCode.GetAttendanceSizeException, 0);
         }
     }
+
+    public ErrorCode IsValidStageId(Int32 stageId)
+    {
+        var totalCount = GetTotalStageCount();
+
+        if (totalCount == 0)
+        {
+            return ErrorCode.GetTotalStageCountException;
+        }
+
+        if (stageId > totalCount || stageId <= 0)
+        {
+            return ErrorCode.InValidStageId;
+        }
+
+        return ErrorCode.None;
+    }
 }

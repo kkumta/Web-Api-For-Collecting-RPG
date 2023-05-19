@@ -2,11 +2,11 @@
 
 public interface IMasterService
 {
-    public void LoadItemListAsync();
-    public void LoadItemAttributeListAsync();
-    public void LoadAttendanceCompensationAsync();
-    public void LoadInAppProductListAsync();
-    public void LoadStageItemListAsync();
-    public void LoadStageAttackNpcListAsync();
-    public void LoadTotalStageCountAsync();
+    public void LoadItemList();
+    public void LoadItemAttributeList();
+    public void LoadAttendanceCompensation();
+    public void LoadInAppProductList();
+    public void LoadStageItemList();
+    public void LoadStageAttackNpcList();
+    public void LoadTotalStageCount();
 }

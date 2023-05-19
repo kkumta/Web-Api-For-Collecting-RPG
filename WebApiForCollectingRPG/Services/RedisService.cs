@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 using ZLogger;
 using static LogManager;
 using WebApiForCollectingRPG.Util;
-using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Linq;
+using WebApiForCollectingRPG.DTO.Dungeon;
+using StackExchange.Redis;
 
 namespace WebApiForCollectingRPG.Services;
 
@@ -17,12 +18,10 @@ public class RedisService : IMemoryService
 {
     public RedisConnection _redisConn;
     private static readonly ILogger<RedisService> s_logger = GetLogger<RedisService>();
-    readonly IHttpContextAccessor _httpContextAccessor;
     readonly IMemoryCacheService _memoryCacheService;
 
-    public RedisService(IHttpContextAccessor httpContextAccessor, IMemoryCacheService memoryCacheService)
+    public RedisService(IMemoryCacheService memoryCacheService)
     {
-        _httpContextAccessor = httpContextAccessor;
         _memoryCacheService = memoryCacheService;
     }
 
@@ -44,16 +43,17 @@ public class RedisService : IMemoryService
             Email = email,
             AuthToken = authToken,
             AccountId = accountId,
-            PlayerId = playerId
+            PlayerId = playerId,
+            State = UserState.Default.ToString()
         };
 
         try
         {
             var redis = new RedisString<AuthUser>(_redisConn, key, LoginTimeSpan());
-            if (await redis.SetAsync(user, LoginTimeSpan()) == false)
+            if (!await redis.SetAsync(user, LoginTimeSpan()) || !await SetUserStateAsync(user, UserState.Login))
             {
                 s_logger.ZLogError(EventIdDic[EventType.LoginAddRedis],
-    $"Email:{email}, AuthToken:{authToken},ErrorMessage:UserBasicAuth, RedisString set Error");
+                    $"Email:{email}, AuthToken:{authToken}, ErrorMessage: User Basic Auth, RedisString set Error");
                 result = ErrorCode.LoginFailAddRedis;
                 return result;
             }
@@ -61,7 +61,7 @@ public class RedisService : IMemoryService
         catch (Exception ex)
         {
             s_logger.ZLogError(EventIdDic[EventType.LoginAddRedis], ex,
-                $"Email:{email},AuthToken:{authToken},ErrorMessage:Redis Connection Error");
+                $"Email:{email},AuthToken:{authToken},ErrorMessage: Redis Connection Error");
             result = ErrorCode.LoginFailAddRedis;
             return result;
         }
@@ -81,7 +81,7 @@ public class RedisService : IMemoryService
             if (!user.HasValue)
             {
                 s_logger.ZLogError(EventIdDic[EventType.Login],
-    $"RedisDb.CheckUserAuthAsync: Email = {email}, AuthToken = {authToken}, ErrorMessage:ID does Not Exist");
+                    $"RedisDb.CheckUserAuthAsync: Email = {email}, AuthToken = {authToken}, ErrorMessage:ID does Not Exist");
                 result = ErrorCode.CheckAuthFailNotExist;
                 return result;
             }
@@ -97,12 +97,34 @@ public class RedisService : IMemoryService
         catch
         {
             s_logger.ZLogError(EventIdDic[EventType.Login],
-    $"RedisDb.CheckUserAuthAsync: Email = {email}, AuthToken = {authToken}, ErrorMessage:Redis Connection Error");
+                $"RedisDb.CheckUserAuthAsync: Email = {email}, AuthToken = {authToken}, ErrorMessage:Redis Connection Error");
             result = ErrorCode.CheckAuthFailException;
             return result;
         }
 
         return result;
+    }
+
+    public async Task<bool> SetUserStateAsync(AuthUser user, UserState userState)
+    {
+        var uid = MemoryDbKeyMaker.MakeUIDKey(user.Email);
+        try
+        {
+            var redis = new RedisString<AuthUser>(_redisConn, uid, null);
+
+            user.State = userState.ToString();
+
+            if (await redis.SetAsync(user) == false)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public async Task<(bool, AuthUser)> GetUserAsync(String id)
@@ -199,90 +221,110 @@ public class RedisService : IMemoryService
         }
     }
 
-    public async Task<ErrorCode> ItemFarmingAsync(Int32 stageId, Int64 itemId)
+    public async Task<ErrorCode> ItemFarmingAsync(String email, Int32 stageId, Int64 itemId)
     {
         try
         {
-            var (errorCode, playerId) = GetPlayerIdFromHttpContext();
+            var errorCode = ErrorCode.ItemNotExist;
+
+            var key = MemoryDbKeyMaker.MakePlayerStageFarmingKey(email, stageId);
+            var redis = new RedisList<RedisItemDTO>(_redisConn, key, StageKeyTimeSpan());
+
+            var items = await redis.RangeAsync(0, -1);
+            for (var idx = 0; idx < items.Length; idx++)
+            {
+                var item = items[idx];
+                if (item.ItemId == itemId)
+                {
+                    if (item.CurCount >= item.TotalCount)
+                    {
+                        return ErrorCode.OverTotalItemCount;
+                    }
+
+                    item.CurCount++;
+                    items[idx] = item;
+
+                    errorCode = ErrorCode.None;
+
+                    break;
+                }
+            }
+
             if (errorCode != ErrorCode.None)
             {
                 return errorCode;
             }
 
-            var key = MemoryDbKeyMaker.MakePlayerStageFarmingKey(playerId, stageId);
-            var redis = new RedisList<Int64>(_redisConn, key, StageKeyTimeSpan());
-            await redis.RightPushAsync(itemId);
+            await redis.DeleteAsync();
+            await redis.RightPushAsync(items);
+
             s_logger.ZLogDebug(EventIdDic[EventType.ItemFarming],
                 $"RedisService.ItemFarmingAsync: Key = {key}, Message = Success Farm Item Number {itemId}!");
 
-            return ErrorCode.None;
+            return errorCode;
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             s_logger.ZLogError(EventIdDic[EventType.ItemFarming], ex,
                 $"RedisService.ItemFarmingAsync: stageId = {stageId}, itemId = {itemId}, ErrorMessage = ItemFarming Exception, ErrorCode: {ErrorCode.ItemFarmingException}");
             return ErrorCode.ItemFarmingException;
         }
     }
 
-    public async Task<(ErrorCode, bool, List<Int64>)> KillNpcAsync(Int32 stageId, Int32 npcId)
+    public async Task<ErrorCode> KillNpcAsync(String email, Int32 stageId, Int32 npcId)
     {
         try
         {
-            var (errorCode, playerId) = GetPlayerIdFromHttpContext();
-            if (errorCode != ErrorCode.None)
+            var errorCode = ErrorCode.NpcNotExist;
+
+            var key = MemoryDbKeyMaker.MakePlayerStageKillingNpcKey(email, stageId);
+            var redis = new RedisList<RedisNpcDTO>(_redisConn, key, StageKeyTimeSpan());
+
+            var npcs = await redis.RangeAsync(0, -1);
+            for (var idx = 0; idx < npcs.Length; idx++)
             {
-                return (errorCode, false, null);
+                var npc = npcs[idx];
+                if (npc.NpcId == npcId)
+                {
+                    if (npc.CurCount >= npc.TotalCount)
+                    {
+                        return ErrorCode.OverTotalNpcCount;
+                    }
+
+                    npc.CurCount++;
+                    npcs[idx] = npc;
+
+                    errorCode = ErrorCode.None;
+                }
             }
 
-            var key = MemoryDbKeyMaker.MakePlayerStageKillingNpcKey(playerId, stageId);
-            var redis = new RedisList<Int32>(_redisConn, key, StageKeyTimeSpan());
-            await redis.RightPushAsync(npcId);
+            if (errorCode != ErrorCode.None)
+            {
+                return errorCode;
+            }
+
+            await redis.DeleteAsync();
+            await redis.RightPushAsync(npcs);
 
             s_logger.ZLogDebug(EventIdDic[EventType.KillNpc],
                 $"RedisService.KillNpcAsync: Key = {key}, Message = Success Kill Npc number {npcId}!");
 
-            Int32 totalNpcCount = 0;
-            (errorCode, var npcs) = _memoryCacheService.GetAttackNpcsByStageId(stageId);
-            if (errorCode != ErrorCode.None)
-            {
-                return (errorCode, false, null);
-            }
-            foreach ( var npc in npcs )
-            {
-                totalNpcCount += npc.NpcCount;
-            }
-
-            if (await redis.LengthAsync() >= totalNpcCount)
-            {
-                (errorCode, var items) = await GetFarmedItemsAndDeleteAsync(playerId, stageId);
-                if (errorCode != ErrorCode.None)
-                {
-                    return (errorCode, false, null);
-                }
-
-                await redis.DeleteAsync();
-
-                s_logger.ZLogDebug(EventIdDic[EventType.KillNpc],
-                    $"RedisService.KillNpcAsync: Key = {key}, Message = Success Clear Stage Number {stageId}!");
-
-                return (ErrorCode.None, true, items);
-            }
-
-            return (ErrorCode.None, false, null);
+            return errorCode;
         }
         catch (Exception ex)
         {
             s_logger.ZLogError(EventIdDic[EventType.KillNpc], ex,
                 $"RedisDb.ItemFarming: stageId = {stageId}, npcId = {npcId}, ErrorMessage = KillNpc Exception, ErrorCode: {ErrorCode.KillNpcException}");
-            return (ErrorCode.KillNpcException, false, null);
+            return ErrorCode.KillNpcException;
         }
     }
 
-    private async Task<(ErrorCode, List<Int64>)> GetFarmedItemsAndDeleteAsync(Int64? playerId, Int32 stageId)
+    private async Task<(ErrorCode, List<RedisItemDTO>)> GetFarmedItemsAndDeleteAsync(String email, Int32 stageId)
     {
-        try {
-            var key = MemoryDbKeyMaker.MakePlayerStageFarmingKey(playerId, stageId);
-            var redis = new RedisList<Int64>(_redisConn, key, StageKeyTimeSpan());
+        try
+        {
+            var key = MemoryDbKeyMaker.MakePlayerStageFarmingKey(email, stageId);
+            var redis = new RedisList<RedisItemDTO>(_redisConn, key, StageKeyTimeSpan());
 
             var result = await redis.RangeAsync(0, -1);
             await redis.DeleteAsync();
@@ -292,25 +334,194 @@ public class RedisService : IMemoryService
         catch (Exception ex)
         {
             s_logger.ZLogError(EventIdDic[EventType.RedisService], ex,
-                $"MemoryService.GetFarmedItems: playerId = {playerId}, stageId = {stageId}, ErrorMessage = KillNpc Exception, ErrorCode: {ErrorCode.GetFarmedItemsException}");
+                $"MemoryService.GetFarmedItems: email = {email}, stageId = {stageId}, ErrorMessage = KillNpc Exception, ErrorCode: {ErrorCode.GetFarmedItemsException}");
             return (ErrorCode.GetFarmedItemsException, null);
         }
     }
 
-    private (ErrorCode, Int64?) GetPlayerIdFromHttpContext()
+    public async Task<ErrorCode> EnterStageAsync(String email, Int32 stageId)
     {
-        var playerId = (_httpContextAccessor.HttpContext.Items[nameof(AuthUser)] as AuthUser)?.PlayerId;
-
-        if (playerId == null)
+        try
         {
-            s_logger.ZLogError(EventIdDic[EventType.GameService],
-                $"[GameService.GetPlayerIdFromHttpContext] ErrorCode: {ErrorCode.PlayerIdNotExist}");
-            return new(ErrorCode.PlayerIdNotExist, playerId);
-        }
+            (bool isExisting, AuthUser user) = await GetUserAsync(email);
+            if (!isExisting)
+            {
+                return ErrorCode.AuthUserNotExist;
+            }
 
-        return (ErrorCode.None, playerId);
+            if (user.State == UserState.Playing.ToString() || !await SetUserStateAsync(user, UserState.Playing))
+            {
+                return ErrorCode.EnterStageFail;
+            }
+
+            // 던전 NPC 정보 로딩
+            var key = MemoryDbKeyMaker.MakePlayerStageKillingNpcKey(email, stageId);
+            var npcRedis = new RedisList<RedisNpcDTO>(_redisConn, key, StageKeyTimeSpan());
+            var npcs = _memoryCacheService.GetAttackNpcsByStageId(stageId);
+            foreach (var npc in npcs.Item2)
+            {
+                var redisNpc = new RedisNpcDTO
+                {
+                    NpcId = npc.NpcId,
+                    CurCount = 0,
+                    TotalCount = npc.NpcCount
+                };
+
+                await npcRedis.RightPushAsync(redisNpc);
+            }
+
+            // 던전 아이템 정보 로딩
+            key = MemoryDbKeyMaker.MakePlayerStageFarmingKey(email, stageId);
+            var farmingRedis = new RedisList<RedisItemDTO>(_redisConn, key, StageKeyTimeSpan());
+            var items = _memoryCacheService.GetStageItemsByStageId(stageId);
+            foreach (var item in items.Item2)
+            {
+                var redisItem = new RedisItemDTO
+                {
+                    ItemId = item,
+                    CurCount = 0,
+                    TotalCount = 1
+                };
+
+                await farmingRedis.RightPushAsync(redisItem);
+            }
+
+            return ErrorCode.None;
+        }
+        catch
+        {
+            // 롤백
+            AuthUser user = GetUserAsync(email).Result.Item2;
+
+            await SetUserStateAsync(user, UserState.Login);
+
+            var key = MemoryDbKeyMaker.MakePlayerStageKillingNpcKey(email, stageId);
+            var npcRedis = new RedisList<RedisNpcDTO>(_redisConn, key, StageKeyTimeSpan());
+            await npcRedis.DeleteAsync();
+
+            key = MemoryDbKeyMaker.MakePlayerStageFarmingKey(email, stageId);
+            var farmingRedis = new RedisList<RedisItemDTO>(_redisConn, key, StageKeyTimeSpan());
+            await farmingRedis.DeleteAsync();
+
+            return ErrorCode.MemoryEnterStageAsyncException;
+        }
     }
 
+    public async Task<ErrorCode> IsPlaying(String email)
+    {
+        try
+        {
+            (bool isExisting, AuthUser user) = await GetUserAsync(email);
+            if (!isExisting)
+            {
+                return ErrorCode.AuthUserNotExist;
+            }
+
+            if (user.State != UserState.Playing.ToString())
+            {
+                return ErrorCode.UserStateIsNotPlaying;
+            }
+
+            return ErrorCode.None;
+        }
+        catch
+        {
+            return ErrorCode.IsPlayingException;
+        }
+    }
+
+    public async Task<(ErrorCode, List<RedisItemDTO>)> CompleteStage(String email, Int32 stageId)
+    {
+        try
+        {
+            var key = MemoryDbKeyMaker.MakePlayerStageKillingNpcKey(email, stageId);
+            var redis = new RedisList<RedisNpcDTO>(_redisConn, key, StageKeyTimeSpan());
+
+            var npcs = await redis.RangeAsync(0, -1);
+            for (var idx = 0; idx < npcs.Length; idx++)
+            {
+                var npc = npcs[idx];
+
+                if (npc.CurCount < npc.TotalCount)
+                {
+                    return (ErrorCode.StageNpcExist, null);
+                }
+            }
+
+            (bool isExisting, AuthUser user) = await GetUserAsync(email);
+            if (!isExisting)
+            {
+                return (ErrorCode.AuthUserNotExist, null);
+            }
+
+            if (!await SetUserStateAsync(user, UserState.Login))
+            {
+                return (ErrorCode.SetUserStateFail, null);
+            }
+
+            var (errorCode, items) = await GetFarmedItemsAndDeleteAsync(email, stageId);
+            if (errorCode != ErrorCode.None)
+            {
+                // 롤백
+                await SetUserStateAsync(user, UserState.Playing);
+                return (errorCode, null);
+            }
+
+            if (!await redis.DeleteAsync())
+            {
+                // 롤백
+                key = MemoryDbKeyMaker.MakePlayerStageFarmingKey(email, stageId);
+                var farmingRedis = new RedisList<RedisItemDTO>(_redisConn, key, StageKeyTimeSpan());
+                await farmingRedis.RightPushAsync(items);
+            }
+
+            s_logger.ZLogDebug(EventIdDic[EventType.CompleteStage],
+                $"RedisService.CompleteStage: Key = {key}, Message = Success Clear Stage Number {stageId}!");
+
+            return (ErrorCode.None, items);
+        }
+        catch (Exception ex)
+        {
+            s_logger.ZLogError(EventIdDic[EventType.StopStage], ex,
+                $"RedisService.CompleteStage: stageId = {stageId}, ErrorMessage = Complete Stage Exception, ErrorCode: {ErrorCode.CompleteStageException}");
+            return (ErrorCode.CompleteStageException, null);
+        }
+    }
+
+    public async Task<ErrorCode> StopStage(String email, Int32 stageId)
+    {
+        try
+        {
+            var key = MemoryDbKeyMaker.MakePlayerStageKillingNpcKey(email, stageId);
+            var npcRedis = new RedisList<RedisNpcDTO>(_redisConn, key, StageKeyTimeSpan());
+            var npcs = await npcRedis.RangeAsync(0, -1);
+            if (!await npcRedis.DeleteAsync())
+            {
+                return ErrorCode.DeleteNpcRedisFail;
+            }
+
+            key = MemoryDbKeyMaker.MakePlayerStageFarmingKey(email, stageId);
+            var farmingRedis = new RedisList<RedisItemDTO>(_redisConn, key, StageKeyTimeSpan());
+            if (!await farmingRedis.DeleteAsync())
+            {
+                // 롤백
+                await npcRedis.RightPushAsync(npcs);
+
+                return ErrorCode.DeleteFarmingRedisFail;
+            }
+
+            s_logger.ZLogDebug(EventIdDic[EventType.StopStage],
+                $"RedisService.StopStage: Key = {key}, Message = Success Stop Stage Number {stageId}!");
+
+            return ErrorCode.None;
+        }
+        catch (Exception ex)
+        {
+            s_logger.ZLogError(EventIdDic[EventType.StopStage], ex,
+                $"RedisService.StopStage: stageId = {stageId}, ErrorMessage = Complete Stage Exception, ErrorCode: {ErrorCode.StopStageException}");
+            return ErrorCode.StopStageException;
+        }
+    }
     public TimeSpan LoginTimeSpan()
     {
         return TimeSpan.FromMinutes(RediskeyExpireTime.LoginKeyExpireMin);

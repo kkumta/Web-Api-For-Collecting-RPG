@@ -10,22 +10,22 @@ namespace WebApiForCollectingRPG.Controllers;
 
 [ApiController]
 [Route("api")]
-public class KillNpc : ControllerBase
+public class StopStage : ControllerBase
 {
     readonly IMemoryService _memoryService;
-    readonly ILogger<KillNpc> _logger;
+    readonly ILogger<CompleteStage> _logger;
 
-    public KillNpc(IMemoryService memoryService, ILogger<KillNpc> logger)
+    public StopStage(IMemoryService memoryService, ILogger<CompleteStage> logger)
     {
         _memoryService = memoryService;
         _logger = logger;
     }
 
     [HttpPost]
-    [Route("killNpc")]
-    public async Task<KillNpcRes> Post(KillNpcReq request)
+    [Route("StopStage")]
+    public async Task<StopStageRes> Post(StopStageReq request)
     {
-        var response = new KillNpcRes();
+        var response = new StopStageRes();
 
         var errorCode = await _memoryService.IsPlaying(request.Email);
         if (errorCode != ErrorCode.None)
@@ -34,14 +34,14 @@ public class KillNpc : ControllerBase
             return response;
         }
 
-        errorCode = await _memoryService.KillNpcAsync(request.Email, request.StageId, request.NpcId);
+        errorCode = await _memoryService.StopStage(request.Email, request.StageId);
         if (errorCode != ErrorCode.None)
         {
             response.Result = errorCode;
             return response;
         }
 
-        _logger.ZLogInformationWithPayload(EventIdDic[EventType.KillNpc], $"KillNpc Success");
+        _logger.ZLogInformationWithPayload(EventIdDic[EventType.StopStage], $"StopStage Success");
 
         return response;
     }

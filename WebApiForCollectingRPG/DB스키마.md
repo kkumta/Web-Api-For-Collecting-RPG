@@ -168,7 +168,7 @@ insert into stage_item (stage_id, item_id) values
 (1, 1),
 (1, 2),
 (2, 3),
-(2, 3);
+(2, 4);
 ```
 
 ## stage_attack_npc Table
